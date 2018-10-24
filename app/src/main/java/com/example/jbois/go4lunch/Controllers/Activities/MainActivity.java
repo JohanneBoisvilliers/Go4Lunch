@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers;
+package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
