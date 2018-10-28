@@ -1,16 +1,20 @@
 package com.example.jbois.go4lunch.Controllers.Controllers.Fragments;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.jbois.go4lunch.Controllers.Controllers.Activities.RestaurantProfileActivity;
 import com.example.jbois.go4lunch.Controllers.Controllers.Adapters.RestaurantAdapter;
 import com.example.jbois.go4lunch.Controllers.Models.Restaurant;
+import com.example.jbois.go4lunch.Controllers.Utils.ItemClickSupport;
 import com.example.jbois.go4lunch.R;
 
 import java.util.ArrayList;
@@ -42,6 +46,7 @@ public class RestaurantListFragment extends Fragment {
         ButterKnife.bind(this,view);
         this.configureTestList();
         this.configureRecyclerView();
+        this.configureOnClickRecyclerView();
         return view;
     }
 
@@ -60,5 +65,16 @@ public class RestaurantListFragment extends Fragment {
             mRestaurantList.add(new Restaurant());
             mRestaurantList.get(i).setName("Ligne "+i);
         }
+    }
+
+    private void configureOnClickRecyclerView(){
+        ItemClickSupport.addTo(mRecyclerView, R.layout.recyclerview_restaurant_list_item)
+                .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
+                        startActivity(intent);
+                    }
+                });
     }
 }

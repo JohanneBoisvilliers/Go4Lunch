@@ -24,7 +24,10 @@
     <string name="navigation_drawer_menu_lunch">YOUR LUNCH</string>
     <string name="navigation_drawer_menu_settings">SETTINGS</string>
     <string name="navigation_drawer_menu_logout">LOGOUT</string>
+    <!-- Restaurant Profile-->
+    <string name="call_button">CALL</string>
+    <string name="like_button">LIKE</string>
+    <string name="website_button">WEBSITE</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

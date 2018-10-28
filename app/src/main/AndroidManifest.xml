@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Controllers.Controllers.Activities.LunchActivity"></activity>
+        <activity android:name=".Controllers.Controllers.Activities.LunchActivity" />
+        <activity android:name=".Controllers.Controllers.Activities.RestaurantProfileActivity"></activity>
     </application>
 
 </manifest>
