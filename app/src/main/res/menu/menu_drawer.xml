@@ -6,12 +6,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/drawer_your_lunch"
+            android:icon="@drawable/baseline_restaurant_menu_black_18"
             android:title="@string/navigation_drawer_menu_lunch" />
         <item
             android:id="@+id/drawer_settings"
+            android:icon="@drawable/baseline_settings_black_18"
             android:title="@string/navigation_drawer_menu_settings"  />
         <item
             android:id="@+id/drawer_logout"
+            android:icon="@drawable/baseline_power_settings_new_black_18"
             android:title="@string/navigation_drawer_menu_logout" />
     </group>
 

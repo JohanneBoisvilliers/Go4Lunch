@@ -5,14 +5,17 @@
     <item
         android:id="@+id/navigation_map"
         android:title="@string/bottom_navigation_map"
+        android:icon="@drawable/baseline_map_black_24"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/navigation_list"
         android:title="@string/bottom_navigation_list"
+        android:icon="@drawable/baseline_view_list_black_24"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/navigation_workmates"
         android:title="@string/bottom_navigation_workmates"
+        android:icon="@drawable/baseline_group_black_24"
         app:showAsAction="ifRoom"/>
 
 </menu>

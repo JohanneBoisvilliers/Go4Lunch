@@ -1,7 +1,6 @@
-package com.example.jbois.go4lunch.Controllers.Activities;
+package com.example.jbois.go4lunch.Controllers.Controllers.Activities;
 
 import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationMenu;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,10 +10,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
+import com.example.jbois.go4lunch.Controllers.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.R;
 
 import butterknife.BindView;
@@ -28,11 +26,14 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     @BindView(R.id.activity_main_drawer_layout)DrawerLayout mDrawerLayout;
     @BindView(R.id.activity_main_nav_view)NavigationView mNavigationView;
 
+    private String[] mTitleList = new String[3];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lunch);
         ButterKnife.bind(this);
+        mTitleList = getResources().getStringArray(R.array.toolbar_title_list);
         this.configureToolbar();
         this.configureViewPager();
         this.configureBottomView();
@@ -53,7 +54,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     private void configureToolbar(){
         // Sets the Toolbar
         setSupportActionBar(mToolbar);
-        mToolbar.setTitle(getResources().getString(R.string.title_map));
+        mToolbar.setTitle(mTitleList[0]);
     }
 
     private void configureViewPager(){
@@ -72,6 +73,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
             @Override
             public void onPageSelected(int position) {
                 mBottomNavigationView.getMenu().getItem(position).setChecked(true);
+                mToolbar.setTitle(mTitleList[position]);
             }
 
             @Override
@@ -93,14 +95,14 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         });
     }
 
-    // 2 - Configure Drawer Layout
+    //Configure Drawer Layout
     private void configureDrawerLayout(){
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
     }
 
-    // 3 - Configure NavigationView
+    //Configure NavigationView
     private void configureNavigationView(){
         mNavigationView.setNavigationItemSelectedListener(this);
     }
@@ -109,15 +111,15 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         switch (integer) {
             case R.id.navigation_map:
                 mViewPager.setCurrentItem(0);
-                mToolbar.setTitle(getResources().getString(R.string.title_map));
+                mToolbar.setTitle(mTitleList[0]);
                 break;
             case R.id.navigation_list:
                 mViewPager.setCurrentItem(1);
-                mToolbar.setTitle(getResources().getString(R.string.title_map));
+                mToolbar.setTitle(mTitleList[0]);
                 break;
             case R.id.navigation_workmates:
                 mViewPager.setCurrentItem(2);
-                mToolbar.setTitle(getResources().getString(R.string.title_workmates));
+                mToolbar.setTitle(mTitleList[2]);
                 break;
         }
     }

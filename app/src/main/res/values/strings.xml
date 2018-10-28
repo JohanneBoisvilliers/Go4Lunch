@@ -13,11 +13,18 @@
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb2129451590433265</string>
     <!-- TOOLBAR-->
     <string name="title_map">I\'m Hungry!</string>
-    <string name="title_workmates">Available workmates</string>
+    <string-array name="toolbar_title_list">
+        <item>I\'m Hungry!</item>
+        <item>I\'m Hungry!</item>
+        <item>Available workmates</item>
+    </string-array>
     <!-- NavigationDrawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="navigation_drawer_menu_lunch">YOUR LUNCH</string>
     <string name="navigation_drawer_menu_settings">SETTINGS</string>
     <string name="navigation_drawer_menu_logout">LOGOUT</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
