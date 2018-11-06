@@ -2,8 +2,11 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,9 +19,12 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.R;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MapFragment extends Fragment
         implements  GoogleMap.OnMyLocationButtonClickListener,
@@ -27,6 +33,8 @@ public class MapFragment extends Fragment
 
 
     private GoogleMap mMap;
+    private LocationManager mLocationManager;
+    private Location mLocation;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
 
     public MapFragment() {}
@@ -54,16 +62,24 @@ public class MapFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap map) {
         mMap=map;
-        //Check permissions for location and ask for it if user didn't allowed it
+
+        checkPermissionToLocation(mMap);
+        mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMyLocationClickListener(this);
+        setCameraToCurrentLocation();
+    }
+    //Check permissions for location and ask for it if user didn't allowed it
+    public void checkPermissionToLocation(GoogleMap map){
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
+            map.setMyLocationEnabled(true);
+            mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+            Criteria criteria = new Criteria();
+            mLocation = mLocationManager.getLastKnownLocation(mLocationManager.getBestProvider(criteria, false));
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_FINE_LOCATION);
             }
         }
-        mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMyLocationClickListener(this);
     }
     //What to do when user allowed or not permission for location
     @Override
@@ -94,6 +110,19 @@ public class MapFragment extends Fragment
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
+    }
+    //On map Opening, the camera zoom in to the user's position
+    public void setCameraToCurrentLocation(){
+        if (mLocation != null)
+        {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), 13));
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()))// Sets the center of the map to location user
+                    .zoom(15) // Sets the orientation of the camera to east
+                    .build(); // Creates a CameraPosition from the builder
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
 
 }
