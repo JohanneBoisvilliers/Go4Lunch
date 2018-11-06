@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Models;
+package com.example.jbois.go4lunch.Models;
 
 public class Restaurant {
     private String mName;

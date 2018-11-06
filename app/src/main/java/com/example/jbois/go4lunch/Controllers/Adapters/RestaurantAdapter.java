@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Adapters;
+package com.example.jbois.go4lunch.Controllers.Adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -7,8 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Controllers.Models.Restaurant;
-import com.example.jbois.go4lunch.Controllers.Views.RestaurantViewHolder;
+import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 import com.example.jbois.go4lunch.R;
 
 import java.util.List;

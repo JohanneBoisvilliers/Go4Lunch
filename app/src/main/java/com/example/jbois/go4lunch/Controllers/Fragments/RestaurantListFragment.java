@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Fragments;
+package com.example.jbois.go4lunch.Controllers.Fragments;
 
 
 import android.content.Intent;
@@ -11,10 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Controllers.Controllers.Activities.RestaurantProfileActivity;
-import com.example.jbois.go4lunch.Controllers.Controllers.Adapters.RestaurantAdapter;
-import com.example.jbois.go4lunch.Controllers.Models.Restaurant;
-import com.example.jbois.go4lunch.Controllers.Utils.ItemClickSupport;
+import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
+import com.example.jbois.go4lunch.Controllers.Adapters.RestaurantAdapter;
+import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Utils.ItemClickSupport;
 import com.example.jbois.go4lunch.R;
 
 import java.util.ArrayList;

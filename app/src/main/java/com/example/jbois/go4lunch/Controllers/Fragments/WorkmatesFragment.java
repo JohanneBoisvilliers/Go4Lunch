@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Fragments;
+package com.example.jbois.go4lunch.Controllers.Fragments;
 
 
 import android.os.Bundle;

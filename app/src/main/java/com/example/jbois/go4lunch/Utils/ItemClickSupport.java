@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Utils;
+package com.example.jbois.go4lunch.Utils;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

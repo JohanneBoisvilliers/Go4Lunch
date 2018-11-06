@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Activities;
+package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -12,7 +12,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import com.example.jbois.go4lunch.Controllers.Controllers.Adapters.PageAdapter;
+import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.R;
 
 import butterknife.BindView;

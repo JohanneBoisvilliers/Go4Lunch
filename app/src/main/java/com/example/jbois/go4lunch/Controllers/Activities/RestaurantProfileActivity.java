@@ -1,4 +1,4 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Activities;
+package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

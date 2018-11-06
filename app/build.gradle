@@ -36,6 +36,8 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     //Facebook SDK for Firebase
     implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    //Google maps
+    implementation 'com.google.android.gms:play-services-maps:15.0.1'
 
 }
 apply plugin: 'com.google.gms.google-services'

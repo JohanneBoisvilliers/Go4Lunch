@@ -1,10 +1,10 @@
-package com.example.jbois.go4lunch.Controllers.Views;
+package com.example.jbois.go4lunch.Views;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.jbois.go4lunch.Controllers.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 
 import butterknife.BindView;

@@ -1,12 +1,12 @@
-package com.example.jbois.go4lunch.Controllers.Controllers.Adapters;
+package com.example.jbois.go4lunch.Controllers.Adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.example.jbois.go4lunch.Controllers.Controllers.Fragments.MapFragment;
-import com.example.jbois.go4lunch.Controllers.Controllers.Fragments.RestaurantListFragment;
-import com.example.jbois.go4lunch.Controllers.Controllers.Fragments.WorkmatesFragment;
+import com.example.jbois.go4lunch.Controllers.Fragments.MapFragment;
+import com.example.jbois.go4lunch.Controllers.Fragments.RestaurantListFragment;
+import com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment;
 
 public class PageAdapter extends FragmentPagerAdapter {
 
