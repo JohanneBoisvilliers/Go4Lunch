@@ -13,16 +13,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
-import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
-import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.example.jbois.go4lunch.Controllers.Activities    .RestaurantProfileActivity;
 import com.example.jbois.go4lunch.R;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
@@ -45,12 +47,13 @@ public class MapFragment extends Fragment
                     OnMapReadyCallback,
         GoogleMap.OnMarkerClickListener {
 
-
     private GoogleMap mMap;
-    private LocationManager mLocationManager;
-    private Location mLocation;
+    private GeoDataClient mGeoDataClient;
     private PlaceDetectionClient mPlaceDetectionClient;
-    private Task<PlaceLikelihoodBufferResponse> mPlaceResult;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    private final LatLng mDefaultLocation = new LatLng(-48.874949, 2.350520);
+    private Location mLastKnownLocation;
+    private boolean mLocationPermissionGranted;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
 
     public MapFragment() {}
@@ -71,6 +74,10 @@ public class MapFragment extends Fragment
         //get map from GoogleMaps
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        //Initialize location objects
+        mGeoDataClient = Places.getGeoDataClient(getContext());
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(getContext());
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
         return result;
     }
@@ -79,34 +86,19 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap map) {
         mMap=map;
 
-        checkPermissionToLocation(mMap);
+        checkPermissionToLocation();
+        updateLocationUI();
+        getDeviceLocation();
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-        setCameraToCurrentLocation();
         mMap.setOnMarkerClickListener(this);
-
-        mPlaceResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
-            @Override
-            public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
-                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                    createMarker(placeLikelihood.getPlace().getLatLng());
-                }
-                likelyPlaces.release();
-            }
-        });
+        showCurrentPlace();
     }
     //Check permission for location and ask for it if user didn't allowed it
-    public void checkPermissionToLocation(GoogleMap map){
+    public void checkPermissionToLocation(){
         //Permission for user's location
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            map.setMyLocationEnabled(true);
-            mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-            Criteria criteria = new Criteria();
-            mLocation = mLocationManager.getLastKnownLocation(mLocationManager.getBestProvider(criteria, false));
-            //Google places need permission to get places around user
-            mPlaceDetectionClient = Places.getPlaceDetectionClient(getActivity());
-            mPlaceResult = mPlaceDetectionClient.getCurrentPlace(null);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mLocationPermissionGranted=true;
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_FINE_LOCATION);
@@ -120,14 +112,25 @@ public class MapFragment extends Fragment
         switch (requestCode) {
             case MY_PERMISSION_FINE_LOCATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mMap.setMyLocationEnabled(true);
+                    if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        mLocationPermissionGranted=true;
                     }
-
-                } else {
-                    Toast.makeText(getContext(), "This app requires location permissions to be granted", Toast.LENGTH_LONG).show();
                 }
-                break;
+        }
+        updateLocationUI();
+    }
+    //Filter types of places, we just need restaurant type
+    public void getPlacesType(Place currentPlace){
+        for (Integer placeType : currentPlace.getPlaceTypes()){
+            Log.i("PLACE_INFOS", String.format("Place '%s' current type is: %s",
+                    currentPlace.getName(),
+                    placeType)
+            );
+
+            switch (placeType){
+                case Place.TYPE_RESTAURANT:
+                    createMarker(currentPlace.getLatLng());
+                    break; }
         }
     }
     //On click on blue dot (user's location)
@@ -143,30 +146,95 @@ public class MapFragment extends Fragment
         // (the camera animates to the user's current position).
         return false;
     }
-    //Set and add a new marker
-    public void createMarker(LatLng latLng){
-        mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
-    }
-    //On map Opening, the camera zoom in to the user's position
-    public void setCameraToCurrentLocation(){
-        if (mLocation != null)
-        {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()), 13));
-
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()))// Sets the center of the map to location user
-                    .zoom(15)
-                    .build(); // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        }
-    }
     //Method to open restaurant profile when user click on a marker
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
         startActivity(intent);
         return false;
+    }
+    //Set and add a new marker
+    public void createMarker(LatLng latLng){
+        mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
+    }
+    // Turn on the My Location layer and the related control on the map.
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (mLocationPermissionGranted) {
+                mMap.setMyLocationEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(false);
+                mLastKnownLocation = null;
+                checkPermissionToLocation();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
         }
     }
+    // Get the current location of the device and set the position of the map.
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (mLocationPermissionGranted) {
+                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            mLastKnownLocation = task.getResult();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(mLastKnownLocation.getLatitude(),
+                                            mLastKnownLocation.getLongitude()), 14));
+                        } else {
+                            mMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(mDefaultLocation, 14));
+                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+    // Get and show current places with marker
+    private void showCurrentPlace() {
+        if (mMap == null) {
+            return;
+        }
+        if (mLocationPermissionGranted) {
+            @SuppressWarnings("MissingPermission") final
+            Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
+            placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
+                        @Override
+                        public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+
+                                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                                    getPlacesType(placeLikelihood.getPlace());
+                                }
+                                // Release the place likelihood buffer, to avoid memory leaks.
+                                likelyPlaces.release();
+                            } else {
+                                Log.e("ERREUR", "Exception: %s", task.getException());
+                            }
+                        }
+                    });
+        } else {
+            // The user has not granted permission.
+            Log.i("GRANTED PERMISSION", "The user did not grant location permission.");
+            // Prompt the user for permission.
+            checkPermissionToLocation();
+        }
+    }
+}
