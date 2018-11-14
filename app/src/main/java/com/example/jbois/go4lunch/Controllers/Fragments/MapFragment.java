@@ -1,60 +1,69 @@
 package com.example.jbois.go4lunch.Controllers.Fragments;
 
-
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.example.jbois.go4lunch.Controllers.Activities    .RestaurantProfileActivity;
 import com.example.jbois.go4lunch.R;
 import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import java.util.ArrayList;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 public class MapFragment extends Fragment
         implements  GoogleMap.OnMyLocationButtonClickListener,
                     GoogleMap.OnMyLocationClickListener,
                     OnMapReadyCallback,
-        GoogleMap.OnMarkerClickListener {
+                    GoogleMap.OnMarkerClickListener,
+                    LocationListener,
+                    GoogleApiClient.OnConnectionFailedListener{
 
     private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
     private GeoDataClient mGeoDataClient;
     private PlaceDetectionClient mPlaceDetectionClient;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private final LatLng mDefaultLocation = new LatLng(-48.874949, 2.350520);
     private Location mLastKnownLocation;
     private boolean mLocationPermissionGranted;
+    private LocationRequest mLocationRequest;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
+
+    private ArrayList<Restaurant> mRestaurantList = new ArrayList<>();
+
+    private Disposable mDisposable;
 
     public MapFragment() {}
 
@@ -64,6 +73,14 @@ public class MapFragment extends Fragment
         MapFragment frag = new MapFragment();
 
         return(frag);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
     }
 
     @Override
@@ -79,6 +96,8 @@ public class MapFragment extends Fragment
         mPlaceDetectionClient = Places.getPlaceDetectionClient(getContext());
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
+        this.buildGoogleApiClient();
+
         return result;
     }
 
@@ -92,7 +111,6 @@ public class MapFragment extends Fragment
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
-        showCurrentPlace();
     }
     //Check permission for location and ask for it if user didn't allowed it
     public void checkPermissionToLocation(){
@@ -119,20 +137,6 @@ public class MapFragment extends Fragment
         }
         updateLocationUI();
     }
-    //Filter types of places, we just need restaurant type
-    public void getPlacesType(Place currentPlace){
-        for (Integer placeType : currentPlace.getPlaceTypes()){
-            Log.i("PLACE_INFOS", String.format("Place '%s' current type is: %s",
-                    currentPlace.getName(),
-                    placeType)
-            );
-
-            switch (placeType){
-                case Place.TYPE_RESTAURANT:
-                    createMarker(currentPlace.getLatLng());
-                    break; }
-        }
-    }
     //On click on blue dot (user's location)
     @Override
     public void onMyLocationClick(@NonNull Location location) {
@@ -150,14 +154,17 @@ public class MapFragment extends Fragment
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
+        Restaurant.Result restaurant=(Restaurant.Result)marker.getTag();
+        intent.putExtra("TEST",restaurant.getName());
         startActivity(intent);
         return false;
     }
     //Set and add a new marker
-    public void createMarker(LatLng latLng){
-        mMap.addMarker(new MarkerOptions()
+    public void createMarker(LatLng latLng,Restaurant.Result restaurant){
+        Marker marker=mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
+        marker.setTag(restaurant);
     }
     // Turn on the My Location layer and the related control on the map.
     private void updateLocationUI() {
@@ -178,63 +185,67 @@ public class MapFragment extends Fragment
     }
     // Get the current location of the device and set the position of the map.
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (mLocationPermissionGranted) {
-                Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
-                            mLastKnownLocation = task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), 14));
-                        } else {
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, 14));
-                            mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                    Task<Location> locationResult = mFusedLocationProviderClient.getLastLocation();
+                    locationResult.addOnCompleteListener(getActivity(),new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful()) {
+                                // Set the map's camera position to the current location of the device.
+                                mLastKnownLocation = task.getResult();
+                                Log.e("VALEUR_LOCATION",mLastKnownLocation.getLatitude()+","+mLastKnownLocation.getLongitude());
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(mLastKnownLocation.getLatitude(),
+                                                mLastKnownLocation.getLongitude()), 15));
+                                executeRequestToshowCurrentPlace(mLastKnownLocation);
+                            } else {
+                                mMap.moveCamera(CameraUpdateFactory
+                                        .newLatLngZoom(mDefaultLocation, 15));
+                                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+                            }
                         }
-                    }
-                });
+                    });
             }
         } catch (SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
     }
     // Get and show current places with marker
-    private void showCurrentPlace() {
-        if (mMap == null) {
-            return;
-        }
-        if (mLocationPermissionGranted) {
-            @SuppressWarnings("MissingPermission") final
-            Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
-            placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
-                        @Override
-                        public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
-                            if (task.isSuccessful() && task.getResult() != null) {
-                                PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+    private void executeRequestToshowCurrentPlace(Location location) {
+        this.mDisposable = GooglePlacesStreams.streamFetchRestaurants( location.getLatitude()+","+location.getLongitude(),
+                "distance","restaurant").subscribeWith(new DisposableObserver<Restaurant>() {
+            @Override
+            public void onNext(Restaurant restaurant) {
+                for(int i=0; i<restaurant.getResults().size();i++){
+                    Double lat = restaurant.getResults().get(i).getGeometry().getLocation().getLat();
+                    Double lng = restaurant.getResults().get(i).getGeometry().getLocation().getLng();
+                    createMarker(new LatLng(lat,lng),restaurant.getResults().get(i));
+                }
+            }
+            @Override
+            public void onError(Throwable e) {
+            }
+            @Override
+            public void onComplete() {
+            }
+        });
+    }
+    //Create google api client
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+                .enableAutoManage(getActivity(), this)
+                .addApi(LocationServices.API)
+                .build();
+    }
 
-                                for (PlaceLikelihood placeLikelihood : likelyPlaces) {
-                                    getPlacesType(placeLikelihood.getPlace());
-                                }
-                                // Release the place likelihood buffer, to avoid memory leaks.
-                                likelyPlaces.release();
-                            } else {
-                                Log.e("ERREUR", "Exception: %s", task.getException());
-                            }
-                        }
-                    });
-        } else {
-            // The user has not granted permission.
-            Log.i("GRANTED PERMISSION", "The user did not grant location permission.");
-            // Prompt the user for permission.
-            checkPermissionToLocation();
-        }
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

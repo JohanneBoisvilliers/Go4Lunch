@@ -20,6 +20,6 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     }
 
     public void updateRestaurantName(Restaurant restaurant){
-        this.mTextView.setText(restaurant.getName());
+//        this.mTextView.setText(restaurant.getResults().get(0).getName());
     }
 }

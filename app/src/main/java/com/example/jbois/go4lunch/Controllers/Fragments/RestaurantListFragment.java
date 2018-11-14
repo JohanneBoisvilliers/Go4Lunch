@@ -63,7 +63,7 @@ public class RestaurantListFragment extends Fragment {
         this.mRestaurantList = new ArrayList<>();
         for(int i=0;i<10;i++){
             mRestaurantList.add(new Restaurant());
-            mRestaurantList.get(i).setName("Ligne "+i);
+            //mRestaurantList.get(i).setName("Ligne "+i);
         }
     }
 
