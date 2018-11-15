@@ -14,19 +14,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.example.jbois.go4lunch.Controllers.Activities    .RestaurantProfileActivity;
 import com.example.jbois.go4lunch.R;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlaceDetectionClient;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,7 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import io.reactivex.disposables.Disposable;
@@ -52,16 +49,13 @@ public class MapFragment extends Fragment
 
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    private GeoDataClient mGeoDataClient;
-    private PlaceDetectionClient mPlaceDetectionClient;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private final LatLng mDefaultLocation = new LatLng(-48.874949, 2.350520);
     private Location mLastKnownLocation;
     private boolean mLocationPermissionGranted;
-    private LocationRequest mLocationRequest;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
 
-    private ArrayList<Restaurant> mRestaurantList = new ArrayList<>();
+    private ArrayList<RestaurantListJson> mRestaurantListJsonList = new ArrayList<>();
 
     private Disposable mDisposable;
 
@@ -82,6 +76,11 @@ public class MapFragment extends Fragment
             mGoogleApiClient.connect();
         }
     }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.disposeWhenDestroy();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,8 +91,6 @@ public class MapFragment extends Fragment
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         //Initialize location objects
-        mGeoDataClient = Places.getGeoDataClient(getContext());
-        mPlaceDetectionClient = Places.getPlaceDetectionClient(getContext());
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
 
         this.buildGoogleApiClient();
@@ -137,6 +134,10 @@ public class MapFragment extends Fragment
         }
         updateLocationUI();
     }
+    //Avoid memory leaks
+    private void disposeWhenDestroy(){
+        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
+    }
     //On click on blue dot (user's location)
     @Override
     public void onMyLocationClick(@NonNull Location location) {
@@ -154,13 +155,13 @@ public class MapFragment extends Fragment
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
-        Restaurant.Result restaurant=(Restaurant.Result)marker.getTag();
-        intent.putExtra("TEST",restaurant.getName());
+        RestaurantListJson.Result restaurant=(RestaurantListJson.Result)marker.getTag();
+        intent.putExtra("TEST",new Restaurant(restaurant.getName()));
         startActivity(intent);
         return false;
     }
     //Set and add a new marker
-    public void createMarker(LatLng latLng,Restaurant.Result restaurant){
+    public void createMarker(LatLng latLng,RestaurantListJson.Result restaurant){
         Marker marker=mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
@@ -214,13 +215,13 @@ public class MapFragment extends Fragment
     // Get and show current places with marker
     private void executeRequestToshowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurants( location.getLatitude()+","+location.getLongitude(),
-                "distance","restaurant").subscribeWith(new DisposableObserver<Restaurant>() {
+                "distance","restaurant").subscribeWith(new DisposableObserver<RestaurantListJson>() {
             @Override
-            public void onNext(Restaurant restaurant) {
-                for(int i=0; i<restaurant.getResults().size();i++){
-                    Double lat = restaurant.getResults().get(i).getGeometry().getLocation().getLat();
-                    Double lng = restaurant.getResults().get(i).getGeometry().getLocation().getLng();
-                    createMarker(new LatLng(lat,lng),restaurant.getResults().get(i));
+            public void onNext(RestaurantListJson restaurantListJson) {
+                for(int i = 0; i< restaurantListJson.getResults().size(); i++){
+                    Double lat = restaurantListJson.getResults().get(i).getGeometry().getLocation().getLat();
+                    Double lng = restaurantListJson.getResults().get(i).getGeometry().getLocation().getLng();
+                    createMarker(new LatLng(lat,lng), restaurantListJson.getResults().get(i));
                 }
             }
             @Override

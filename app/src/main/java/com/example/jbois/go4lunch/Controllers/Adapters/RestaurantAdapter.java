@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 import com.example.jbois.go4lunch.R;
 
@@ -15,10 +15,10 @@ import java.util.List;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
-    private List<Restaurant> mRestaurantList;
+    private List<RestaurantListJson> mRestaurantListJsonList;
 
-    public RestaurantAdapter(List<Restaurant> restaurantList){
-        this.mRestaurantList=restaurantList;
+    public RestaurantAdapter(List<RestaurantListJson> restaurantListJsonList){
+        this.mRestaurantListJsonList = restaurantListJsonList;
     }
     @NonNull
     @Override
@@ -33,11 +33,11 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
-        holder.updateRestaurantName(mRestaurantList.get(position));
+        holder.updateRestaurantName(mRestaurantListJsonList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return this.mRestaurantList.size();
+        return this.mRestaurantListJsonList.size();
     }
 }

@@ -6,14 +6,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
 import com.example.jbois.go4lunch.Controllers.Adapters.RestaurantAdapter;
-import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.Utils.ItemClickSupport;
 import com.example.jbois.go4lunch.R;
 
@@ -27,7 +26,7 @@ public class RestaurantListFragment extends Fragment {
 
     @BindView(R.id.restaurant_list_recycler_view)RecyclerView mRecyclerView;
 
-    private List<Restaurant> mRestaurantList;
+    private List<RestaurantListJson> mRestaurantListJsonList;
     private RestaurantAdapter adapter;
 
     public RestaurantListFragment() {}
@@ -52,7 +51,7 @@ public class RestaurantListFragment extends Fragment {
 
     private void configureRecyclerView(){
         // 3.2 - Create adapter passing the list of users
-        this.adapter = new RestaurantAdapter(this.mRestaurantList);
+        this.adapter = new RestaurantAdapter(this.mRestaurantListJsonList);
         // 3.3 - Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
         // 3.4 - Set layout manager to position the items
@@ -60,10 +59,10 @@ public class RestaurantListFragment extends Fragment {
     }
 
     private void configureTestList(){
-        this.mRestaurantList = new ArrayList<>();
+        this.mRestaurantListJsonList = new ArrayList<>();
         for(int i=0;i<10;i++){
-            mRestaurantList.add(new Restaurant());
-            //mRestaurantList.get(i).setName("Ligne "+i);
+            mRestaurantListJsonList.add(new RestaurantListJson());
+            //mRestaurantListJsonList.get(i).setName("Ligne "+i);
         }
     }
 
