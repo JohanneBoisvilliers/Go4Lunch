@@ -15,7 +15,11 @@ public class Restaurant implements Parcelable {
         }
     };
 
+    private String mId;
     private String mName;
+    private String mAdress;
+
+    public Restaurant(){}
 
     public Restaurant(String name){
         this.mName = name;
@@ -40,5 +44,21 @@ public class Restaurant implements Parcelable {
 
     public void setName(String name) {
         mName = name;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    public void setId(String id) {
+        mId = id;
+    }
+
+    public String getAdress() {
+        return mAdress;
+    }
+
+    public void setAdress(String adress) {
+        mAdress = adress;
     }
 }

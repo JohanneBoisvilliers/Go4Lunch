@@ -1,5 +1,6 @@
 package com.example.jbois.go4lunch.Utils;
 
+import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 
 import io.reactivex.Observable;
@@ -14,10 +15,15 @@ import retrofit2.http.Query;
 public interface GooglePlaceServices {
     // Set the urls to request
     @GET("maps/api/place/nearbysearch/json")
-    Observable<RestaurantListJson> getRestaurant(
+    Observable<RestaurantListJson> getRestaurants(
             @Query("location") String location,
             @Query("rankby") String rankby,
             @Query("type") String type,
+            @Query("key") String apiKey);
+
+    @GET("maps/api/place/details/json")
+    Observable<RestaurantDetails > getRestaurantDetails(
+            @Query("placeid") String placeId,
             @Query("key") String apiKey);
 
 
