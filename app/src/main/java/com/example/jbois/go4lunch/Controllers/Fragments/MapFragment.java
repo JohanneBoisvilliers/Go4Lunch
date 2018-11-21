@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetails;
-import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -36,8 +35,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
@@ -57,6 +54,8 @@ public class MapFragment extends Fragment
     private Location mLastKnownLocation;
     private boolean mLocationPermissionGranted;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
+    public final static String RESTAURANT_IN_TAG = "restaurant";
+
 
     private Disposable mDisposable;
 
@@ -162,12 +161,12 @@ public class MapFragment extends Fragment
     @Override
     public boolean onMarkerClick(final Marker marker) {
         Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
-        intent.putExtra("TEST",(Restaurant)marker.getTag());
+        intent.putExtra(RESTAURANT_IN_TAG,(Restaurant)marker.getTag());
         startActivity(intent);
         return false;
     }
     //Set and add a new marker
-    public void createMarker(LatLng latLng,RestaurantDetails restaurant){
+    public void createMarker(LatLng latLng,Restaurant restaurant){
 
         Marker marker=mMap.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -202,11 +201,10 @@ public class MapFragment extends Fragment
                             if (task.isSuccessful()) {
                                 // Set the map's camera position to the current location of the device.
                                 mLastKnownLocation = task.getResult();
-                                Log.e("VALEUR_LOCATION",mLastKnownLocation.getLatitude()+","+mLastKnownLocation.getLongitude());
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), 15));
-                                executeRequestToshowCurrentPlacetest(mLastKnownLocation);
+                                executeRequestToShowCurrentPlace(mLastKnownLocation);
                             } else {
                                 mMap.moveCamera(CameraUpdateFactory
                                         .newLatLngZoom(mDefaultLocation, 15));
@@ -219,78 +217,39 @@ public class MapFragment extends Fragment
             Log.e("Exception: %s", e.getMessage());
         }
     }
-    private void executeRequestToshowCurrentPlacetest(Location location) {
-        Log.e("PAAA","ERROR DE SA MERE");
+    // Get places around user and put marker on this places
+    private void executeRequestToShowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurantsWithNeededInfos(location.getLatitude()+","+location.getLongitude())
-                .subscribeWith(new DisposableObserver<List<RestaurantDetails>>() {
+                .subscribeWith(new DisposableObserver<RestaurantDetails>() {
                     @Override
-                    public void onNext(List<RestaurantDetails> restaurantListJson) {
-                        Log.e("EEEEEEE",""+restaurantListJson.size());
-                        for(int i = 0; i< restaurantListJson.size(); i++){
-                            Log.e("MARKER TEST",""+restaurantListJson.size());
-                            Double lat = restaurantListJson.get(i).getResult().getGeometry().getLocation().getLat();
-                            Double lng = restaurantListJson.get(i).getResult().getGeometry().getLocation().getLng();
-                            createMarker(new LatLng(lat,lng), restaurantListJson.get(i));
-                        }
+                    public void onNext(RestaurantDetails restaurantDetails) {
+                            Double lat = restaurantDetails.getResult().getGeometry().getLocation().getLat();
+                            Double lng = restaurantDetails.getResult().getGeometry().getLocation().getLng();
+
+                            createMarker(new LatLng(lat,lng), convertResponseIntoRestaurant(restaurantDetails));
                     }
                     @Override
-                    public void onError(Throwable e) {
-                        Log.e("MARKER TEST","ERROR DE SA MERE");
-                    }
+                    public void onError(Throwable e) {}
                     @Override
-                    public void onComplete() {
-                        Log.e("MARKER TEST","ERROR DE SA MERE");
-                    }
+                    public void onComplete() {}
                 });
     }
-    // Get and show current places with marker
-    //private void executeRequestToshowCurrentPlace(Location location) {
-    //    this.mDisposable = GooglePlacesStreams.streamFetchRestaurants( location.getLatitude()+","+location.getLongitude())
-    //            .subscribeWith(new DisposableObserver<RestaurantListJson>() {
-    //        @Override
-    //        public void onNext(RestaurantListJson restaurantListJson) {
-    //            for(int i = 0; i< restaurantListJson.getResults().size(); i++){
-    //                Double lat = restaurantListJson.getResults().get(i).getGeometry().getLocation().getLat();
-    //                Double lng = restaurantListJson.getResults().get(i).getGeometry().getLocation().getLng();
-    //                createMarker(new LatLng(lat,lng), restaurantListJson.getResults().get(i));
-    //            }
-    //        }
-    //        @Override
-    //        public void onError(Throwable e) {
-    //        }
-    //        @Override
-    //        public void onComplete() {
-    //        }
-    //    });
-    //}
-
-    //private Restaurant executeRequestToGetRestaurantInfos(String placeId){
-    //    final Restaurant restaurant = new Restaurant();
-//
-    //    this.mDisposable = GooglePlacesStreams.streamFetchRestaurantDetails(placeId)
-    //            .subscribeWith(new DisposableObserver<RestaurantDetails>() {
-    //                @Override
-    //                public void onNext(RestaurantDetails restaurantDetails) {
-    //                    restaurant.setName(restaurantDetails.getResult().getName());
-    //                    restaurant.setAdress(restaurantDetails.getResult().getFormattedAddress());
-    //                }
-    //                @Override
-    //                public void onError(Throwable e) {
-    //                }
-    //                @Override
-    //                public void onComplete() {
-    //                }
-    //            });
-    //    return restaurant;
-    //}
-    //Create google api client
+    // Create google api client
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .enableAutoManage(getActivity(), this)
                 .addApi(LocationServices.API)
                 .build();
     }
-
+    // Convert detail APi response into restaurants objects
+    private Restaurant convertResponseIntoRestaurant(RestaurantDetails restaurantDetails){
+        Restaurant restaurant = new Restaurant();
+        restaurant.setName(restaurantDetails.getResult().getName());
+        restaurant.setAdress(restaurantDetails.getResult().getFormattedAddress());
+        restaurant.setUrl(restaurantDetails.getResult().getWebsite());
+        restaurant.setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
+        return restaurant;
+    }
     @Override
     public void onLocationChanged(Location location) {
 

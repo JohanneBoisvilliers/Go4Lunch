@@ -50,6 +50,7 @@
                 android:textColor="#000000"/>
         </LinearLayout>
         <TextView
+            android:id="@+id/activity_restaurant_adress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="12 rue du blabla"/>
@@ -62,6 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="0.2">
         <Button
+            android:id="@+id/activity_restaurant_phoneNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -69,6 +71,7 @@
             android:background="@color/fui_transparent"
             android:text="@string/call_button"/>
         <Button
+            android:id="@+id/activity_restaurant_like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -76,12 +79,14 @@
             android:background="@color/fui_transparent"
             android:text="@string/like_button"/>
         <Button
+            android:id="@+id/activity_restaurant_website"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:drawableTop="@drawable/baseline_public_black_24"
             android:background="@color/fui_transparent"
-            android:text="@string/website_button"/>
+            android:text="@string/website_button"
+            android:onClick="onClick"/>
     </LinearLayout>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_restaurant_profile_workmates"

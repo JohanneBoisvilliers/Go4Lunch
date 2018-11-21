@@ -18,15 +18,16 @@ public class Restaurant implements Parcelable {
     private String mId;
     private String mName;
     private String mAdress;
+    private String mUrl;
+    private String mPhoneNumber;
 
     public Restaurant(){}
 
-    public Restaurant(String name){
-        this.mName = name;
-    }
-
     public Restaurant(Parcel in){
         this.mName = in.readString();
+        this.mAdress = in.readString();
+        this.mUrl = in.readString();
+        this.mPhoneNumber = in.readString();
     }
     @Override
     public int describeContents() {
@@ -36,6 +37,9 @@ public class Restaurant implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(this.mName);
+        dest.writeString(this.mAdress);
+        dest.writeString(this.mUrl);
+        dest.writeString(this.mPhoneNumber);
     }
 
     public String getName() {
@@ -60,5 +64,21 @@ public class Restaurant implements Parcelable {
 
     public void setAdress(String adress) {
         mAdress = adress;
+    }
+
+    public String getUrl() {
+        return mUrl;
+    }
+
+    public void setUrl(String url) {
+        mUrl = url;
+    }
+
+    public String getPhoneNumber() {
+        return mPhoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        mPhoneNumber = phoneNumber;
     }
 }
