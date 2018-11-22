@@ -19,6 +19,7 @@ public interface GooglePlaceServices {
             @Query("location") String location,
             @Query("rankby") String rankby,
             @Query("type") String type,
+            @Query("pagetoken") String pageToken,
             @Query("key") String apiKey);
 
     @GET("maps/api/place/details/json")

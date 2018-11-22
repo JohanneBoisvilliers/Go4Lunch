@@ -2,6 +2,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
@@ -35,9 +37,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MapFragment extends Fragment
         implements  GoogleMap.OnMyLocationButtonClickListener,
@@ -55,9 +63,10 @@ public class MapFragment extends Fragment
     private boolean mLocationPermissionGranted;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
     public final static String RESTAURANT_IN_TAG = "restaurant";
-
-
     private Disposable mDisposable;
+
+    private List<Restaurant> mRestaurantsAroundUser = new ArrayList<>();
+    private SharedPreferences mSharedPreferences;
 
     public MapFragment() {}
 
@@ -98,6 +107,7 @@ public class MapFragment extends Fragment
         mapFragment.getMapAsync(this);
         //Initialize location objects
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+        mSharedPreferences = getActivity().getPreferences(MODE_PRIVATE);
 
         this.buildGoogleApiClient();
 
@@ -233,6 +243,9 @@ public class MapFragment extends Fragment
                     @Override
                     public void onComplete() {}
                 });
+        Gson gson = new Gson();
+        String mRestaurantListAroundUser = gson.toJson(mRestaurantsAroundUser);
+        mSharedPreferences.edit().putString("TestListe",mRestaurantListAroundUser).apply();
     }
     // Create google api client
     protected synchronized void buildGoogleApiClient() {
@@ -248,6 +261,7 @@ public class MapFragment extends Fragment
         restaurant.setAdress(restaurantDetails.getResult().getFormattedAddress());
         restaurant.setUrl(restaurantDetails.getResult().getWebsite());
         restaurant.setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
+        mRestaurantsAroundUser.add(restaurant);
         return restaurant;
     }
     @Override
