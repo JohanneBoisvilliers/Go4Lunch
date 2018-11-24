@@ -13,7 +13,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
+import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,6 +31,14 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     @BindView(R.id.activity_main_nav_view)NavigationView mNavigationView;
 
     private String[] mTitleList = new String[3];
+
+    public static class refreshRestaurantsList{
+        public List<Restaurant> restaurantList;
+
+        public refreshRestaurantsList(List<Restaurant> restlist){
+            this.restaurantList = restlist;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ListAdapter;
 import android.widget.Toast;
 
+import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
@@ -38,6 +39,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,6 @@ public class MapFragment extends Fragment
     private Disposable mDisposable;
 
     private List<Restaurant> mRestaurantsAroundUser = new ArrayList<>();
-    private SharedPreferences mSharedPreferences;
 
     public MapFragment() {}
 
@@ -107,7 +109,6 @@ public class MapFragment extends Fragment
         mapFragment.getMapAsync(this);
         //Initialize location objects
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
-        mSharedPreferences = getActivity().getPreferences(MODE_PRIVATE);
 
         this.buildGoogleApiClient();
 
@@ -241,11 +242,9 @@ public class MapFragment extends Fragment
                     @Override
                     public void onError(Throwable e) {}
                     @Override
-                    public void onComplete() {}
+                    public void onComplete() {
+                    }
                 });
-        Gson gson = new Gson();
-        String mRestaurantListAroundUser = gson.toJson(mRestaurantsAroundUser);
-        mSharedPreferences.edit().putString("TestListe",mRestaurantListAroundUser).apply();
     }
     // Create google api client
     protected synchronized void buildGoogleApiClient() {
@@ -262,6 +261,7 @@ public class MapFragment extends Fragment
         restaurant.setUrl(restaurantDetails.getResult().getWebsite());
         restaurant.setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
         mRestaurantsAroundUser.add(restaurant);
+        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
         return restaurant;
     }
     @Override

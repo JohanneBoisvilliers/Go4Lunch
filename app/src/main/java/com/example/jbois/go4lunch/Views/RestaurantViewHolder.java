@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 
@@ -19,7 +20,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         ButterKnife.bind(this,itemView);
     }
 
-    public void updateRestaurantName(RestaurantListJson restaurantListJson){
-//        this.mTextView.setText(restaurantListJson.getResults().get(0).getName());
+    public void updateRestaurantName(Restaurant restaurant){
+        this.mTextView.setText(restaurant.getName());
     }
 }
