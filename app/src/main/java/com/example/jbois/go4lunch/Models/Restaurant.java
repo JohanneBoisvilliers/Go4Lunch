@@ -20,14 +20,21 @@ public class Restaurant implements Parcelable {
     private String mAdress;
     private String mUrl;
     private String mPhoneNumber;
+    private String mPhotoReference;
+    private Double mLat;
+    private Double mLng;
 
     public Restaurant(){}
 
     public Restaurant(Parcel in){
+        this.mId = in.readString();
         this.mName = in.readString();
         this.mAdress = in.readString();
         this.mUrl = in.readString();
         this.mPhoneNumber = in.readString();
+        this.mPhotoReference = in.readString();
+        this.mLat = in.readDouble();
+        this.mLng = in.readDouble();
     }
     @Override
     public int describeContents() {
@@ -36,10 +43,14 @@ public class Restaurant implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mId);
         dest.writeString(this.mName);
         dest.writeString(this.mAdress);
         dest.writeString(this.mUrl);
         dest.writeString(this.mPhoneNumber);
+        dest.writeString(this.mPhotoReference);
+        dest.writeDouble(this.mLat);
+        dest.writeDouble(this.mLng);
     }
 
     public String getName() {
@@ -80,5 +91,29 @@ public class Restaurant implements Parcelable {
 
     public void setPhoneNumber(String phoneNumber) {
         mPhoneNumber = phoneNumber;
+    }
+
+    public String getPhotoReference() {
+        return mPhotoReference;
+    }
+
+    public void setPhotoReference(String photoReference) {
+        mPhotoReference = photoReference;
+    }
+
+    public Double getLat() {
+        return mLat;
+    }
+
+    public void setLat(Double lat) {
+        mLat = lat;
+    }
+
+    public Double getLng() {
+        return mLng;
+    }
+
+    public void setLng(Double lng) {
+        mLng = lng;
     }
 }

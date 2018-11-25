@@ -27,6 +27,12 @@ public interface GooglePlaceServices {
             @Query("placeid") String placeId,
             @Query("key") String apiKey);
 
+    @GET("maps/api/place/photo")
+    Observable<RestaurantListJson.Photo> getRestaurantPhotos(
+            @Query("photoreference") String photoreference,
+            @Query("maxwidth")int maxwidth,
+            @Query("key") String apiKey);
+
 
     // Set a listener to know all about requests
     OkHttpClient okHttpClient = new OkHttpClient.Builder()

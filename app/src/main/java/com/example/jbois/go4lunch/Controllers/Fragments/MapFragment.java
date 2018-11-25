@@ -231,20 +231,27 @@ public class MapFragment extends Fragment
     // Get places around user and put marker on this places
     private void executeRequestToShowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurantsWithNeededInfos(location.getLatitude()+","+location.getLongitude())
-                .subscribeWith(new DisposableObserver<RestaurantDetails>() {
+                .subscribeWith(new DisposableObserver<List<Restaurant>>() {
                     @Override
-                    public void onNext(RestaurantDetails restaurantDetails) {
-                            Double lat = restaurantDetails.getResult().getGeometry().getLocation().getLat();
-                            Double lng = restaurantDetails.getResult().getGeometry().getLocation().getLng();
-
-                            createMarker(new LatLng(lat,lng), convertResponseIntoRestaurant(restaurantDetails));
+                    public void onNext(List<Restaurant> restaurantList) {
+                        Log.e("test",restaurantList.toString());
+                        for(Restaurant restaurant:restaurantList){
+                            Double lat = restaurant.getLat();
+                            Log.e("DEBUG LAT",""+lat);
+                            Double lng = restaurant.getLng();
+                            createMarker(new LatLng(lat,lng), restaurant);
+                        }
+                        mRestaurantsAroundUser.addAll(restaurantList);
                     }
                     @Override
-                    public void onError(Throwable e) {}
+                    public void onError(Throwable e) {
+                        Log.e("ERRORDESAMERE",""+e);
+                    }
                     @Override
                     public void onComplete() {
                     }
                 });
+        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
     }
     // Create google api client
     protected synchronized void buildGoogleApiClient() {
@@ -253,17 +260,7 @@ public class MapFragment extends Fragment
                 .addApi(LocationServices.API)
                 .build();
     }
-    // Convert detail APi response into restaurants objects
-    private Restaurant convertResponseIntoRestaurant(RestaurantDetails restaurantDetails){
-        Restaurant restaurant = new Restaurant();
-        restaurant.setName(restaurantDetails.getResult().getName());
-        restaurant.setAdress(restaurantDetails.getResult().getFormattedAddress());
-        restaurant.setUrl(restaurantDetails.getResult().getWebsite());
-        restaurant.setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
-        mRestaurantsAroundUser.add(restaurant);
-        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
-        return restaurant;
-    }
+
     @Override
     public void onLocationChanged(Location location) {
 

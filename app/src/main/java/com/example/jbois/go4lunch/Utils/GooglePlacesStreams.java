@@ -1,37 +1,29 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
-import com.example.jbois.go4lunch.Controllers.Fragments.MapFragment;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
-import com.google.android.gms.common.api.Api;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import butterknife.Optional;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import retrofit2.http.OPTIONS;
 
 public class GooglePlacesStreams {
 
-    public static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
-    public static final String rankby = "distance";
-    public static final String type = "restaurant";
+    private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
+    private static final String rankby = "distance";
+    private static final String type = "restaurant";
+    public static final int maxwidth = 0;
 
     //Observable to fetch Restaurants list from google
-    public static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
+    private static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurants(location,rankby,type,pageToken,apiKey)
                 .subscribeOn(Schedulers.io())
@@ -39,7 +31,7 @@ public class GooglePlacesStreams {
                 .timeout(10, TimeUnit.SECONDS);
     }
     //Observable to fetch Restaurants Details
-    public static Observable<RestaurantDetails> streamFetchRestaurantDetails(String placeId){
+    private static Observable<RestaurantDetails> streamFetchRestaurantDetails(String placeId){
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurantDetails(placeId,apiKey)
                 .subscribeOn(Schedulers.io())
@@ -47,13 +39,21 @@ public class GooglePlacesStreams {
                 .timeout(10, TimeUnit.SECONDS);
     }
 
-    public static Observable<RestaurantDetails> streamFetchRestaurantsWithNeededInfos(String location){
+    public static Observable<RestaurantListJson.Photo> streamFetchRestaurantPhoto(String photoreference){
+        GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
+        return googlePlaceServices.getRestaurantPhotos(photoreference,maxwidth,apiKey)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .timeout(10, TimeUnit.SECONDS);
+    }
+
+    public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
-                    googlePlacesStreams.browseResponseList(restaurantListJson,restaurantList);
+                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                     return Observable.just(restaurantListJson);
                 })
                 .delay(2, TimeUnit.SECONDS)
@@ -61,7 +61,7 @@ public class GooglePlacesStreams {
                     if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
-                                    googlePlacesStreams.browseResponseList(restaurantListJson,restaurantList);
+                                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                                     return Observable.just(restaurantListJsonNextPage);
                                 });
                     }
@@ -72,21 +72,43 @@ public class GooglePlacesStreams {
                     if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJson -> {
-                                    googlePlacesStreams.browseResponseList(restaurantListJson,restaurantList);
+                                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                                     return Observable.just(restaurantList);
                                 });
                     }
                     return Observable.just(restaurantList);
                 })
                 .flatMapIterable(restaurants ->restaurants)
-                .flatMap((Function<Restaurant, Observable<RestaurantDetails>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()));
+                .flatMap((Function<Restaurant, Observable<RestaurantDetails>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()))
+                .flatMap((Function<RestaurantDetails,Observable<List<Restaurant>>>)restdet ->{
+                    googlePlacesStreams.extrudeDetailsInfo(restaurantList,restdet);
+                    return Observable.just(restaurantList);
+                });
+
         }
 
-        public void browseResponseList (RestaurantListJson restlist,List<Restaurant> list){
+        //-------Private methods---------
+
+        private void extrudePlaceInfo(RestaurantListJson restlist, List<Restaurant> list){
             for(int i=0;i<restlist.getResults().size();i++){
                 Restaurant restaurant = new Restaurant();
                 restaurant.setId(restlist.getResults().get(i).getPlaceId());
+                //if(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference()!=null){
+                //    restaurant.setPhotoReference(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference());
+                //}
+                restaurant.setLat(restlist.getResults().get(i).getGeometry().getLocation().getLat());
+                restaurant.setLng(restlist.getResults().get(i).getGeometry().getLocation().getLng());
                 list.add(restaurant);
             }
         }
+
+        private void extrudeDetailsInfo(List<Restaurant> restaurantList, RestaurantDetails restaurantDetails){
+            for(int i=0;i<restaurantList.size();i++){
+                restaurantList.get(i).setName(restaurantDetails.getResult().getName());
+                restaurantList.get(i).setAdress(restaurantDetails.getResult().getFormattedAddress());
+                restaurantList.get(i).setUrl(restaurantDetails.getResult().getWebsite());
+                restaurantList.get(i).setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
+            }
+        }
+
 }
