@@ -244,7 +244,7 @@ public class MapFragment extends Fragment
                             Double lng = restaurant.getLng();
                             createMarker(new LatLng(lat,lng), restaurant);
                         }
-                                            }
+                    }
                     @Override
                     public void onError(Throwable e) {
                     }

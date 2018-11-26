@@ -100,11 +100,10 @@
 
 </LinearLayout>
     <ImageView
-        android:id="@+id/article_image"
+        android:id="@+id/restaurant_image_recyclerview"
         android:layout_width="75dip"
         android:layout_height="75dip"
         android:layout_margin="5dp"
-        android:background="@android:color/darker_gray"
         android:contentDescription="No Image"
         />
 </LinearLayout>

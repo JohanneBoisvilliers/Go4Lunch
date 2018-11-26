@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
 import com.example.jbois.go4lunch.Controllers.Adapters.RestaurantAdapter;
@@ -28,6 +29,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
 public class RestaurantListFragment extends Fragment {
 
@@ -68,7 +71,7 @@ public class RestaurantListFragment extends Fragment {
 
     private void configureRecyclerView(){
         // 3.2 - Create adapter passing the list of users
-        this.adapter = new RestaurantAdapter(this.mRestaurantList);
+        this.adapter = new RestaurantAdapter(this.mRestaurantList,Glide.with(this));
         // 3.3 - Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
         // 3.4 - Set layout manager to position the items
@@ -81,6 +84,7 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                         Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
+                        intent.putExtra(RESTAURANT_IN_TAG,mRestaurantList.get(position));
                         startActivity(intent);
                     }
                 });
@@ -89,7 +93,6 @@ public class RestaurantListFragment extends Fragment {
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList=event.restaurantList;
-
         configureRecyclerView();
     }
 }

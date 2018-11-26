@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestManager;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
@@ -17,9 +18,11 @@ import java.util.List;
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     private List<Restaurant> mRestaurantList;
+    private RequestManager glide;
 
-    public RestaurantAdapter(List<Restaurant> restaurantList){
+    public RestaurantAdapter(List<Restaurant> restaurantList, RequestManager glide){
         this.mRestaurantList = restaurantList;
+        this.glide = glide;
     }
     @NonNull
     @Override
@@ -34,7 +37,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
-        holder.updateRestaurantName(mRestaurantList.get(position));
+        holder.updateRestaurantName(mRestaurantList.get(position),this.glide);
     }
 
     @Override

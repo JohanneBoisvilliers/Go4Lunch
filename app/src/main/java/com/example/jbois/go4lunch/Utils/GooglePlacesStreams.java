@@ -58,7 +58,7 @@ public class GooglePlacesStreams {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                     return Observable.just(restaurantListJson);
                 })
-                .delay(2, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
                     if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
@@ -69,7 +69,7 @@ public class GooglePlacesStreams {
                     }
                     return Observable.just(restaurantListJsonNextPage);
                 })
-                .delay(2, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
                     if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
