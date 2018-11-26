@@ -45,8 +45,10 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -178,11 +180,12 @@ public class MapFragment extends Fragment
     }
     //Set and add a new marker
     public void createMarker(LatLng latLng,Restaurant restaurant){
-
         Marker marker=mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
         marker.setTag(restaurant);
+        mRestaurantsAroundUser.add(restaurant);
+        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
     }
     // Turn on the My Location layer and the related control on the map.
     private void updateLocationUI() {
@@ -231,27 +234,25 @@ public class MapFragment extends Fragment
     // Get places around user and put marker on this places
     private void executeRequestToShowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurantsWithNeededInfos(location.getLatitude()+","+location.getLongitude())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableObserver<List<Restaurant>>() {
                     @Override
                     public void onNext(List<Restaurant> restaurantList) {
-                        Log.e("test",restaurantList.toString());
                         for(Restaurant restaurant:restaurantList){
                             Double lat = restaurant.getLat();
-                            Log.e("DEBUG LAT",""+lat);
                             Double lng = restaurant.getLng();
                             createMarker(new LatLng(lat,lng), restaurant);
                         }
-                        mRestaurantsAroundUser.addAll(restaurantList);
-                    }
+                                            }
                     @Override
                     public void onError(Throwable e) {
-                        Log.e("ERRORDESAMERE",""+e);
                     }
                     @Override
                     public void onComplete() {
                     }
                 });
-        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
+
     }
     // Create google api client
     protected synchronized void buildGoogleApiClient() {

@@ -24,6 +24,7 @@ import butterknife.ButterKnife;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
+import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
 public class RestaurantProfileActivity extends AppCompatActivity implements View.OnClickListener {
@@ -37,7 +38,6 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
     private String mWebsiteUrl;
     private String mPhoneNumber;
     private String mPhotoReference;
-    private Disposable mDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +48,7 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
         getRestaurantFromBundleAndSetProfile();
         mWebsiteButton.setOnClickListener(this);
         mPhoneNumberButton.setOnClickListener(this);
-        Glide
-                .with(this)
-                .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
-                        +getScreenWidth(this)
-                        +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
-                .into(mRestaurantPhoto);
+        this.fetchRestaurantPhoto();
     }
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
     private void getRestaurantFromBundleAndSetProfile(){
@@ -86,6 +81,15 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
         DisplayMetrics metrics = new DisplayMetrics();
         ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
         return metrics.widthPixels;
+    }
+    //Use Glide to fetch restaurant's photo and set it into the imageview on top of view
+    private void fetchRestaurantPhoto(){
+        Glide
+                .with(this)
+                .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
+                        +getScreenWidth(this)
+                        +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
+                .into(mRestaurantPhoto);
     }
 
     @Override

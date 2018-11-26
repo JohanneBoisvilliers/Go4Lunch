@@ -89,6 +89,7 @@ public class RestaurantListFragment extends Fragment {
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList=event.restaurantList;
+
         configureRecyclerView();
     }
 }

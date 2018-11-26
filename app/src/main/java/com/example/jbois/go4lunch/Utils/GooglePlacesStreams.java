@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetails;
@@ -49,6 +50,7 @@ public class GooglePlacesStreams {
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
+        List<RestaurantDetails> restaurantDetailsList = new ArrayList<>();
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
@@ -79,9 +81,9 @@ public class GooglePlacesStreams {
                     return Observable.just(restaurantList);
                 })
                 .flatMapIterable(restaurants ->restaurants)
-                .flatMap((Function<Restaurant, Observable<RestaurantDetails>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()))
-                .flatMap((Function<RestaurantDetails,Observable<List<Restaurant>>>)restdet ->{
-                    googlePlacesStreams.extrudeDetailsInfo(restaurantList,restdet);
+                .flatMap((Function<Restaurant, Observable<List<RestaurantDetails>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
+                .flatMap ((Function<List<RestaurantDetails>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
+                    googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
                     return Observable.just(restaurantList);
                 });
 
@@ -93,21 +95,25 @@ public class GooglePlacesStreams {
             for(int i=0;i<restlist.getResults().size();i++){
                 Restaurant restaurant = new Restaurant();
                 restaurant.setId(restlist.getResults().get(i).getPlaceId());
-                //if(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference()!=null){
-                //    restaurant.setPhotoReference(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference());
-                //}
+                if(restlist.getResults().get(i).getPhotos()!=null){
+                    restaurant.setPhotoReference(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference());
+                }
                 restaurant.setLat(restlist.getResults().get(i).getGeometry().getLocation().getLat());
                 restaurant.setLng(restlist.getResults().get(i).getGeometry().getLocation().getLng());
                 list.add(restaurant);
             }
         }
 
-        private void extrudeDetailsInfo(List<Restaurant> restaurantList, RestaurantDetails restaurantDetails){
-            for(int i=0;i<restaurantList.size();i++){
-                restaurantList.get(i).setName(restaurantDetails.getResult().getName());
-                restaurantList.get(i).setAdress(restaurantDetails.getResult().getFormattedAddress());
-                restaurantList.get(i).setUrl(restaurantDetails.getResult().getWebsite());
-                restaurantList.get(i).setPhoneNumber(restaurantDetails.getResult().getFormattedPhoneNumber());
+        private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetails> restaurantDetailsList){
+            for (int i=0;i<restaurantList.size();i++){
+                for (int j = 0; j < restaurantDetailsList.size(); j++) {
+                    if(restaurantDetailsList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
+                        restaurantList.get(i).setName(restaurantDetailsList.get(j).getResult().getName());
+                        restaurantList.get(i).setAdress(restaurantDetailsList.get(j).getResult().getFormattedAddress());
+                        restaurantList.get(i).setUrl(restaurantDetailsList.get(j).getResult().getWebsite());
+                        restaurantList.get(i).setPhoneNumber(restaurantDetailsList.get(j).getResult().getFormattedPhoneNumber());
+                    }
+                }
             }
         }
 
