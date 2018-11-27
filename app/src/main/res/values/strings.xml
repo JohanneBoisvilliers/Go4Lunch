@@ -28,6 +28,9 @@
     <string name="call_button">CALL</string>
     <string name="like_button">LIKE</string>
     <string name="website_button">WEBSITE</string>
+    <string name="closed_status">Closed</string>
+    <string name="closing_soon_status">Closing soon</string>
+    <string name="open_status">Open until 1%s2%s</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
 

@@ -1,13 +1,16 @@
 package com.example.jbois.go4lunch.Utils;
 
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
+import com.example.jbois.go4lunch.R;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -22,6 +25,7 @@ public class GooglePlacesStreams {
     private static final String rankby = "distance";
     private static final String type = "restaurant";
     public static final int maxwidth = 0;
+    public Context ctx;
 
     //Observable to fetch Restaurants list from google
     private static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
@@ -91,15 +95,15 @@ public class GooglePlacesStreams {
 
         //-------Private methods---------
 
-        private void extrudePlaceInfo(RestaurantListJson restlist, List<Restaurant> list){
-            for(int i=0;i<restlist.getResults().size();i++){
+        private void extrudePlaceInfo(RestaurantListJson restList, List<Restaurant> list){
+            for(int i=0;i<restList.getResults().size();i++){
                 Restaurant restaurant = new Restaurant();
-                restaurant.setId(restlist.getResults().get(i).getPlaceId());
-                if(restlist.getResults().get(i).getPhotos()!=null){
-                    restaurant.setPhotoReference(restlist.getResults().get(i).getPhotos().get(0).getPhotoReference());
+                restaurant.setId(restList.getResults().get(i).getPlaceId());
+                if(restList.getResults().get(i).getPhotos()!=null){
+                    restaurant.setPhotoReference(restList.getResults().get(i).getPhotos().get(0).getPhotoReference());
                 }
-                restaurant.setLat(restlist.getResults().get(i).getGeometry().getLocation().getLat());
-                restaurant.setLng(restlist.getResults().get(i).getGeometry().getLocation().getLng());
+                restaurant.setLat(restList.getResults().get(i).getGeometry().getLocation().getLat());
+                restaurant.setLng(restList.getResults().get(i).getGeometry().getLocation().getLng());
                 list.add(restaurant);
             }
         }
@@ -112,9 +116,28 @@ public class GooglePlacesStreams {
                         restaurantList.get(i).setAdress(restaurantDetailsList.get(j).getResult().getFormattedAddress());
                         restaurantList.get(i).setUrl(restaurantDetailsList.get(j).getResult().getWebsite());
                         restaurantList.get(i).setPhoneNumber(restaurantDetailsList.get(j).getResult().getFormattedPhoneNumber());
+                        restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsList.get(j)));
                     }
                 }
             }
+        }
+
+        private String checkOpeningHours(RestaurantDetails restaurantDetails){
+            String openingHours="";
+            Calendar today = Calendar.getInstance();
+            List<RestaurantDetails.Period> periodList = restaurantDetails.getResult().getOpeningHours().getPeriods();
+
+            if(restaurantDetails.getResult().getOpeningHours().getOpenNow()){
+                for (int i = 0; i < periodList.size() ; i++) {
+                    if(periodList.get(i).getOpen().getDay()+1 == today.DAY_OF_WEEK){
+
+                    }
+                }
+            }else{
+                openingHours = ctx.getResources().getString(R.string.closed_status);
+            }
+
+            return openingHours;
         }
 
 }
