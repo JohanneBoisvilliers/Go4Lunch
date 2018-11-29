@@ -2,7 +2,6 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -14,12 +13,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListAdapter;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,7 +35,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -49,8 +45,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class MapFragment extends Fragment
         implements  GoogleMap.OnMyLocationButtonClickListener,
@@ -218,6 +212,7 @@ public class MapFragment extends Fragment
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), 15));
+                                EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
                                 executeRequestToShowCurrentPlace(mLastKnownLocation);
                             } else {
                                 mMap.moveCamera(CameraUpdateFactory
@@ -260,6 +255,10 @@ public class MapFragment extends Fragment
                 .enableAutoManage(getActivity(), this)
                 .addApi(LocationServices.API)
                 .build();
+    }
+
+    public Location getLastKnownLocation() {
+        return mLastKnownLocation;
     }
 
     @Override

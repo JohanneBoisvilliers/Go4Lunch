@@ -14,17 +14,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Models.RestaurantDetails;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
-import com.google.android.gms.maps.model.LatLng;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
 
-import static com.bumptech.glide.request.RequestOptions.fitCenterTransform;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
 public class RestaurantProfileActivity extends AppCompatActivity implements View.OnClickListener {

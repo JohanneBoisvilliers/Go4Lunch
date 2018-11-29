@@ -1,5 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
+import android.content.Context;
+import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
@@ -14,6 +16,7 @@ import android.view.MenuItem;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 
 import java.util.ArrayList;
@@ -31,12 +34,22 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     @BindView(R.id.activity_main_nav_view)NavigationView mNavigationView;
 
     private String[] mTitleList = new String[3];
+    private Context mContext;
 
     public static class refreshRestaurantsList{
         public List<Restaurant> restaurantList;
 
         public refreshRestaurantsList(List<Restaurant> restlist){
             this.restaurantList = restlist;
+        }
+
+    }
+
+    public static class getLocation{
+        public Location location;
+
+        public getLocation(Location location){
+            this.location = location;
         }
     }
 
@@ -45,6 +58,7 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lunch);
         ButterKnife.bind(this);
+        mContext = this;
         mTitleList = getResources().getStringArray(R.array.toolbar_title_list);
         this.configureToolbar();
         this.configureViewPager();
@@ -155,5 +169,9 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         this.mDrawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 }

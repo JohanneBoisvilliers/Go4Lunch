@@ -1,13 +1,19 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
+import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Models.RestaurantDetails;
+import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,7 +42,7 @@ public class GooglePlacesStreams {
                 .timeout(10, TimeUnit.SECONDS);
     }
     //Observable to fetch Restaurants Details
-    private static Observable<RestaurantDetails> streamFetchRestaurantDetails(String placeId){
+    private static Observable<RestaurantDetailsJson> streamFetchRestaurantDetails(String placeId){
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurantDetails(placeId,apiKey)
                 .subscribeOn(Schedulers.io())
@@ -44,9 +50,9 @@ public class GooglePlacesStreams {
                 .timeout(10, TimeUnit.SECONDS);
     }
 
-    public static Observable<RestaurantListJson.Photo> streamFetchRestaurantPhoto(String photoreference){
+    public static Observable<DistanceJson> streamComputeRestaurantDistance(String currentLocation, String placeId){
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
-        return googlePlaceServices.getRestaurantPhotos(photoreference,maxwidth,apiKey)
+        return googlePlaceServices.getDistanceRestaurantFromUser(currentLocation,placeId,apiKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(10, TimeUnit.SECONDS);
@@ -54,7 +60,7 @@ public class GooglePlacesStreams {
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
-        List<RestaurantDetails> restaurantDetailsList = new ArrayList<>();
+        List<RestaurantDetailsJson> restaurantDetailsJsonList = new ArrayList<>();
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
@@ -85,8 +91,8 @@ public class GooglePlacesStreams {
                     return Observable.just(restaurantList);
                 })
                 .flatMapIterable(restaurants ->restaurants)
-                .flatMap((Function<Restaurant, Observable<List<RestaurantDetails>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
-                .flatMap ((Function<List<RestaurantDetails>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
+                .flatMap((Function<Restaurant, Observable<List<RestaurantDetailsJson>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
+                .flatMap ((Function<List<RestaurantDetailsJson>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
                     googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
                     return Observable.just(restaurantList);
                 });
@@ -108,36 +114,51 @@ public class GooglePlacesStreams {
             }
         }
 
-        private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetails> restaurantDetailsList){
+        private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
             for (int i=0;i<restaurantList.size();i++){
-                for (int j = 0; j < restaurantDetailsList.size(); j++) {
-                    if(restaurantDetailsList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
-                        restaurantList.get(i).setName(restaurantDetailsList.get(j).getResult().getName());
-                        restaurantList.get(i).setAdress(restaurantDetailsList.get(j).getResult().getFormattedAddress());
-                        restaurantList.get(i).setUrl(restaurantDetailsList.get(j).getResult().getWebsite());
-                        restaurantList.get(i).setPhoneNumber(restaurantDetailsList.get(j).getResult().getFormattedPhoneNumber());
-                        restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsList.get(j)));
+                for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
+                    if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
+                        restaurantList.get(i).setName(restaurantDetailsJsonList.get(j).getResult().getName());
+                        restaurantList.get(i).setAdress(restaurantDetailsJsonList.get(j).getResult().getFormattedAddress());
+                        restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
+                        restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
+                        restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j)));
                     }
                 }
             }
         }
 
-        private String checkOpeningHours(RestaurantDetails restaurantDetails){
+        private String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson){
             String openingHours="";
             Calendar today = Calendar.getInstance();
-            List<RestaurantDetails.Period> periodList = restaurantDetails.getResult().getOpeningHours().getPeriods();
-
-            if(restaurantDetails.getResult().getOpeningHours().getOpenNow()){
-                for (int i = 0; i < periodList.size() ; i++) {
-                    if(periodList.get(i).getOpen().getDay()+1 == today.DAY_OF_WEEK){
-
-                    }
-                }
+            List<RestaurantDetailsJson.Period> periodList=new ArrayList<>();
+            if (restaurantDetailsJson.getResult().getOpeningHours() == null) {
+                openingHours="???";
             }else{
-                openingHours = ctx.getResources().getString(R.string.closed_status);
+                periodList = restaurantDetailsJson.getResult().getOpeningHours().getPeriods();
+                if(restaurantDetailsJson.getResult().getOpeningHours().getOpenNow()){
+                    for (int i = 0; i < periodList.size() ; i++) {
+                        if(periodList.get(i).getOpen().getDay()+1 == today.DAY_OF_WEEK){
+                            openingHours = convertHours(periodList.get(i).getOpen().getTime());
+                        }
+                    }
+                }else{
+                    //openingHours = Resources.getSystem().getString(R.string.closed_status);
+                    openingHours ="Closed";
+                }
             }
 
             return openingHours;
         }
 
+        private String convertHours(String stringToConvert){
+            String hoursAsString = stringToConvert;
+
+            DateTimeFormatter dtf = DateTimeFormat.forPattern("HHmm");
+            DateTime dateTime = dtf.parseDateTime(hoursAsString);
+            DateTimeFormatter outputFormat = DateTimeFormat.forPattern("K.mma");
+            hoursAsString = outputFormat.print(dateTime);
+
+            return hoursAsString;
+        }
 }

@@ -1,7 +1,9 @@
 package com.example.jbois.go4lunch.Utils;
 
-import com.example.jbois.go4lunch.Models.RestaurantDetails;
+import com.example.jbois.go4lunch.Models.DistanceJson;
+import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
+import com.google.android.gms.maps.model.LatLng;
 
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
@@ -23,14 +25,14 @@ public interface GooglePlaceServices {
             @Query("key") String apiKey);
 
     @GET("maps/api/place/details/json")
-    Observable<RestaurantDetails > getRestaurantDetails(
+    Observable<RestaurantDetailsJson> getRestaurantDetails(
             @Query("placeid") String placeId,
             @Query("key") String apiKey);
 
-    @GET("maps/api/place/photo")
-    Observable<RestaurantListJson.Photo> getRestaurantPhotos(
-            @Query("photoreference") String photoreference,
-            @Query("maxwidth")int maxwidth,
+    @GET("maps/api/distancematrix/json")
+    Observable<DistanceJson> getDistanceRestaurantFromUser(
+            @Query("origins") String origins,
+            @Query("destinations")String destinations,
             @Query("key") String apiKey);
 
 

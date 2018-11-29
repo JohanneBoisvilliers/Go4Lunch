@@ -30,7 +30,7 @@
     <string name="website_button">WEBSITE</string>
     <string name="closed_status">Closed</string>
     <string name="closing_soon_status">Closing soon</string>
-    <string name="open_status">Open until 1%s2%s</string>
+    <string name="open_status">Open until %s</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
 

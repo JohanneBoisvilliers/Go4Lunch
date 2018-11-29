@@ -2,6 +2,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,6 +39,7 @@ public class RestaurantListFragment extends Fragment {
 
     private List<Restaurant> mRestaurantList=new ArrayList<>();
     private RestaurantAdapter adapter;
+    private Location mLocation;
 
     public RestaurantListFragment() {}
 
@@ -70,11 +72,11 @@ public class RestaurantListFragment extends Fragment {
     }
 
     private void configureRecyclerView(){
-        // 3.2 - Create adapter passing the list of users
-        this.adapter = new RestaurantAdapter(this.mRestaurantList,Glide.with(this));
-        // 3.3 - Attach the adapter to the recyclerview to populate items
+        //Create adapter passing the list of users
+        this.adapter = new RestaurantAdapter(this.mRestaurantList,Glide.with(this),mLocation);
+        //Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
-        // 3.4 - Set layout manager to position the items
+        //Set layout manager to position the items
         this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
@@ -89,10 +91,16 @@ public class RestaurantListFragment extends Fragment {
                     }
                 });
     }
-
+    //Callback method to fetch restaurant list
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList=event.restaurantList;
+        configureRecyclerView();
+    }
+    //Callback method to fetch user's position
+    @Subscribe
+    public void onLocationFetch(LunchActivity.getLocation event) {
+        mLocation = event.location;
         configureRecyclerView();
     }
 }
