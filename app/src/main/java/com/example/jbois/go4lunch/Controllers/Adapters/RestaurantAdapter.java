@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.RequestManager;
 import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
@@ -23,14 +22,12 @@ import io.reactivex.observers.DisposableObserver;
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     private List<Restaurant> mRestaurantList;
-    private RequestManager glide;
     private Disposable mDisposable;
     private Location mLocation;
     private String mDistanceText;
 
-    public RestaurantAdapter(List<Restaurant> restaurantList, RequestManager glide,Location location){
+    public RestaurantAdapter(List<Restaurant> restaurantList,Location location){
         this.mRestaurantList = restaurantList;
-        this.glide = glide;
         this.mLocation = location;
     }
     @NonNull
@@ -48,7 +45,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
         this.executeRequestToComputeDistance(mLocation,mRestaurantList.get(position).getId());
         mRestaurantList.get(position).setDistance(mDistanceText);
-        holder.updateRestaurantName(mRestaurantList.get(position),this.glide);
+        holder.updateRestaurantInfos(mRestaurantList.get(position));
     }
 
     @Override

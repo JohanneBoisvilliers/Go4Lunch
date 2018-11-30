@@ -73,7 +73,7 @@ public class RestaurantListFragment extends Fragment {
 
     private void configureRecyclerView(){
         //Create adapter passing the list of users
-        this.adapter = new RestaurantAdapter(this.mRestaurantList,Glide.with(this),mLocation);
+        this.adapter = new RestaurantAdapter(this.mRestaurantList,mLocation);
         //Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
         //Set layout manager to position the items
