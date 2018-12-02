@@ -26,6 +26,7 @@
             android:layout_height="wrap_content">
             <TextView
                 android:id="@+id/activity_restaurant_name"
+                android:paddingLeft="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"/>
             <ImageView
@@ -54,6 +55,7 @@
             android:id="@+id/activity_restaurant_adress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
             android:text="12 rue du blabla"/>
 
     </LinearLayout>
@@ -92,6 +94,7 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_restaurant_profile_workmates"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_weight="0.1"/>
 
 </LinearLayout>

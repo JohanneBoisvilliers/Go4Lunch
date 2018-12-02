@@ -30,23 +30,27 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         this.mRestaurantName.setText(restaurant.getName());
         this.mRestaurantLocation.setText(restaurant.getAdress());
         this.glideRequest(restaurant);
-        if (restaurant.getOpeningHours()!=null) {
-            if(restaurant.getOpeningHours().equals("Closed")){
-                this.mClosingTime.setText(restaurant.getOpeningHours());
-            }else{
-                this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
-            }
-        }
-        this.mDistance.setText(restaurant.getDistance());
+        this.setOpeningHours(restaurant);
+        this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
     }
-    //Use glide to fetch restaurant photo and set it in the recyclerview
+    //Use glide to fetch restaurant photo and set it into the recyclerview
     private void glideRequest(Restaurant restaurant){
-
             GlideApp.with(this.mRestaurantImage.getContext())
                     .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth=128&photoreference="+restaurant.getPhotoReference()+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
                     .apply(new RequestOptions().transforms(new CenterCrop(),new RoundedCorners(10)))
                     .error(R.drawable.no_image_small_icon)
                     .into(mRestaurantImage);
-
+    }
+    //check openingHours value and set hours in recyclerview
+    private void setOpeningHours(Restaurant restaurant){
+        if (restaurant.getOpeningHours()!=null) {
+            if(restaurant.getOpeningHours().equals("Closed")){
+                this.mClosingTime.setText(restaurant.getOpeningHours());
+            }else if (restaurant.getOpeningHours().equals("???")){
+                this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)));
+            }else{
+                this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
+            }
+        }
     }
 }

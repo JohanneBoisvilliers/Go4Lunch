@@ -119,7 +119,7 @@ public class GooglePlacesStreams {
                 for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
                     if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
                         restaurantList.get(i).setName(restaurantDetailsJsonList.get(j).getResult().getName());
-                        restaurantList.get(i).setAdress(restaurantDetailsJsonList.get(j).getResult().getFormattedAddress());
+                        restaurantList.get(i).setAdress(extrudeAdressFromJson(restaurantDetailsJsonList.get(j)));
                         restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
                         restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
                         restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j)));
@@ -127,7 +127,7 @@ public class GooglePlacesStreams {
                 }
             }
         }
-
+        //Get openingHours for each restaurant 
         private String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson){
             String openingHours="";
             Calendar today = Calendar.getInstance();
@@ -150,7 +150,7 @@ public class GooglePlacesStreams {
 
             return openingHours;
         }
-
+        //convert hours from api into AM PM format
         private String convertHours(String stringToConvert){
             String hoursAsString = stringToConvert;
 
@@ -160,5 +160,19 @@ public class GooglePlacesStreams {
             hoursAsString = outputFormat.print(dateTime);
 
             return hoursAsString;
+        }
+        //extrude from Json a compact adress ( street number + road )
+        private String extrudeAdressFromJson(RestaurantDetailsJson restaurantDetailsJson){
+        List<RestaurantDetailsJson.AddressComponent> addressComponentList = restaurantDetailsJson.getResult().getAddressComponents();
+        String road = "";
+        String streetNumber = "";
+            for (RestaurantDetailsJson.AddressComponent adress : addressComponentList) {
+                if (adress.getTypes().get(0).equals("street_number")){
+                    road = adress.getLongName();
+                }else if(adress.getTypes().get(0).equals("route")){
+                    streetNumber = adress.getLongName();
+                }
+            }
+            return road+" "+streetNumber;
         }
 }

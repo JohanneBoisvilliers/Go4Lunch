@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -40,8 +42,8 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
         ButterKnife.bind(this);
 
         getRestaurantFromBundleAndSetProfile();
-        mWebsiteButton.setOnClickListener(this);
-        mPhoneNumberButton.setOnClickListener(this);
+        this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
+        this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
         this.fetchRestaurantPhoto();
     }
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
@@ -64,11 +66,11 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
     }
     //Open the dial page with the restaurant phone number
     public void dialPhoneNumber(String phoneNumber) {
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:" + phoneNumber));
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            }
     }
     //Get the screen width to optimize the google photo request
     private int getScreenWidth(Context context){
@@ -97,6 +99,15 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
             case R.id.activity_restaurant_website:
                 openWebPage(mWebsiteUrl);
                 break;
+        }
+    }
+
+    private void checkToSetStateButton(Button button,String buttonName){
+        if (buttonName==null || buttonName.equals("")){
+            DrawableCompat.setTint(button.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.deactivated));
+            button.setEnabled(false);
+        }else{
+            button.setOnClickListener(this);
         }
     }
 }

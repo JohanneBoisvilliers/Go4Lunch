@@ -24,7 +24,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
     private List<Restaurant> mRestaurantList;
     private Disposable mDisposable;
     private Location mLocation;
-    private String mDistanceText;
+    private int mDistance;
 
     public RestaurantAdapter(List<Restaurant> restaurantList,Location location){
         this.mRestaurantList = restaurantList;
@@ -44,7 +44,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
         this.executeRequestToComputeDistance(mLocation,mRestaurantList.get(position).getId());
-        mRestaurantList.get(position).setDistance(mDistanceText);
+        mRestaurantList.get(position).setDistance(mDistance);
         holder.updateRestaurantInfos(mRestaurantList.get(position));
     }
 
@@ -59,7 +59,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
                 .subscribeWith(new DisposableObserver<DistanceJson>() {
                     @Override
                     public void onNext(DistanceJson distance) {
-                        mDistanceText = distance.getRows().get(0).getElements().get(0).getDistance().getText();
+                        mDistance = distance.getRows().get(0).getElements().get(0).getDistance().getValue();
                     }
                     @Override
                     public void onError(Throwable e) {

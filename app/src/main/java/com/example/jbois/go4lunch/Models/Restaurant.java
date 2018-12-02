@@ -24,7 +24,7 @@ public class Restaurant implements Parcelable {
     private Double mLat;
     private Double mLng;
     private String mOpeningHours;
-    private String mDistance;
+    private int mDistance;
 
     public Restaurant(){}
 
@@ -38,7 +38,7 @@ public class Restaurant implements Parcelable {
         this.mLat = in.readDouble();
         this.mLng = in.readDouble();
         this.mOpeningHours = in.readString();
-        this.mDistance = in.readString();
+        this.mDistance = in.readInt();
     }
     @Override
     public int describeContents() {
@@ -56,7 +56,7 @@ public class Restaurant implements Parcelable {
         dest.writeDouble(this.mLat);
         dest.writeDouble(this.mLng);
         dest.writeString(this.mOpeningHours);
-        dest.writeString(this.mDistance);
+        dest.writeInt(this.mDistance);
     }
 
     public String getName() {
@@ -131,11 +131,11 @@ public class Restaurant implements Parcelable {
         mOpeningHours = openingHours;
     }
 
-    public String getDistance() {
+    public int getDistance() {
         return mDistance;
     }
 
-    public void setDistance(String distance) {
+    public void setDistance(int distance) {
         mDistance = distance;
     }
 }

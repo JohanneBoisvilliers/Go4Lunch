@@ -20,7 +20,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#000000"
-            android:text="mdco"/>
+            android:maxLines="1"
+            android:maxLength="25"
+            android:text="name"/>
 
         <TextView
             android:id="@+id/how_far_is_it"
