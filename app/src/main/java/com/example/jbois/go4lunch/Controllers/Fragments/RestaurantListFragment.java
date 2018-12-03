@@ -72,7 +72,7 @@ public class RestaurantListFragment extends Fragment {
     }
 
     private void configureRecyclerView(){
-        //Create adapter passing the list of users
+        //Create adapter passing the list of restaurant
         this.adapter = new RestaurantAdapter(this.mRestaurantList,mLocation);
         //Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
