@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Fragments;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ public class RestaurantListFragment extends Fragment {
 
         return(frag);
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -92,13 +94,13 @@ public class RestaurantListFragment extends Fragment {
                 });
     }
     //Callback method to fetch restaurant list
-    @Subscribe
+    @Subscribe(sticky = true)
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList=event.restaurantList;
         configureRecyclerView();
     }
     //Callback method to fetch user's position
-    @Subscribe
+    @Subscribe(sticky = true)
     public void onLocationFetch(LunchActivity.getLocation event) {
         mLocation = event.location;
         configureRecyclerView();

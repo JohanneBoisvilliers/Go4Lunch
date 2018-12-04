@@ -36,6 +36,7 @@
     <string name="distance_unit">%d m</string>
     <!-- Workmates recyclerview -->
     <string name="restaurant_chose_by_workmate">%s is eating to : %s</string>
+    <string name="workmate_joining">%s is joining</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
 

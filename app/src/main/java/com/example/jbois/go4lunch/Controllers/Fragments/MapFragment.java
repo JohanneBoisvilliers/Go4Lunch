@@ -179,7 +179,7 @@ public class MapFragment extends Fragment
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
         marker.setTag(restaurant);
         mRestaurantsAroundUser.add(restaurant);
-        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
+        EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
     }
     // Turn on the My Location layer and the related control on the map.
     private void updateLocationUI() {
@@ -212,7 +212,7 @@ public class MapFragment extends Fragment
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(mLastKnownLocation.getLatitude(),
                                                 mLastKnownLocation.getLongitude()), 15));
-                                EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
+                                EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
                                 executeRequestToShowCurrentPlace(mLastKnownLocation);
                             } else {
                                 mMap.moveCamera(CameraUpdateFactory
@@ -255,10 +255,6 @@ public class MapFragment extends Fragment
                 .enableAutoManage(getActivity(), this)
                 .addApi(LocationServices.API)
                 .build();
-    }
-
-    public Location getLastKnownLocation() {
-        return mLastKnownLocation;
     }
 
     @Override

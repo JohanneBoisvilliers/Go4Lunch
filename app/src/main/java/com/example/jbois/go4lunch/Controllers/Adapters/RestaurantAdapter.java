@@ -43,37 +43,12 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
-        this.executeRequestToComputeDistance(mLocation,mRestaurantList.get(position).getId());
-        mRestaurantList.get(position).setDistance(mDistance);
         holder.updateRestaurantInfos(mRestaurantList.get(position));
     }
 
     @Override
     public int getItemCount() {
         return this.mRestaurantList.size();
-    }
-
-    // Get places around user and put marker on this places
-    private void executeRequestToComputeDistance(Location location, String placeId) {
-        this.mDisposable = GooglePlacesStreams.streamComputeRestaurantDistance(location.getLatitude()+","+location.getLongitude(),"place_id:"+placeId)
-                .subscribeWith(new DisposableObserver<DistanceJson>() {
-                    @Override
-                    public void onNext(DistanceJson distance) {
-                        mDistance = distance.getRows().get(0).getElements().get(0).getDistance().getValue();
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                    }
-                    @Override
-                    public void onComplete() {
-                    }
-                });
-
-    }
-
-    @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
-        if (this.mDisposable != null && !this.mDisposable.isDisposed()) this.mDisposable.dispose();
     }
 
 }

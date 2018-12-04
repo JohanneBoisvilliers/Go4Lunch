@@ -2,6 +2,7 @@ package com.example.jbois.go4lunch.Utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 
 import com.example.jbois.go4lunch.Models.DistanceJson;
@@ -18,9 +19,11 @@ import org.joda.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
@@ -30,8 +33,6 @@ public class GooglePlacesStreams {
     private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
     private static final String rankby = "distance";
     private static final String type = "restaurant";
-    public static final int maxwidth = 0;
-    public Context ctx;
 
     //Observable to fetch Restaurants list from google
     private static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
@@ -39,7 +40,7 @@ public class GooglePlacesStreams {
         return googlePlaceServices.getRestaurants(location,rankby,type,pageToken,apiKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .timeout(10, TimeUnit.SECONDS);
+                .timeout(20, TimeUnit.SECONDS);
     }
     //Observable to fetch Restaurants Details
     private static Observable<RestaurantDetailsJson> streamFetchRestaurantDetails(String placeId){
@@ -47,7 +48,7 @@ public class GooglePlacesStreams {
         return googlePlaceServices.getRestaurantDetails(placeId,apiKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .timeout(10, TimeUnit.SECONDS);
+                .timeout(20, TimeUnit.SECONDS);
     }
 
     public static Observable<DistanceJson> streamComputeRestaurantDistance(String currentLocation, String placeId){
@@ -55,18 +56,18 @@ public class GooglePlacesStreams {
         return googlePlaceServices.getDistanceRestaurantFromUser(currentLocation,placeId,apiKey)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .timeout(10, TimeUnit.SECONDS);
+                .timeout(20, TimeUnit.SECONDS);
+
     }
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
-        List<RestaurantDetailsJson> restaurantDetailsJsonList = new ArrayList<>();
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                    return Observable.just(restaurantListJson);
+                    return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 })
                 .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
@@ -74,10 +75,10 @@ public class GooglePlacesStreams {
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
                                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                                    return Observable.just(restaurantListJsonNextPage);
+                                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                                 });
                     }
-                    return Observable.just(restaurantListJsonNextPage);
+                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 })
                 .delay(1, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
@@ -85,17 +86,25 @@ public class GooglePlacesStreams {
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJson -> {
                                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                                    return Observable.just(restaurantList);
+                                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                                 });
                     }
-                    return Observable.just(restaurantList);
+                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 })
                 .flatMapIterable(restaurants ->restaurants)
                 .flatMap((Function<Restaurant, Observable<List<RestaurantDetailsJson>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
                 .flatMap ((Function<List<RestaurantDetailsJson>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
                     googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
-                    return Observable.just(restaurantList);
-                });
+                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                })
+                .flatMapIterable(restaurants ->restaurants)
+                .flatMap((Function<Restaurant, Observable<List<Restaurant>>>) restaurant -> streamComputeRestaurantDistance(location,"place_id:"+restaurant.getId())
+                        .flatMap((Function<DistanceJson, Observable<Restaurant>>) distanceJson -> {
+                            restaurant.setDistance(distanceJson.getRows().get(0).getElements().get(0).getDistance().getValue());
+                            return Observable.fromCallable(() -> restaurant);
+                        })
+                        .toList()
+                        .toObservable());
 
         }
 
