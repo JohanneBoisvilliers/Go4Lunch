@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.jbois.go4lunch">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
 
     <application
@@ -21,14 +21,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".Controllers.Activities.LunchActivity" />
-        <activity android:name=".Controllers.Activities.RestaurantProfileActivity"></activity>
+        <activity android:name=".Controllers.Activities.RestaurantProfileActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/APIKEY"/>
+            android:value="@string/APIKEY" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <activity android:name=".Controllers.Activities.ProfileActivity" />
+        <activity android:name=".Controllers.Activities.BaseUserActivity"></activity>
     </application>
 
 </manifest>

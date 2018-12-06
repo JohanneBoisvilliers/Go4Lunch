@@ -69,11 +69,9 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
 
     @Override
     public void onBackPressed() {
-        // 5 - Handle back click to close menu
+        //Handle back click to close menu
         if (this.mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             this.mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
         }
     }
 

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 
 
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 
 import butterknife.BindView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseUserActivity {
 
     @BindView(R.id.main_activity_coordinator_layout) CoordinatorLayout mCoordinatorLayout;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
+                this.createUserInFirestore();
             } else { // ERRORS
                 if (response == null) {
                     showSnackBar(this.mCoordinatorLayout, getString(R.string.error_authentication_canceled));
@@ -80,5 +82,17 @@ public class MainActivity extends AppCompatActivity {
     private void startLunchActivity(){
         Intent intent = new Intent(this, LunchActivity.class);
         startActivity(intent);
+    }
+
+    private void createUserInFirestore(){
+
+        if (this.getCurrentUser() != null){
+
+            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
+            String username = this.getCurrentUser().getDisplayName();
+            String uid = this.getCurrentUser().getUid();
+
+            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+        }
     }
 }
