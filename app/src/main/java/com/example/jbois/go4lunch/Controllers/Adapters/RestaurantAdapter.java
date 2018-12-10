@@ -8,16 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
-import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 
 import java.util.List;
 
 import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 

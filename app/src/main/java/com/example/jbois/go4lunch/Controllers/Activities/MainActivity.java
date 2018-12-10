@@ -4,8 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-
+import android.widget.Button;
 
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.UserHelper;
@@ -20,9 +19,9 @@ import butterknife.BindView;
 public class MainActivity extends BaseUserActivity {
 
     @BindView(R.id.main_activity_coordinator_layout) CoordinatorLayout mCoordinatorLayout;
+    @BindView(R.id.google_signin_button) Button mGoogleSignInButton;
 
     private static final int RC_SIGN_IN = 123;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

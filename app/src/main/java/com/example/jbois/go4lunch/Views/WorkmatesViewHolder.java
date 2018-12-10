@@ -1,14 +1,12 @@
 package com.example.jbois.go4lunch.Views;
 
-import android.app.Activity;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity_ViewBinding;
-import com.example.jbois.go4lunch.Models.Workmates;
+import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
 
 import butterknife.BindView;
@@ -24,11 +22,11 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this,itemView);
     }
 
-    public void updateRestaurantDestination(Workmates workmates){
+    public void updateRestaurantDestination(User workmates){
         if(mRestaurantPhoto != null){
-            mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_joining),workmates.getName()));
+            mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_joining),workmates.getUsername()));
         }else{
-            mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.restaurant_chose_by_workmate),workmates.getName(),"BLA"));
+            mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.restaurant_chose_by_workmate),workmates.getUsername(),"BLA"));
         }
 
     }

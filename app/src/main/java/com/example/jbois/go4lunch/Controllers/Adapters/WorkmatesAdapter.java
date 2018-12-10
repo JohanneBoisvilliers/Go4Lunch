@@ -7,18 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Models.Workmates;
+import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
 
 import java.util.List;
 
 public class WorkmatesAdapter extends RecyclerView.Adapter<WorkmatesViewHolder> {
 
-    private List<Workmates> mWorkmatesList;
+    private List<User> mWorkmatesList;
 
-    public WorkmatesAdapter(List<Workmates> workmatesList) {
+    public WorkmatesAdapter(List<User> workmatesList) {
         this.mWorkmatesList = workmatesList;
     }
 

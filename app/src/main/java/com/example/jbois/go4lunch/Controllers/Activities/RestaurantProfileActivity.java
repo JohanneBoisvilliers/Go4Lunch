@@ -4,10 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
@@ -15,8 +15,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.GlideApp;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -80,11 +84,12 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
     }
     //Use Glide to fetch restaurant's photo and set it into the imageview on top of view
     private void fetchRestaurantPhoto(){
-        Glide
-                .with(this)
+        GlideApp.with(this)
                 .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
                         +getScreenWidth(this)
                         +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
+                .centerInside()
+                .error(R.drawable.no_photo_profile)
                 .into(mRestaurantPhoto);
     }
 

@@ -6,8 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.adapter.rxjava2.Result;
-
 public class RestaurantListJson {
     @SerializedName("html_attributions")
     @Expose

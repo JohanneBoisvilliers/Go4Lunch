@@ -3,7 +3,6 @@ package com.example.jbois.go4lunch.Utils;
 import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
-import com.google.android.gms.maps.model.LatLng;
 
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
