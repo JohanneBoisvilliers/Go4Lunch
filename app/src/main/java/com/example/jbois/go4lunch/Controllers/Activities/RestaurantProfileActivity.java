@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,26 +19,31 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
+import com.example.jbois.go4lunch.Utils.UserHelper;
+import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
-public class RestaurantProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class RestaurantProfileActivity extends BaseUserActivity implements View.OnClickListener {
 
     @BindView(R.id.activity_restaurant_name)TextView mRestaurantNameInProfile;
     @BindView(R.id.activity_restaurant_adress)TextView mRestaurantAdressInProfile;
     @BindView(R.id.activity_restaurant_website)Button mWebsiteButton;
     @BindView(R.id.activity_restaurant_phoneNumber)Button mPhoneNumberButton;
     @BindView(R.id.restaurant_photo)ImageView mRestaurantPhoto;
+    @BindView(R.id.fab)FloatingActionButton mCheckToChoose;
 
     private String mWebsiteUrl;
     private String mPhoneNumber;
     private String mPhotoReference;
+    private String mRestaurantChose;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +54,9 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
         getRestaurantFromBundleAndSetProfile();
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
-        this.fetchRestaurantPhoto();
+        //this.fetchRestaurantPhoto();
     }
+
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
     private void getRestaurantFromBundleAndSetProfile(){
         Bundle data = getIntent().getExtras();
@@ -59,6 +66,7 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
         mWebsiteUrl = restaurant.getUrl();
         mPhoneNumber = restaurant.getPhoneNumber();
         mPhotoReference = restaurant.getPhotoReference();
+        mRestaurantChose = restaurant.getId();
     }
     //Open the restaurant website in browser
     public void openWebPage(String url) {
@@ -103,6 +111,9 @@ public class RestaurantProfileActivity extends AppCompatActivity implements View
                 break;
             case R.id.activity_restaurant_website:
                 openWebPage(mWebsiteUrl);
+                break;
+            case R.id.fab:
+                UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
                 break;
         }
     }

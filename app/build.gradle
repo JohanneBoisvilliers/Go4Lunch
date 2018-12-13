@@ -18,6 +18,7 @@ android {
                 includeCompileClasspath false
             }
         }
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {

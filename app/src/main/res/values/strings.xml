@@ -38,6 +38,7 @@
     <!-- Workmates recyclerview -->
     <string name="restaurant_chose_by_workmate">%s is eating to : %s</string>
     <string name="workmate_joining">%s is joining</string>
+    <string name="workmate_no_choice_yet">%s hasn\'t decided yet</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
 

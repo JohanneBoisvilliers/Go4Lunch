@@ -31,7 +31,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     public void updateRestaurantInfos(Restaurant restaurant){
         this.mRestaurantName.setText(restaurant.getName());
         this.mRestaurantLocation.setText(restaurant.getAdress());
-        this.glideRequest(restaurant);
+       // this.glideRequest(restaurant);
         this.setOpeningHours(restaurant);
         this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
     }

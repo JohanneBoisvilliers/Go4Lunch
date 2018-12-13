@@ -132,7 +132,7 @@ public class MapFragment extends Fragment
         View result = inflater.inflate(R.layout.fragment_map, container, false);
         //get map from GoogleMaps
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
-        //mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(this);
         //Initialize location objects
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
         mLocationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
@@ -258,7 +258,7 @@ public class MapFragment extends Fragment
                                     new LatLng(mLastKnownLocation.getLatitude(),
                                             mLastKnownLocation.getLongitude()), 15));
                             EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
-                            //executeRequestToShowCurrentPlace(mLastKnownLocation);
+                            executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
                             mMap.moveCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, 15));

@@ -89,15 +89,15 @@ public class GooglePlacesStreams {
                 .flatMap ((Function<List<RestaurantDetailsJson>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
                     googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
                     return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                })
-                .flatMapIterable(restaurants ->restaurants)
-                .flatMap((Function<Restaurant, Observable<List<Restaurant>>>) restaurant -> streamComputeRestaurantDistance(location,"place_id:"+restaurant.getId())
-                        .flatMap((Function<DistanceJson, Observable<Restaurant>>) distanceJson -> {
-                            restaurant.setDistance(distanceJson.getRows().get(0).getElements().get(0).getDistance().getValue());
-                            return Observable.fromCallable(() -> restaurant);
-                        })
-                        .toList()
-                        .toObservable());
+                });
+                //.flatMapIterable(restaurants ->restaurants)
+                //.flatMap((Function<Restaurant, Observable<List<Restaurant>>>) restaurant -> streamComputeRestaurantDistance(location,"place_id:"+restaurant.getId())
+                //        .flatMap((Function<DistanceJson, Observable<Restaurant>>) distanceJson -> {
+                //            restaurant.setDistance(distanceJson.getRows().get(0).getElements().get(0).getDistance().getValue());
+                //            return Observable.fromCallable(() -> restaurant);
+                //        })
+                //        .toList()
+                //        .toObservable());
 
         }
 

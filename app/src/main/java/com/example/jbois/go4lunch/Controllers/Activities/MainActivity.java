@@ -19,7 +19,6 @@ import butterknife.BindView;
 public class MainActivity extends BaseUserActivity {
 
     @BindView(R.id.main_activity_coordinator_layout) CoordinatorLayout mCoordinatorLayout;
-    @BindView(R.id.google_signin_button) Button mGoogleSignInButton;
 
     private static final int RC_SIGN_IN = 123;
     @Override
@@ -36,6 +35,7 @@ public class MainActivity extends BaseUserActivity {
         // 4 - Handle SignIn Activity response on activity result
         this.handleResponseAfterSignIn(requestCode, resultCode, data);
         this.startLunchActivity();
+
     }
     //Start an activity that let user choose between two ways for connection
     private void startSignInActivity(){
@@ -50,7 +50,7 @@ public class MainActivity extends BaseUserActivity {
                                 ) // FACEBOOK
                         )
                         .setIsSmartLockEnabled(false, true)
-                        //.setLogo(R.drawable.ic_logo_auth)
+                        .setLogo(R.drawable.logo_go4lunch)
                         .build(),
                 RC_SIGN_IN);
     }
@@ -90,8 +90,9 @@ public class MainActivity extends BaseUserActivity {
             String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
             String username = this.getCurrentUser().getDisplayName();
             String uid = this.getCurrentUser().getUid();
+            String restaurantChose = null;
 
-            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+            UserHelper.createUser(uid, username, urlPicture, restaurantChose).addOnFailureListener(this.onFailureListener());
         }
     }
 }

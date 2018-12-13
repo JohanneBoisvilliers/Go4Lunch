@@ -1,101 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".Controllers.Activities.RestaurantProfileActivity"
-    android:weightSum="4">
+    tools:context=".Controllers.Activities.RestaurantProfileActivity">
 
-    <ImageView
-        android:id="@+id/restaurant_photo"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.5"
-        android:scaleType="centerCrop"/>
-    <LinearLayout
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5"
-        android:gravity="center_vertical"
-        android:background="@color/colorPrimary">
+        tools:context=".Controllers.Activities.RestaurantProfileActivity"
+        android:weightSum="4">
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/restaurant_photo"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="0dp"
+            android:layout_weight="1.5"
+            android:scaleType="centerCrop"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:gravity="center_vertical"
+            android:background="@color/colorPrimary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/activity_restaurant_name"
+                    android:paddingLeft="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"/>
+                <ImageView
+                    android:id="@+id/stars1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_star_black_18"
+                    android:gravity="start"
+                    android:textColor="#000000"/>
+                <ImageView
+                    android:id="@+id/stars2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_star_black_18"
+                    android:gravity="start"
+                    android:textColor="#000000"/>
+                <ImageView
+                    android:id="@+id/stars3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/baseline_star_black_18"
+                    android:gravity="start"
+                    android:textColor="#000000"/>
+            </LinearLayout>
             <TextView
-                android:id="@+id/activity_restaurant_name"
+                android:id="@+id/activity_restaurant_adress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"/>
-            <ImageView
-                android:id="@+id/stars1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_star_black_18"
-                android:gravity="start"
-                android:textColor="#000000"/>
-            <ImageView
-                android:id="@+id/stars2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_star_black_18"
-                android:gravity="start"
-                android:textColor="#000000"/>
-            <ImageView
-                android:id="@+id/stars3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/baseline_star_black_18"
-                android:gravity="start"
-                android:textColor="#000000"/>
+                android:text="12 rue du blabla"/>
+
         </LinearLayout>
-        <TextView
-            android:id="@+id/activity_restaurant_adress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:text="12 rue du blabla"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5">
+            <Button
+                android:id="@+id/activity_restaurant_phoneNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/baseline_call_black_24"
+                android:background="@color/fui_transparent"
+                android:text="@string/call_button"/>
+            <Button
+                android:id="@+id/activity_restaurant_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/baseline_star_black_24"
+                android:background="@color/fui_transparent"
+                android:text="@string/like_button"/>
+            <Button
+                android:id="@+id/activity_restaurant_website"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/baseline_public_black_24"
+                android:background="@color/fui_transparent"
+                android:text="@string/website_button"
+                android:onClick="onClick"/>
+        </LinearLayout>
+
+        <fragment
+            android:name="com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment"
+            android:id="@+id/fooFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.5"/>
 
     </LinearLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.5">
-        <Button
-            android:id="@+id/activity_restaurant_phoneNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/baseline_call_black_24"
-            android:background="@color/fui_transparent"
-            android:text="@string/call_button"/>
-        <Button
-            android:id="@+id/activity_restaurant_like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/baseline_star_black_24"
-            android:background="@color/fui_transparent"
-            android:text="@string/like_button"/>
-        <Button
-            android:id="@+id/activity_restaurant_website"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableTop="@drawable/baseline_public_black_24"
-            android:background="@color/fui_transparent"
-            android:text="@string/website_button"
-            android:onClick="onClick"/>
-    </LinearLayout>
-    <fragment
-        android:name="com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment"
-        android:id="@+id/fooFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.5"/>
 
-</LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="20dp"
+        android:clickable="true"
+        android:scaleType="center"
+        app:backgroundTint="@color/floatingButton"
+        app:srcCompat="@drawable/baseline_check_circle_black_24"
+        android:tint="@color/colorPrimary"
+        app:layout_anchor="@id/restaurant_photo"
+        app:layout_anchorGravity="bottom|right|end" />
+
+</android.support.design.widget.CoordinatorLayout>

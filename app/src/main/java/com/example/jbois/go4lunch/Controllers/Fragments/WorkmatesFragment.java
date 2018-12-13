@@ -27,8 +27,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-//import com.google.firebase.auth.ExportedUserRecord;
-//import com.google.firebase.auth.ListUsersPage;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,7 +70,7 @@ public class WorkmatesFragment extends Fragment {
         return view;
     }
 
-    private void configureRecyclerView(){
+    public void configureRecyclerView(){
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
                 .setQuery(UserHelper.getUsersCollection(), User.class)
                 .build();
@@ -79,8 +78,7 @@ public class WorkmatesFragment extends Fragment {
         adapter = new FirestoreRecyclerAdapter<User, WorkmatesViewHolder>(options) {
             @Override
             public void onBindViewHolder(WorkmatesViewHolder holder, int position, User model) {
-                // Bind the Chat object to the ChatHolder
-                // ...
+
                     holder.updateRestaurantDestination(model);
             }
 

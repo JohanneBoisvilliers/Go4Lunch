@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
+import com.firebase.ui.auth.AuthUI;
 
 import java.util.List;
 
@@ -32,7 +34,6 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
     @BindView(R.id.activity_main_nav_view)NavigationView mNavigationView;
 
     private String[] mTitleList = new String[3];
-    private Context mContext;
 
     public static class refreshRestaurantsList{
         public List<Restaurant> restaurantList;
@@ -56,7 +57,6 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lunch);
         ButterKnife.bind(this);
-        mContext = this;
         mTitleList = getResources().getStringArray(R.array.toolbar_title_list);
         this.configureToolbar();
         this.configureViewPager();
@@ -158,6 +158,8 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
             case R.id.drawer_settings:
                 break;
             case R.id.drawer_logout:
+                this.signOutUserFromFirebase();
+                this.returntoMainActivity();
                 break;
             default:
                 break;
@@ -166,8 +168,15 @@ public class LunchActivity extends AppCompatActivity implements NavigationView.O
 
         return true;
     }
-
-    public Context getContext() {
-        return mContext;
+    //SignOut user
+    private void signOutUserFromFirebase(){
+        AuthUI.getInstance()
+                .signOut(this);
+    }
+    //When user logout, return to MainActivity to let user log again
+    private void returntoMainActivity(){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }
+
