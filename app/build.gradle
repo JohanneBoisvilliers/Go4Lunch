@@ -19,6 +19,7 @@ android {
             }
         }
         vectorDrawables.useSupportLibrary = true
+        resConfigs "en"
     }
 
     buildTypes {
@@ -60,12 +61,15 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:4.2.0'
     implementation 'com.google.firebase:firebase-database:16.0.1'
     implementation 'com.firebaseui:firebase-ui-firestore:4.2.0'
+    implementation 'com.google.firebase:firebase-auth:16.0.1'
     //Butterknife
     implementation 'com.jakewharton:butterknife:8.8.1'
     implementation 'com.android.support:support-v4:27.0.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     //Facebook SDK for Firebase
     implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+    //Twitter SDK for firebase
+    implementation("com.twitter.sdk.android:twitter-core:3.1.1@aar") { transitive = true }
     //Google maps
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-auth:15.0.1'

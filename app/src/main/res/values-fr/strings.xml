@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Go4Lunch</string>
+
+    <string name="connection_succeed">Connection réussie</string>
+    <string name="error_authentication_canceled">Connection annulée</string>
+    <string name="error_no_internet">Pas de connection internet</string>
+    <string name="error_unknown_error">Erreur inconnue</string>
+    <!-- BOTTOM NAVIGATION BAR -->
+    <string name="bottom_navigation_map">Carte</string>
+    <string name="bottom_navigation_list">Restaurants</string>
+    <string name="bottom_navigation_workmates">Collègues</string>
+    <!-- FACEBOOK PURPOSE -->
+    <string name="facebook_application_id" translatable="false">2129451590433265</string>
+    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb2129451590433265</string>
+    <!-- TOOLBAR-->
+    <string name="title_map">J\'ai Faim!</string>
+    <string-array name="toolbar_title_list">
+        <item>J\'ai Faim!</item>
+        <item>J\'ai Faim!</item>
+        <item>Liste de Collègues</item>
+    </string-array>
+    <!-- NavigationDrawer -->
+    <string name="navigation_drawer_open">Ouvrir navigation drawer</string>
+    <string name="navigation_drawer_close">Fermer navigation drawer</string>
+    <string name="navigation_drawer_menu_lunch">VOTRE REPAS</string>
+    <string name="navigation_drawer_menu_settings">PARAMETRES</string>
+    <string name="navigation_drawer_menu_logout">SE DECONNECTER</string>
+    <!-- Restaurant Profile-->
+    <string name="call_button">APPELER</string>
+    <string name="like_button">AIMER</string>
+    <string name="website_button">SITE INTERNET</string>
+    <!-- Restaurant recyclerview-->
+    <string name="closed_status">fermé</string>
+    <string name="unknown_hours">Horaires inconnues</string>
+    <string name="closing_soon_status">Ferme bientôt</string>
+    <string name="open_status">Ouvert jusqu\'à %s</string>
+    <string name="distance_unit">%d m</string>
+    <!-- Workmates recyclerview -->
+    <string name="restaurant_chose_by_workmate">%s mange à : %s</string>
+    <string name="workmate_joining">%s mange ici</string>
+    <string name="workmate_no_choice_yet">%s n\'a pas encore décidé</string>
+    <!-- Google Maps-->
+    <string name="user_position">Vous êtes ici !</string>
+</resources>

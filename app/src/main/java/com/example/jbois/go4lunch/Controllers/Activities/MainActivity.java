@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.multidex.MultiDex;
 import android.widget.Button;
 
 import com.example.jbois.go4lunch.R;
@@ -32,7 +33,7 @@ public class MainActivity extends BaseUserActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // 4 - Handle SignIn Activity response on activity result
+        // Handle SignIn Activity response on activity result
         this.handleResponseAfterSignIn(requestCode, resultCode, data);
         this.startLunchActivity();
 
@@ -46,7 +47,9 @@ public class MainActivity extends BaseUserActivity {
                         .setAvailableProviders(
                                 Arrays.asList(
                                         new AuthUI.IdpConfig.GoogleBuilder().build(),
-                                        new AuthUI.IdpConfig.FacebookBuilder().build()
+                                        new AuthUI.IdpConfig.FacebookBuilder().build(),
+                                        new AuthUI.IdpConfig.TwitterBuilder().build(),
+                                        new AuthUI.IdpConfig.EmailBuilder().build()
                                 ) // FACEBOOK
                         )
                         .setIsSmartLockEnabled(false, true)

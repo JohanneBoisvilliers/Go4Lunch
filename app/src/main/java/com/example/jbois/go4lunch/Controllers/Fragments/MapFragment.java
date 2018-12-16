@@ -174,12 +174,13 @@ public class MapFragment extends Fragment
     //What to do when user allowed or not permission for location
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case MY_PERMISSION_FINE_LOCATION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        mLocationPermissionGranted = true;
+                for (int grantResult : grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionGranted = true;
+                        }
                     }
                 }
         }
@@ -258,7 +259,7 @@ public class MapFragment extends Fragment
                                     new LatLng(mLastKnownLocation.getLatitude(),
                                             mLastKnownLocation.getLongitude()), 15));
                             EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
-                            executeRequestToShowCurrentPlace(mLastKnownLocation);
+                            //executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
                             mMap.moveCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, 15));

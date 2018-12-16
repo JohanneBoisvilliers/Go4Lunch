@@ -3,6 +3,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.jbois.go4lunch.Controllers.Adapters.WorkmatesAdapter;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.ItemClickSupport;
@@ -18,11 +18,8 @@ import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.firebase.ui.firestore.SnapshotParser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -63,7 +60,6 @@ public class WorkmatesFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
         ButterKnife.bind(this,view);
-        //configureTestList();
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
 
@@ -72,7 +68,14 @@ public class WorkmatesFragment extends Fragment {
 
     public void configureRecyclerView(){
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
-                .setQuery(UserHelper.getUsersCollection(), User.class)
+                .setQuery(UserHelper.getUsersCollection(),  new SnapshotParser<User>(){
+            @NonNull
+            @Override
+            public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+                User user = snapshot.toObject(User.class);
+                return user;
+            }
+        })
                 .build();
 
         adapter = new FirestoreRecyclerAdapter<User, WorkmatesViewHolder>(options) {

@@ -1,10 +1,10 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Go4Lunch</string>
 
-    <string name="connection_succeed">Connection réussie</string>
-    <string name="error_authentication_canceled">Authentification annulée</string>
-    <string name="error_no_internet">Pas de connection internet</string>
-    <string name="error_unknown_error">Erreur inconnue</string>
+    <string name="connection_succeed">Connection succeed</string>
+    <string name="error_authentication_canceled">Connection failed</string>
+    <string name="error_no_internet">Network error</string>
+    <string name="error_unknown_error">Unknown error</string>
     <!-- BOTTOM NAVIGATION BAR -->
     <string name="bottom_navigation_map">Map View</string>
     <string name="bottom_navigation_list">List View</string>
@@ -12,6 +12,9 @@
     <!-- FACEBOOK PURPOSE -->
     <string name="facebook_application_id" translatable="false">2129451590433265</string>
     <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb2129451590433265</string>
+    <!--TWITTER PURPOSE-->
+    <string name="twitter_consumer_key" translatable="false">tBLWrzidToAUqS5TvaOXeDMjt</string>
+    <string name="twitter_consumer_secret" translatable="false">doOpPukPMmE9uYMv3nQDevd4RoMe5f93CNZKDQDitC1HQzVmQZ</string>
     <!-- TOOLBAR-->
     <string name="title_map">I\'m Hungry!</string>
     <string-array name="toolbar_title_list">
@@ -41,6 +44,4 @@
     <string name="workmate_no_choice_yet">%s hasn\'t decided yet</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
-
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
