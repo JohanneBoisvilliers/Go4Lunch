@@ -87,15 +87,16 @@ public class MainActivity extends BaseUserActivity {
     }
 
     private void createUserInFirestore(){
+        if(!UserHelper.getUser(this.getCurrentUser().getUid()).isSuccessful()){
+            if (this.getCurrentUser() != null){
 
-        if (this.getCurrentUser() != null){
+                String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
+                String username = this.getCurrentUser().getDisplayName();
+                String uid = this.getCurrentUser().getUid();
 
-            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-            String username = this.getCurrentUser().getDisplayName();
-            String uid = this.getCurrentUser().getUid();
-            String restaurantChose = null;
-
-            UserHelper.createUser(uid, username, urlPicture, restaurantChose).addOnFailureListener(this.onFailureListener());
+                UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+            }
         }
+
     }
 }

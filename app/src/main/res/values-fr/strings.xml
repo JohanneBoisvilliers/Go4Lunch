@@ -30,6 +30,7 @@
     <string name="call_button">APPELER</string>
     <string name="like_button">AIMER</string>
     <string name="website_button">SITE INTERNET</string>
+    <string name="no_restaurant_chose">Aucun de vos collègues ne mange ici!</string>
     <!-- Restaurant recyclerview-->
     <string name="closed_status">fermé</string>
     <string name="unknown_hours">Horaires inconnues</string>

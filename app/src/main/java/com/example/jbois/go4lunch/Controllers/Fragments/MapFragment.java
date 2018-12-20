@@ -156,6 +156,7 @@ public class MapFragment extends Fragment
         getDeviceLocation();
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
+        this.createMarkerFAKE();
         mMap.setOnMarkerClickListener(this);
     }
 
@@ -220,6 +221,19 @@ public class MapFragment extends Fragment
     public void createMarker(LatLng latLng, Restaurant restaurant) {
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
+        marker.setTag(restaurant);
+        mRestaurantsAroundUser.add(restaurant);
+        EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
+    }
+    public void createMarkerFAKE() {
+        Restaurant restaurant = new Restaurant();
+        restaurant.setLat(48.87509379999999);
+        restaurant.setLng(2.3509834);
+        restaurant.setId("ChIJAQAUmBRu5kcRbcbXozJtU-g");
+        restaurant.setName("Au Paradis");
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(restaurant.getLat(),restaurant.getLng()))
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
         marker.setTag(restaurant);
         mRestaurantsAroundUser.add(restaurant);

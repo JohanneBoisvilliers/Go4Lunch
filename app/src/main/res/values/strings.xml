@@ -32,6 +32,7 @@
     <string name="call_button">CALL</string>
     <string name="like_button">LIKE</string>
     <string name="website_button">WEBSITE</string>
+    <string name="no_restaurant_chose">No workmate come here!</string>
     <!-- Restaurant recyclerview-->
     <string name="closed_status">Closed</string>
     <string name="unknown_hours">Unknown timetable</string>

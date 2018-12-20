@@ -11,13 +11,12 @@ public class User {
     @Nullable
     private String mRestaurantChose;
 
-    public User() { }
+    public User() {}
 
-    public User(String uid, String username, String urlPicture, String restaurantChose) {
+    public User(String uid, String username, String urlPicture) {
         this.mUid = uid;
         this.mUsername = username;
         this.mUrlPicture = urlPicture;
-        this.mRestaurantChose = restaurantChose;
     }
 
     // --- GETTERS ---

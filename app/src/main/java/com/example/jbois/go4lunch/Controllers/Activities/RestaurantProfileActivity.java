@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.app.Activity;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +27,11 @@ import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -39,11 +46,33 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     @BindView(R.id.activity_restaurant_phoneNumber)Button mPhoneNumberButton;
     @BindView(R.id.restaurant_photo)ImageView mRestaurantPhoto;
     @BindView(R.id.fab)FloatingActionButton mCheckToChoose;
+    @BindView(R.id.workmates_list_recycler_view)RecyclerView mRecyclerView;
 
     private String mWebsiteUrl;
     private String mPhoneNumber;
     private String mPhotoReference;
     private String mRestaurantChose;
+    private FirestoreRecyclerAdapter adapter;
+
+    public static class getRestaurantNameForJoiningUsers{
+        public String restaurantName;
+
+        public getRestaurantNameForJoiningUsers(String restName){
+            this.restaurantName = restName;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        adapter.startListening();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        adapter.stopListening();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +81,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         ButterKnife.bind(this);
 
         getRestaurantFromBundleAndSetProfile();
+        EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurantNameForJoiningUsers(mRestaurantChose));
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
         //this.fetchRestaurantPhoto();
@@ -66,7 +96,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mWebsiteUrl = restaurant.getUrl();
         mPhoneNumber = restaurant.getPhoneNumber();
         mPhotoReference = restaurant.getPhotoReference();
-        mRestaurantChose = restaurant.getId();
+        mRestaurantChose = restaurant.getName();
     }
     //Open the restaurant website in browser
     public void openWebPage(String url) {
@@ -114,6 +144,8 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 break;
             case R.id.fab:
                 UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
+                UserHelper.createRestaurantCollection(mRestaurantChose,this.getCurrentUser().getUid());
+                //UserHelper.updateIfUserChoseRestaurant(this.getCurrentUser().getUid(), true);
                 break;
         }
     }

@@ -3,6 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <TextView
+        android:id="@+id/no_workmate"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="5dp"
+        android:gravity="center"
+        android:visibility="invisible"
+        android:text="@string/no_restaurant_chose"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/workmates_list_recycler_view"
         android:layout_width="match_parent"

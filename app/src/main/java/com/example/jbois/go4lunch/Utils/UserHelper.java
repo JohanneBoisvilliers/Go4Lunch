@@ -2,25 +2,34 @@ package com.example.jbois.go4lunch.Utils;
 
 import com.example.jbois.go4lunch.Models.User;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class UserHelper {
 
-    private static final String COLLECTION_NAME = "users";
+    private static final String COLLECTION_USERS = "users";
 
     // --- COLLECTION REFERENCE ---
 
     public static CollectionReference getUsersCollection(){
-        return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
+        return FirebaseFirestore.getInstance().collection(COLLECTION_USERS);
+    }
+
+    public static CollectionReference getRestaurantsCollection(String restaurantName){
+        return FirebaseFirestore.getInstance().collection(restaurantName);
     }
 
     // --- CREATE ---
 
-    public static Task<Void> createUser(String uid, String username, String urlPicture, String restaurantChose) {
-        User userToCreate = new User(uid, username, urlPicture,restaurantChose);
+    public static Task<Void> createUser(String uid, String username, String urlPicture) {
+        User userToCreate = new User(uid, username, urlPicture);
         return UserHelper.getUsersCollection().document(uid).set(userToCreate);
+    }
+    public static Task<Void> createRestaurantCollection(String restaurantName, String uid) {
+        User userToCreate = new User();
+        return UserHelper.getRestaurantsCollection(restaurantName).document(uid).set(userToCreate);
     }
 
     // --- GET ---
@@ -31,9 +40,10 @@ public class UserHelper {
 
     // --- UPDATE ---
 
-    public static Task<Void> updateUsername(String username, String uid) {
-        return UserHelper.getUsersCollection().document(uid).update("username", username);
+    public static Task<Void> updateIfUserChoseRestaurant(String uid, Boolean isChose) {
+        return UserHelper.getUsersCollection().document(uid).update("restaurantIsChose", isChose);
     }
+
     public static Task<Void> updateRestaurantChose(String uid, String restaurantChose) {
         return UserHelper.getUsersCollection().document(uid).update("restaurantChose", restaurantChose);
     }

@@ -81,7 +81,8 @@
                 android:layout_weight="1"
                 android:drawableTop="@drawable/baseline_call_black_24"
                 android:background="@color/fui_transparent"
-                android:text="@string/call_button"/>
+                android:text="@string/call_button"
+                android:onClick="onClick"/>
             <Button
                 android:id="@+id/activity_restaurant_like"
                 android:layout_width="wrap_content"
@@ -89,7 +90,8 @@
                 android:layout_weight="1"
                 android:drawableTop="@drawable/baseline_star_black_24"
                 android:background="@color/fui_transparent"
-                android:text="@string/like_button"/>
+                android:text="@string/like_button"
+                android:onClick="onClick"/>
             <Button
                 android:id="@+id/activity_restaurant_website"
                 android:layout_width="wrap_content"
@@ -121,6 +123,7 @@
         app:srcCompat="@drawable/baseline_check_circle_black_24"
         android:tint="@color/colorPrimary"
         app:layout_anchor="@id/restaurant_photo"
-        app:layout_anchorGravity="bottom|right|end" />
+        app:layout_anchorGravity="bottom|right|end"
+        android:onClick="onClick"/>
 
 </android.support.design.widget.CoordinatorLayout>
