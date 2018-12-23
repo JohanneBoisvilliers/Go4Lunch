@@ -40,8 +40,8 @@ public class UserHelper {
 
     // --- UPDATE ---
 
-    public static Task<Void> updateIfUserChoseRestaurant(String uid, Boolean isChose) {
-        return UserHelper.getUsersCollection().document(uid).update("restaurantIsChose", isChose);
+    public static Task<Void> updateUsername(String uid, String username) {
+        return UserHelper.getUsersCollection().document(uid).update("username", username);
     }
 
     public static Task<Void> updateRestaurantChose(String uid, String restaurantChose) {

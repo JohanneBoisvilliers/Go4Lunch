@@ -61,13 +61,11 @@ public class WorkmatesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        adapter.startListening();
         EventBus.getDefault().register(this);
     }
     @Override
     public void onStop() {
         super.onStop();
-        adapter.stopListening();
         EventBus.getDefault().unregister(this);
     }
 
@@ -85,6 +83,7 @@ public class WorkmatesFragment extends Fragment {
 
     public void configureRecyclerView(){
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
+                .setLifecycleOwner(this)
                 .setQuery(UserHelper.getUsersCollection(), new SnapshotParser<User>() {
                     @NonNull
                     @Override

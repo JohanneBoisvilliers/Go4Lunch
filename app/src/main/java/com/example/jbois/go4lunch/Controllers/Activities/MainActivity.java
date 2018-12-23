@@ -13,6 +13,8 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Arrays;
 
 import butterknife.BindView;
@@ -95,6 +97,7 @@ public class MainActivity extends BaseUserActivity {
                 String uid = this.getCurrentUser().getUid();
 
                 UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
+                EventBus.getDefault().postSticky(new LunchActivity.getUid(uid));
             }
         }
 

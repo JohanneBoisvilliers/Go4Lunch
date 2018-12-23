@@ -45,4 +45,14 @@
     <string name="workmate_no_choice_yet">%s hasn\'t decided yet</string>
     <!-- Google Maps-->
     <string name="user_position">You are here !</string>
+    <!-- Settings Activity -->
+    <string name="user_name">Your name</string>
+    <string name="description_username_setting">Please provide your username</string>
+    <string name="notification_activation">Notifications settings</string>
+    <string name="description_notification_setting">This option if selected will allow the application to send you a notification to remind you where you will eat.</string>
+    <string name="title_activity_settings">Settings</string>
+    <!-- Firebase -->
+    <string name="info_no_email_found">No email found</string>
+    <string name="info_no_username_found">No username found</string>
+
 </resources>

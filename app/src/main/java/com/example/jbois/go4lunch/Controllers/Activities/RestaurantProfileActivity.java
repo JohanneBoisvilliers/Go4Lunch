@@ -27,6 +27,7 @@ import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
+import com.firebase.ui.auth.util.data.PrivacyDisclosureUtils;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 
 import org.greenrobot.eventbus.EventBus;
@@ -52,6 +53,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private String mPhoneNumber;
     private String mPhotoReference;
     private String mRestaurantChose;
+    private Restaurant mRestaurant;
     private FirestoreRecyclerAdapter adapter;
 
     public static class getRestaurantNameForJoiningUsers{
@@ -61,17 +63,12 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             this.restaurantName = restName;
         }
     }
+    public static class getRestaurant{
+        public Restaurant restaurant;
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        adapter.startListening();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        adapter.stopListening();
+        public getRestaurant(Restaurant restaurant){
+            this.restaurant = restaurant;
+        }
     }
 
     @Override
@@ -90,13 +87,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
     private void getRestaurantFromBundleAndSetProfile(){
         Bundle data = getIntent().getExtras();
-        Restaurant restaurant = (Restaurant) data.getParcelable(RESTAURANT_IN_TAG);
-        mRestaurantNameInProfile.setText(restaurant.getName());
-        mRestaurantAdressInProfile.setText(restaurant.getAdress());
-        mWebsiteUrl = restaurant.getUrl();
-        mPhoneNumber = restaurant.getPhoneNumber();
-        mPhotoReference = restaurant.getPhotoReference();
-        mRestaurantChose = restaurant.getName();
+        mRestaurant = (Restaurant) data.getParcelable(RESTAURANT_IN_TAG);
+        mRestaurantNameInProfile.setText(mRestaurant.getName());
+        mRestaurantAdressInProfile.setText(mRestaurant.getAdress());
+        mWebsiteUrl = mRestaurant.getUrl();
+        mPhoneNumber = mRestaurant.getPhoneNumber();
+        mPhotoReference = mRestaurant.getPhotoReference();
+        mRestaurantChose = mRestaurant.getName();
     }
     //Open the restaurant website in browser
     public void openWebPage(String url) {
@@ -145,7 +142,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             case R.id.fab:
                 UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
                 UserHelper.createRestaurantCollection(mRestaurantChose,this.getCurrentUser().getUid());
-                //UserHelper.updateIfUserChoseRestaurant(this.getCurrentUser().getUid(), true);
+                EventBus.getDefault().postSticky(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
     }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:id="@+id/change_username"
+        android:title="@string/user_name"
+        android:key="username"
+        android:summary="@string/description_username_setting"/>
+    <CheckBoxPreference
+        android:title="@string/notification_activation"
+        android:defaultValue="false"
+        android:summary="@string/description_notification_setting"
+        android:key="restaurantReminder" />
+</PreferenceScreen>
