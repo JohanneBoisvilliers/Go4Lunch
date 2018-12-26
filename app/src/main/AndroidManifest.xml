@@ -32,7 +32,15 @@
 
         <activity android:name=".Controllers.Activities.ProfileActivity" />
         <activity android:name=".Controllers.Activities.BaseUserActivity" />
-        <activity android:name=".Controllers.Activities.SettingsActivity"></activity>
+        <activity android:name=".Controllers.Activities.SettingsActivity"/>
+        <receiver
+            android:name="com.example.jbois.go4lunch.Utils.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.example.BroadcastReceiver"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

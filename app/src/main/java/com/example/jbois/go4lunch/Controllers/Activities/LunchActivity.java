@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
@@ -205,9 +206,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
 
         switch (id) {
             case R.id.drawer_your_lunch:
-                Intent intentRestaurant = new Intent(this,RestaurantProfileActivity.class);
-                intentRestaurant.putExtra(RESTAURANT_IN_TAG, mRestaurant);
-                startActivity(intentRestaurant);
+                this.yourLunchButton();
                 break;
             case R.id.drawer_settings:
                 Intent intent = new Intent(this,SettingsActivity.class);
@@ -272,6 +271,16 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     @Subscribe(sticky = true)
     public void ongetRestaurant(RestaurantProfileActivity.getRestaurant event) {
         mRestaurant=event.restaurant;
+    }
+
+    private void yourLunchButton(){
+        if (mRestaurant!=null){
+            Intent intentRestaurant = new Intent(this,RestaurantProfileActivity.class);
+            intentRestaurant.putExtra(RESTAURANT_IN_TAG, mRestaurant);
+            startActivity(intentRestaurant);
+        }else{
+            Toast.makeText(this, getString(R.string.no_restaurant_chose_yet), Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

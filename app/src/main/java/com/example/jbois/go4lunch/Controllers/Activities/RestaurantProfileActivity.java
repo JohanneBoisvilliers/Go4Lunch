@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +31,7 @@ import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
 import com.firebase.ui.auth.util.data.PrivacyDisclosureUtils;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -54,6 +57,10 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private String mPhotoReference;
     private String mRestaurantChose;
     private Restaurant mRestaurant;
+    private SharedPreferences mMySharedPreferences;
+    private SharedPreferences.Editor mEditor;
+    public static final String PREFS_NAME = "MySharedPreferences";
+    public static final String RESTAURANT_SAVED = "restaurantInSharedPreferences";
     private FirestoreRecyclerAdapter adapter;
 
     public static class getRestaurantNameForJoiningUsers{
@@ -77,6 +84,8 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         setContentView(R.layout.activity_restaurant_profile);
         ButterKnife.bind(this);
 
+        mMySharedPreferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mEditor = mMySharedPreferences.edit();
         getRestaurantFromBundleAndSetProfile();
         EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurantNameForJoiningUsers(mRestaurantChose));
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
@@ -143,16 +152,25 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
                 UserHelper.createRestaurantCollection(mRestaurantChose,this.getCurrentUser().getUid());
                 EventBus.getDefault().postSticky(new RestaurantProfileActivity.getRestaurant(mRestaurant));
+                this.serializeRestaurantForNotification();
                 break;
         }
     }
-
+    //check if the restaurant has a website/or a phone number and set UI
     private void checkToSetStateButton(Button button,String buttonName){
-        if (buttonName==null || buttonName.equals("")){
+        //buttonName==null || buttonName.equals("")
+        if (TextUtils.isEmpty(buttonName)){
             DrawableCompat.setTint(button.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.deactivated));
             button.setEnabled(false);
         }else{
             button.setOnClickListener(this);
         }
+    }
+    //save the restaurant into sharedpreferences to set the notification click
+    private void serializeRestaurantForNotification(){
+        Gson gson = new Gson();
+        String restaurantToList = gson.toJson(mRestaurant);
+        mEditor.putString(RESTAURANT_SAVED,restaurantToList);
+        mEditor.apply();
     }
 }

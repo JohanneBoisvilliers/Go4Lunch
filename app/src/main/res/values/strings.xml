@@ -28,6 +28,7 @@
     <string name="navigation_drawer_menu_lunch">YOUR LUNCH</string>
     <string name="navigation_drawer_menu_settings">SETTINGS</string>
     <string name="navigation_drawer_menu_logout">LOGOUT</string>
+    <string name="no_restaurant_chose_yet">You have to choose a restaurant first</string>
     <!-- Restaurant Profile-->
     <string name="call_button">CALL</string>
     <string name="like_button">LIKE</string>

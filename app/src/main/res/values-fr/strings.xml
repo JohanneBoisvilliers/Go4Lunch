@@ -28,6 +28,7 @@
     <string name="navigation_drawer_menu_lunch">VOTRE REPAS</string>
     <string name="navigation_drawer_menu_settings">PARAMETRES</string>
     <string name="navigation_drawer_menu_logout">SE DECONNECTER</string>
+    <string name="no_restaurant_chose_yet">Vous devez d\'abord choisir un restaurant</string>
     <!-- Restaurant Profile-->
     <string name="call_button">APPELER</string>
     <string name="like_button">AIMER</string>
