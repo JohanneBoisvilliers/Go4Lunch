@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#ff5722</color>
+    <color name="colorNavigationDrawer">#ff8a50</color>
     <color name="colorPrimaryDark">#c41b00</color>
     <color name="colorAccent">#D81B60</color>
     <color name="deactivated">#bababa</color>
     <color name="floatingButton">#ffffff</color>
+    <color name="floatingButtonValidate">#69f0ae</color>
+    <color name="stars">#ffff00</color>
 </resources>

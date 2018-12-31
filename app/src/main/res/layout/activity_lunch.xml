@@ -18,20 +18,31 @@
         android:orientation="vertical"
         tools:context=".Controllers.Controllers.Activities.LunchActivity">
 
-        <android.support.design.widget.AppBarLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        app:theme="@style/ToolBarStyle">
             <android.support.v7.widget.Toolbar
                 android:id="@+id/activity_main_toolbar"
                 android:minHeight="?attr/actionBarSize"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:titleTextColor="@android:color/white"
                 android:background="?attr/colorPrimary"
+                android:layout_weight="6"
                 app:title="@string/title_map"/>
+            <fragment
+                android:id="@+id/place_autocomplete_fragment"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                app:theme="@style/ToolBarStyle"
+                android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                />
 
-        </android.support.design.widget.AppBarLayout>
+    </LinearLayout>
 
         <android.support.v4.view.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -57,6 +68,29 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/menu_drawer" />
+        app:menu="@menu/menu_drawer"
+        android:background="@color/colorNavigationDrawer"
+        app:itemIconTint="@color/drawer_item"
+        app:itemTextColor="@color/drawer_item"
+        app:theme="@style/ToolBarStyle">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:src="@drawable/logo_navigation_drawer" />
+
+        </LinearLayout>
+
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

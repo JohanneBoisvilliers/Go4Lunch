@@ -76,10 +76,10 @@ public class SettingsActivity extends PreferenceActivity {
                     PreferenceGroup preferenceGroup = (PreferenceGroup) preference;
                     for (int j = 0; j < preferenceGroup.getPreferenceCount(); ++j) {
                         Preference singlePref = preferenceGroup.getPreference(j);
-                        updatePreference(singlePref, singlePref.getKey());
+                        updatePreference(singlePref, singlePref.getKey().toString());
                     }
                 } else {
-                    updatePreference(preference, preference.getKey());
+                    updatePreference(preference, preference.getKey().toString());
                 }
             }
         }
@@ -93,10 +93,12 @@ public class SettingsActivity extends PreferenceActivity {
             if (preference == null) return;
             if (preference instanceof EditTextPreference) {
                 EditTextPreference editTextPref = (EditTextPreference) preference;
+                mNewName = editTextPref.getText().toString();
                 if(!TextUtils.isEmpty(mNewName)){
-                    mNewName = editTextPref.getText().toString();
                     UserHelper.updateUsername(mUid, mNewName);
                 }
+                SharedPreferences sharedPrefs = getPreferenceManager().getSharedPreferences();
+                preference.setSummary(sharedPrefs.getString(key, "Default"));
             }
             if (preference instanceof CheckBoxPreference) {
                 CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
@@ -111,8 +113,6 @@ public class SettingsActivity extends PreferenceActivity {
                     }
                 }
             }
-            //SharedPreferences sharedPrefs = getPreferenceManager().getSharedPreferences();
-            //preference.setSummary(sharedPrefs.getString(key, "Default"));
         }
         //method that set the alarm for notifications
         private void settingsForAlarm(){

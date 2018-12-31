@@ -1,6 +1,6 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
-import android.content.Context;
+import android.app.Fragment;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,7 +12,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,14 +28,23 @@ import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -45,7 +53,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Optional;
 
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
@@ -60,7 +67,9 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private String[] mTitleList = new String[3];
     public static final String USERID="user_id";
     private Restaurant mRestaurant;
-
+    private Location mLocation;
+    private PlaceAutocompleteFragment mAutocompleteFragment;
+    //callback class to get restaurant List
     public static class refreshRestaurantsList{
         public List<Restaurant> restaurantList;
 
@@ -69,7 +78,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         }
 
     }
-
+    //callback class to get Location
     public static class getLocation{
         public Location location;
 
@@ -77,12 +86,20 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
             this.location = location;
         }
     }
-
+    //callback class to get user id
     public static class getUid{
         public String uid;
 
         public getUid(String uid){
             this.uid = uid;
+        }
+    }
+    //callback class to set camera position after clicking in autocomplete research item
+    public static class getPlaceLocation{
+        public Location location;
+
+        public getPlaceLocation(Location location){
+            this.location = location;
         }
     }
 
@@ -108,7 +125,24 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lunch);
         ButterKnife.bind(this);
+        mAutocompleteFragment =(PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
         mTitleList = getResources().getStringArray(R.array.toolbar_title_list);
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("ERROR", "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        Log.d("TOKEN", token);
+
+                    }
+                });
         this.configureToolbar();
         this.configureViewPager();
         this.configureBottomView();
@@ -128,6 +162,42 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         // Sets the Toolbar
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(mTitleList[0]);
+    }
+
+    private void configureSearchToolbar(){
+        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
+                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_ADDRESS)
+                .setCountry("FR")
+                .build();
+
+        mAutocompleteFragment.setFilter(typeFilter);
+        mAutocompleteFragment.setBoundsBias(this.boundsCalculation());
+        mAutocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input).setVisibility(View.GONE);
+        mAutocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_button).setDrawingCacheBackgroundColor(getResources().getColor(R.color.floatingButton));
+        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                if (mViewPager.getCurrentItem()==0){
+                    Location location = new Location("");
+                    location.setLatitude(place.getLatLng().latitude);
+                    location.setLongitude(place.getLatLng().longitude);
+                    EventBus.getDefault().postSticky(new LunchActivity.getPlaceLocation(location));
+                }
+            }
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("BLA", "An error occurred: " + status);
+            }
+        });
+    }
+    //set bounds to filter results in autocomplete widget
+    private LatLngBounds boundsCalculation(){
+        LatLng southWest = new LatLng(mLocation.getLatitude()-0.0045,(mLocation.getLongitude()-(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
+        LatLng northEast = new LatLng(mLocation.getLatitude()+0.0045,(mLocation.getLongitude()+(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
+
+        LatLngBounds bounds = new LatLngBounds(southWest,northEast );
+        return bounds;
     }
 
     private void configureViewPager(){
@@ -271,6 +341,12 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     @Subscribe(sticky = true)
     public void ongetRestaurant(RestaurantProfileActivity.getRestaurant event) {
         mRestaurant=event.restaurant;
+    }
+    //Callback method to fetch restaurant
+    @Subscribe(sticky = true)
+    public void onGetLocation(LunchActivity.getLocation event) {
+        mLocation=event.location;
+        this.configureSearchToolbar();
     }
 
     private void yourLunchButton(){

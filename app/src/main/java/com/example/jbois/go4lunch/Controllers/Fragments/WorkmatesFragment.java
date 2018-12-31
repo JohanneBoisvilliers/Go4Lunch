@@ -15,9 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
-import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.ItemClickSupport;
@@ -27,7 +25,6 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.SnapshotParser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.twitter.sdk.android.core.internal.ActivityLifecycleManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -89,8 +86,8 @@ public class WorkmatesFragment extends Fragment {
                     @Override
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
                         User user = snapshot.toObject(User.class);
-                        if(!TextUtils.isEmpty(user.getRestaurantChose())){
-                            if(user.getRestaurantChose().equals(mRestaurantInRestaurantProfile)){
+                        if(!TextUtils.isEmpty(user.getRestaurantChoseName())){
+                            if(user.getRestaurantChoseName().equals(mRestaurantInRestaurantProfile)){
                                 users.add(user);
                                 Log.e("LISTSIZE",users.size()+"");
                             }

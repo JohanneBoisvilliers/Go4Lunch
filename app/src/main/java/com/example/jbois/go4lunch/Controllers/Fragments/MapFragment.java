@@ -40,6 +40,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,6 +111,7 @@ public class MapFragment extends Fragment
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -117,6 +119,12 @@ public class MapFragment extends Fragment
         super.onPause();
         mGoogleApiClient.stopAutoManage(getActivity());
         mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -144,7 +152,7 @@ public class MapFragment extends Fragment
     //Set location Manager which use onLocationChanged method
     @SuppressLint("MissingPermission")
     private void setLocationManager(){
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10, mLocationListenerGPS);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5*60*1000, 10, mLocationListenerGPS);
     }
 
     @Override
@@ -269,9 +277,7 @@ public class MapFragment extends Fragment
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(mLastKnownLocation.getLatitude(),
-                                            mLastKnownLocation.getLongitude()), 15));
+                            moveCamera(mLastKnownLocation);
                             EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
                             //executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
@@ -286,7 +292,12 @@ public class MapFragment extends Fragment
             Log.e("Exception: %s", e.getMessage());
         }
     }
-
+    //center the map on selected item and zoom
+    private void moveCamera(Location location){
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(location.getLatitude(),
+                        location.getLongitude()), 15));
+    }
     // Get places around user and put marker on this places
     private void executeRequestToShowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurantsWithNeededInfos(location.getLatitude() + "," + location.getLongitude())
@@ -320,7 +331,12 @@ public class MapFragment extends Fragment
                 .addApi(LocationServices.API)
                 .build();
     }
-
+    //Callback method to fetch place position into autocomplete widget
+    @Subscribe(sticky = true)
+    public void onGetLocation(LunchActivity.getPlaceLocation event) {
+        mLastKnownLocation=event.location;
+        this.moveCamera(mLastKnownLocation);
+    }
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }

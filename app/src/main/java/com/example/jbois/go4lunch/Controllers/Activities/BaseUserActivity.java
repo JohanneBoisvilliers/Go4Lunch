@@ -1,8 +1,10 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.R;
@@ -27,8 +29,18 @@ public class BaseUserActivity extends AppCompatActivity {
         return new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                Log.e("ERRORFIREBASE",""+e);
                 Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
             }
         };
+    }
+
+    //callback class to get if restaurant is liked
+    public static class getLikedOrNot{
+        public Boolean isLiked;
+
+        public getLikedOrNot(Boolean isLiked){
+            this.isLiked = isLiked;
+        }
     }
 }

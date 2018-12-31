@@ -32,17 +32,23 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical">
                 <TextView
                     android:id="@+id/activity_restaurant_name"
-                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="wrap_content"
+                    android:text="Le Zinc"
+                    android:textSize="20dp"
+                    android:textColor="@android:color/white"/>
                 <ImageView
                     android:id="@+id/stars1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/baseline_star_black_18"
+                    android:tint="@color/stars"
                     android:gravity="start"
                     android:textColor="#000000"/>
                 <ImageView
@@ -50,6 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/baseline_star_black_18"
+                    android:tint="@color/stars"
                     android:gravity="start"
                     android:textColor="#000000"/>
                 <ImageView
@@ -57,6 +64,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/baseline_star_black_18"
+                    android:tint="@color/stars"
                     android:gravity="start"
                     android:textColor="#000000"/>
             </LinearLayout>
@@ -65,7 +73,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
-                android:text="12 rue du blabla"/>
+                android:text="12 rue du blabla"
+                android:textSize="11dp"
+                android:textColor="@android:color/white"/>
 
         </LinearLayout>
         <LinearLayout
@@ -80,8 +90,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/baseline_call_black_24"
+                android:tint="@color/colorPrimary"
                 android:background="@color/fui_transparent"
                 android:text="@string/call_button"
+                android:textColor="@color/colorPrimary"
                 android:onClick="onClick"/>
             <Button
                 android:id="@+id/activity_restaurant_like"
@@ -89,8 +101,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/baseline_star_black_24"
+                android:tint="@color/colorPrimary"
                 android:background="@color/fui_transparent"
                 android:text="@string/like_button"
+                android:textColor="@color/colorPrimary"
                 android:onClick="onClick"/>
             <Button
                 android:id="@+id/activity_restaurant_website"
@@ -98,8 +112,10 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:drawableTop="@drawable/baseline_public_black_24"
+                android:tint="@color/colorPrimary"
                 android:background="@color/fui_transparent"
                 android:text="@string/website_button"
+                android:textColor="@color/colorPrimary"
                 android:onClick="onClick"/>
         </LinearLayout>
 

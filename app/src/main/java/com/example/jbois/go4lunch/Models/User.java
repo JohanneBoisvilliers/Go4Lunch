@@ -9,7 +9,7 @@ public class User {
     @Nullable
     private String mUrlPicture;
     @Nullable
-    private String mRestaurantChose;
+    private String mRestaurantChoseName;
 
     public User() {}
 
@@ -23,11 +23,11 @@ public class User {
     public String getUid() { return mUid; }
     public String getUsername() { return mUsername; }
     public String getUrlPicture() { return mUrlPicture; }
-    public String getRestaurantChose() { return mRestaurantChose; }
+    public String getRestaurantChoseName() { return mRestaurantChoseName; }
 
     // --- SETTERS ---
     public void setUsername(String username) { this.mUsername = username; }
     public void setUid(String uid) { this.mUid = uid; }
     public void setUrlPicture(String urlPicture) { this.mUrlPicture = urlPicture; }
-    public void setRestaurantChose(String restaurantChose) { this.mRestaurantChose = restaurantChose; }
+    public void setRestaurantChoseName(String restaurantChoseName) { this.mRestaurantChoseName = restaurantChoseName; }
 }
