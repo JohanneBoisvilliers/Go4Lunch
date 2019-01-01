@@ -108,17 +108,12 @@ public class MapFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
         EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mGoogleApiClient.stopAutoManage(getActivity());
-        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -146,7 +141,7 @@ public class MapFragment extends Fragment
         mLocationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
 
        // this.setLocationManager();
-        this.buildGoogleApiClient();
+        //this.buildGoogleApiClient();
         return result;
     }
     //Set location Manager which use onLocationChanged method
@@ -164,7 +159,7 @@ public class MapFragment extends Fragment
         getDeviceLocation();
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-        this.createMarkerFAKE();
+        //this.createMarkerFAKE();
         mMap.setOnMarkerClickListener(this);
     }
 
@@ -279,7 +274,7 @@ public class MapFragment extends Fragment
                             mLastKnownLocation = task.getResult();
                             moveCamera(mLastKnownLocation);
                             EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
-                            //executeRequestToShowCurrentPlace(mLastKnownLocation);
+                            executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
                             mMap.moveCamera(CameraUpdateFactory
                                     .newLatLngZoom(mDefaultLocation, 15));

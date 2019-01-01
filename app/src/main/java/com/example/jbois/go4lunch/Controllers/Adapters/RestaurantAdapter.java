@@ -19,9 +19,7 @@ import io.reactivex.disposables.Disposable;
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
     private List<Restaurant> mRestaurantList;
-    private Disposable mDisposable;
     private Location mLocation;
-    private int mDistance;
 
     public RestaurantAdapter(List<Restaurant> restaurantList,Location location){
         this.mRestaurantList = restaurantList;

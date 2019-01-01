@@ -23,6 +23,7 @@ public class Restaurant implements Parcelable {
     private String mPhotoReference;
     private Double mLat;
     private Double mLng;
+    private Double mRating;
     private String mOpeningHours;
     private Boolean mFABChecked = false;
     private Boolean mLikeOrNot = false;
@@ -42,6 +43,7 @@ public class Restaurant implements Parcelable {
         this.mOpeningHours = in.readString();
         this.mDistance = in.readInt();
         this.mFABChecked = (Boolean)in.readValue(null);
+        this.mRating = in.readDouble();
     }
     @Override
     public int describeContents() {
@@ -61,6 +63,7 @@ public class Restaurant implements Parcelable {
         dest.writeString(this.mOpeningHours);
         dest.writeInt(this.mDistance);
         dest.writeValue(this.mFABChecked);
+        dest.writeDouble(this.mRating);
     }
 
     public String getName() {
@@ -151,4 +154,11 @@ public class Restaurant implements Parcelable {
         mFABChecked = FABChecked;
     }
 
+    public Double getRating() {
+        return mRating;
+    }
+
+    public void setRating(Double rating) {
+        mRating = rating;
+    }
 }

@@ -102,7 +102,7 @@ public class GooglePlacesStreams {
         }
 
         //-------Private methods---------
-
+        //extrude place api info for restaurants
         private void extrudePlaceInfo(RestaurantListJson restList, List<Restaurant> list){
             for(int i=0;i<restList.getResults().size();i++){
                 Restaurant restaurant = new Restaurant();
@@ -115,7 +115,7 @@ public class GooglePlacesStreams {
                 list.add(restaurant);
             }
         }
-
+        //extrude place Details api infos for restaurants
         private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
             for (int i=0;i<restaurantList.size();i++){
                 for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
@@ -125,6 +125,7 @@ public class GooglePlacesStreams {
                         restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
                         restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
                         restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j)));
+                        restaurantList.get(i).setRating(restaurantDetailsJsonList.get(j).getResult().getRating());
                     }
                 }
             }
