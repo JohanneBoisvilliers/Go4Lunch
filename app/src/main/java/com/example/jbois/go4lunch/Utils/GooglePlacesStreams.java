@@ -125,7 +125,10 @@ public class GooglePlacesStreams {
                         restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
                         restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
                         restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j)));
-                        restaurantList.get(i).setRating(restaurantDetailsJsonList.get(j).getResult().getRating());
+                        double rating = restaurantDetailsJsonList.get(j).getResult().getRating() != null ?
+                                restaurantDetailsJsonList.get(j).getResult().getRating()
+                                : 0.0;
+                        restaurantList.get(i).setRating(rating);
                     }
                 }
             }

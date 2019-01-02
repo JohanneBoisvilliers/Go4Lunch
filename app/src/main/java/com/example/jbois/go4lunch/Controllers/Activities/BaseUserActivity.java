@@ -5,12 +5,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.List;
 
 public class BaseUserActivity extends AppCompatActivity {
 
@@ -23,8 +27,6 @@ public class BaseUserActivity extends AppCompatActivity {
     //@Nullable
     protected FirebaseUser getCurrentUser(){ return FirebaseAuth.getInstance().getCurrentUser(); }
 
-    protected Boolean isCurrentUserLogged(){ return (this.getCurrentUser() != null); }
-
     protected OnFailureListener onFailureListener(){
         return new OnFailureListener() {
             @Override
@@ -34,7 +36,23 @@ public class BaseUserActivity extends AppCompatActivity {
             }
         };
     }
-
+    //set number of stars to show
+    protected void setStars(Double rating,List<ImageView> stars) {
+        int numberOfStars = rating.intValue();
+        switch (numberOfStars){
+            case 4 :case 5:numberOfStars = 3;
+                break;
+            case 3:numberOfStars = 2;
+                break;
+            case 2 :numberOfStars = 1;
+                break;
+            case 0 :case 1 :numberOfStars = 0;
+                break;
+        }
+        for (int i = 0; i < numberOfStars; i++) {
+            stars.get(i).setVisibility(View.VISIBLE);
+        }
+    }
     //callback class to get if restaurant is liked
     public static class getLikedOrNot{
         public Boolean isLiked;

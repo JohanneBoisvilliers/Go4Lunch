@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Utils.GlideApp;
+//import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,7 +34,10 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.List;
+
 import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
@@ -50,11 +53,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     @BindView(R.id.restaurant_photo)ImageView mRestaurantPhoto;
     @BindView(R.id.fab)FloatingActionButton mCheckToChoose;
     @BindView(R.id.workmates_list_recycler_view)RecyclerView mRecyclerView;
+    @BindViews({ R.id.stars1, R.id.stars2, R.id.stars3 }) List<ImageView> mStars;
 
     private String mWebsiteUrl;
     private String mPhoneNumber;
     private String mPhotoReference;
     private String mRestaurantChose;
+    private Double mRating;
     private Restaurant mRestaurant;
     private Boolean mIsLiked=false;
     private SharedPreferences mMySharedPreferences;
@@ -102,6 +107,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
 
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
+        this.setStars(mRestaurant.getRating(),mStars);
         this.checkIfRestaurantIsLiked();
         //this.fetchRestaurantPhoto();
 
@@ -117,6 +123,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mPhoneNumber = mRestaurant.getPhoneNumber();
         mPhotoReference = mRestaurant.getPhotoReference();
         mRestaurantChose = mRestaurant.getName();
+        mRating = mRestaurant.getRating();
     }
     //Open the restaurant website in browser
     public void openWebPage(String url) {
@@ -141,15 +148,15 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         return metrics.widthPixels;
     }
     //Use Glide to fetch restaurant's photo and set it into the imageview on top of view
-    private void fetchRestaurantPhoto(){
-        GlideApp.with(this)
-                .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
-                        +getScreenWidth(this)
-                        +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
-                .centerInside()
-                .error(R.drawable.no_photo_profile)
-                .into(mRestaurantPhoto);
-    }
+    //private void fetchRestaurantPhoto(){
+    //    GlideApp.with(this)
+    //            .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
+    //                    +getScreenWidth(this)
+    //                    +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
+    //            .centerInside()
+    //            .error(R.drawable.no_photo_profile)
+    //            .into(mRestaurantPhoto);
+    //}
     @Override
     public void onClick(View v) {
         switch (v.getId()){
