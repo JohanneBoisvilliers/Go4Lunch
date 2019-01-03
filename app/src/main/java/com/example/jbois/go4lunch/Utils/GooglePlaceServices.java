@@ -28,13 +28,6 @@ public interface GooglePlaceServices {
             @Query("placeid") String placeId,
             @Query("key") String apiKey);
 
-    @GET("maps/api/distancematrix/json")
-    Observable<DistanceJson> getDistanceRestaurantFromUser(
-            @Query("origins") String origins,
-            @Query("destinations")String destinations,
-            @Query("key") String apiKey);
-
-
     // Set a listener to know all about requests
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))

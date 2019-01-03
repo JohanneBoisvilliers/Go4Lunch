@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
@@ -44,14 +45,6 @@ public class GooglePlacesStreams {
                 .timeout(20, TimeUnit.SECONDS);
     }
 
-    public static Observable<DistanceJson> streamComputeRestaurantDistance(String currentLocation, String placeId){
-        GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
-        return googlePlaceServices.getDistanceRestaurantFromUser(currentLocation,placeId,apiKey)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .timeout(20, TimeUnit.SECONDS);
-
-    }
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
@@ -90,14 +83,6 @@ public class GooglePlacesStreams {
                     googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
                     return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 });
-                //.flatMapIterable(restaurants ->restaurants)
-                //.flatMap((Function<Restaurant, Observable<List<Restaurant>>>) restaurant -> streamComputeRestaurantDistance(location,"place_id:"+restaurant.getId())
-                //        .flatMap((Function<DistanceJson, Observable<Restaurant>>) distanceJson -> {
-                //            restaurant.setDistance(distanceJson.getRows().get(0).getElements().get(0).getDistance().getValue());
-                //            return Observable.fromCallable(() -> restaurant);
-                //        })
-                //        .toList()
-                //        .toObservable());
 
         }
 
@@ -138,22 +123,27 @@ public class GooglePlacesStreams {
             String openingHours="";
             Calendar today = Calendar.getInstance();
             List<RestaurantDetailsJson.Period> periodList=new ArrayList<>();
-            if (restaurantDetailsJson.getResult().getOpeningHours() == null) {
-                openingHours="???";
-            }else{
+            if (restaurantDetailsJson.getResult().getOpeningHours() != null) {
                 periodList = restaurantDetailsJson.getResult().getOpeningHours().getPeriods();
                 if(restaurantDetailsJson.getResult().getOpeningHours().getOpenNow()){
                     for (int i = 0; i < periodList.size() ; i++) {
-                        if(periodList.get(i).getOpen().getDay()+1 == today.DAY_OF_WEEK){
-                            openingHours = convertHours(periodList.get(i).getOpen().getTime());
+                        if (periodList.get(i).getOpen().getDay() + 1 == today.DAY_OF_WEEK) {
+                            if(periodList.get(i).getClose()==null){
+                                openingHours ="Open 24/7";
+                            }else{
+                                DateTime open= new DateTime(periodList.get(i).getOpen().getTime());
+                                Log.e("HOURS",open.toString());
+                                if(open.isBeforeNow()){
+                                    openingHours = convertHours(periodList.get(i).getClose().getTime());
+                                }
+                            }
+                        } else {
+                            //openingHours = Resources.getSystem().getString(R.string.closed_status);
+                            openingHours = "Closed";
                         }
                     }
-                }else{
-                    //openingHours = Resources.getSystem().getString(R.string.closed_status);
-                    openingHours ="Closed";
                 }
             }
-
             return openingHours;
         }
         //convert hours from api into AM PM format

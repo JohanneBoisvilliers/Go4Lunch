@@ -38,8 +38,21 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
+        mRestaurantList.get(position).setDistance(this.extrudeDistance(mRestaurantList,position));
         holder.updateRestaurantInfos(mRestaurantList.get(position));
     }
+
+    private int extrudeDistance(List<Restaurant> restaurantList,int index){
+        int distance;
+        Float tempDistance;
+        Location location = new Location("targetRestaurant");
+        location.setLatitude(restaurantList.get(index).getLat());
+        location.setLongitude(restaurantList.get(index).getLng());
+        tempDistance = mLocation.distanceTo(location);
+        distance = tempDistance.intValue();
+        return distance;
+    }
+
 
     @Override
     public int getItemCount() {

@@ -1,6 +1,8 @@
 package com.example.jbois.go4lunch.Views;
 
+import android.location.Location;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -9,6 +11,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 
@@ -45,14 +48,15 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     }
     //check openingHours value and set hours in recyclerview
     private void setOpeningHours(Restaurant restaurant){
-        if (restaurant.getOpeningHours()!=null) {
-            if(restaurant.getOpeningHours().equals("Closed")){
-                this.mClosingTime.setText(restaurant.getOpeningHours());
-            }else if (restaurant.getOpeningHours().equals("???")){
-                this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)));
-            }else{
-                this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
+        if (TextUtils.isEmpty(restaurant.getOpeningHours())) {
+            this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)));
+        }else{
+                if(restaurant.getOpeningHours().equals("Closed")){
+                    this.mClosingTime.setText(restaurant.getOpeningHours());
+                } else{
+                    this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
+                }
             }
         }
-    }
+
 }

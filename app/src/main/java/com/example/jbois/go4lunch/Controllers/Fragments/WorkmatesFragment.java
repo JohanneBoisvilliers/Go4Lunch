@@ -98,6 +98,7 @@ public class WorkmatesFragment extends Fragment {
                 .build();
 
         adapter = new FirestoreRecyclerAdapter<User, WorkmatesViewHolder>(options) {
+
             @Override
             public void onBindViewHolder(WorkmatesViewHolder holder, int position, User model) {
                 if(mActivity.getClass().getSimpleName().equals("RestaurantProfileActivity")){
