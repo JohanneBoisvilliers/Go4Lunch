@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +22,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 //import com.example.jbois.go4lunch.Utils.GlideApp;
@@ -30,6 +33,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -105,9 +109,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mEditor = mMySharedPreferences.edit();
         getRestaurantFromBundleAndSetProfile();
 
+        WorkmatesFragment fragment = (WorkmatesFragment)getSupportFragmentManager().findFragmentById(R.id.fooFragment);
+        fragment.configureRecyclerView();
+
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
-        this.setStars(mRestaurant.getRating(),mStars);
+        BaseUserActivity.setStars(mRestaurant.getRating(),mStars);
+        this.checkStateOfFAB();
         this.checkIfRestaurantIsLiked();
         //this.fetchRestaurantPhoto();
 
@@ -202,6 +210,17 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             this.serializeRestaurantForNotification(null);
         }
         UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
+    }
+    private void checkStateOfFAB(){
+        Gson gson = new Gson();
+        try{
+            String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
+            Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
+            mRestaurant.setFABChecked(restaurant.getFABChecked());
+        }catch (Exception e){
+            Log.e("SP_RESTAURANT","no restaurant available!");
+        }
+
     }
     //save the restaurant into sharedpreferences to set the notification click
     private void serializeRestaurantForNotification(@Nullable Restaurant restaurant){

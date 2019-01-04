@@ -84,6 +84,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
 
     private String[] mTitleList = new String[3];
     public static final String USERID="user_id";
+    public static final String TAG_ERROR_FIREBASE="LunchActivity_auth";
     private Restaurant mRestaurant;
     private Location mLocation;
     private PlaceAutocompleteFragment mAutocompleteFragment;
@@ -92,6 +93,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private SearchView mSearchView;
     private SearchView.SearchAutoComplete mSearchAutoComplete;
     private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
+
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -350,8 +352,8 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
                 startActivity(intent);
                 break;
             case R.id.drawer_logout:
-                this.signOutUserFromFirebase();
                 this.returntoMainActivity();
+                this.signOutUserFromFirebase();
                 break;
             default:
                 break;
@@ -409,8 +411,10 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot,
                                 @Nullable FirebaseFirestoreException e) {
-                User user = snapshot.toObject(User.class);
-                textView.setText(user.getUsername());
+                if(snapshot!=null){
+                    User user = snapshot.toObject(User.class);
+                    textView.setText(user.getUsername());
+                }
             }
         });
     }

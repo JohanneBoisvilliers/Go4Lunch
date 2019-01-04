@@ -10,12 +10,16 @@ import android.widget.TextView;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 
+import java.util.List;
+
 import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 public class RestaurantViewHolder extends RecyclerView.ViewHolder{
@@ -25,6 +29,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     @BindView(R.id.restaurant_image_recyclerview)ImageView mRestaurantImage;
     @BindView(R.id.closing_time)TextView mClosingTime;
     @BindView(R.id.how_far_is_it)TextView mDistance;
+    @BindViews({R.id.stars1_recyclerView,R.id.stars2_recyclerView,R.id.stars3_recyclerView}) List<ImageView> mStars;
 
     public RestaurantViewHolder(View itemView){
         super(itemView);
@@ -37,6 +42,9 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
        // this.glideRequest(restaurant);
         this.setOpeningHours(restaurant);
         this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
+        if(restaurant.getRating()!=null){
+            BaseUserActivity.setStars(restaurant.getRating(),mStars);
+        }
     }
     //Use glide to fetch restaurant photo and set it into the recyclerview
     private void glideRequest(Restaurant restaurant){
@@ -50,13 +58,19 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     private void setOpeningHours(Restaurant restaurant){
         if (TextUtils.isEmpty(restaurant.getOpeningHours())) {
             this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)));
+            mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.black));
         }else{
-                if(restaurant.getOpeningHours().equals("Closed")){
-                    this.mClosingTime.setText(restaurant.getOpeningHours());
-                } else{
+            if(restaurant.getOpeningHours().equals("Closed")){
+                this.mClosingTime.setText(restaurant.getOpeningHours());
+            } else{
+                if (!restaurant.getClosingSoon()){
                     this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
+                }else{
+                    this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.closing_soon_status)));
+                    mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.colorPrimaryDark));
                 }
             }
         }
+    }
 
 }

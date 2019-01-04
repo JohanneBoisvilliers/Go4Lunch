@@ -40,6 +40,7 @@
     <string name="closing_soon_status">Ferme bientôt</string>
     <string name="open_status">Ouvert jusqu\'à %s</string>
     <string name="distance_unit">%d m</string>
+    <string name="number_of_workmates">(%d)</string>
     <!-- Workmates recyclerview -->
     <string name="restaurant_chose_by_workmate">%s mange à : %s</string>
     <string name="workmate_joining">%s mange ici</string>

@@ -37,7 +37,7 @@ public class BaseUserActivity extends AppCompatActivity {
         };
     }
     //set number of stars to show
-    protected void setStars(Double rating,List<ImageView> stars) {
+    public static void setStars(Double rating,List<ImageView> stars) {
         int numberOfStars = rating.intValue();
         switch (numberOfStars){
             case 4 :case 5:numberOfStars = 3;

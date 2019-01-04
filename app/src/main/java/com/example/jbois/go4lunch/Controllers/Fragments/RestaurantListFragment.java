@@ -89,15 +89,15 @@ public class RestaurantListFragment extends Fragment {
                 });
     }
     //Callback method to fetch restaurant list
-    @Subscribe(sticky = true)
+    @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
-        mRestaurantList=event.restaurantList;
-        configureRecyclerView();
+        mRestaurantList.addAll(event.restaurantList);
+        this.configureRecyclerView();
     }
     //Callback method to fetch user's position
     @Subscribe(sticky = true)
     public void onLocationFetch(LunchActivity.getLocation event) {
         mLocation = event.location;
-        configureRecyclerView();
+        //mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 }

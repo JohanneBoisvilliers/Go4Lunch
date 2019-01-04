@@ -67,6 +67,7 @@ public class MapFragment extends Fragment
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
     public final static String RESTAURANT_IN_TAG = "restaurant";
     private Disposable mDisposable;
+    private final static String TAG = "debug";
 
     private List<Restaurant> mRestaurantsAroundUser = new ArrayList<>();
     //Set onLocationChanged method to know what to do when user is moving
@@ -226,22 +227,20 @@ public class MapFragment extends Fragment
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
         marker.setTag(restaurant);
-        mRestaurantsAroundUser.add(restaurant);
-        EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
     }
-    public void createMarkerFAKE() {
-        Restaurant restaurant = new Restaurant();
-        restaurant.setLat(48.87509379999999);
-        restaurant.setLng(2.3509834);
-        restaurant.setId("ChIJAQAUmBRu5kcRbcbXozJtU-g");
-        restaurant.setName("Au Paradis");
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(restaurant.getLat(),restaurant.getLng()))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
-        marker.setTag(restaurant);
-        mRestaurantsAroundUser.add(restaurant);
-        EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
-    }
+    //public void createMarkerFAKE() {
+    //    Restaurant restaurant = new Restaurant();
+    //    restaurant.setLat(48.87509379999999);
+    //    restaurant.setLng(2.3509834);
+    //    restaurant.setId("ChIJAQAUmBRu5kcRbcbXozJtU-g");
+    //    restaurant.setName("Au Paradis");
+    //    Marker marker = mMap.addMarker(new MarkerOptions()
+    //            .position(new LatLng(restaurant.getLat(),restaurant.getLng()))
+    //            .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
+    //    marker.setTag(restaurant);
+    //    mRestaurantsAroundUser.add(restaurant);
+    //    EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
+    //}
 
     // Turn on the My Location layer and the related control on the map.
     private void updateLocationUI() {
@@ -301,6 +300,8 @@ public class MapFragment extends Fragment
                 .subscribeWith(new DisposableObserver<List<Restaurant>>() {
                     @Override
                     public void onNext(List<Restaurant> restaurantList) {
+                        mRestaurantsAroundUser.clear();
+                        mRestaurantsAroundUser.addAll(restaurantList);
                         for (Restaurant restaurant : restaurantList) {
                             Double lat = restaurant.getLat();
                             Double lng = restaurant.getLng();
@@ -314,6 +315,7 @@ public class MapFragment extends Fragment
 
                     @Override
                     public void onComplete() {
+                        EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
                     }
                 });
 
