@@ -1,5 +1,6 @@
 package com.example.jbois.go4lunch.Views;
 
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -29,9 +30,13 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
             if(TextUtils.isEmpty(workmates.getRestaurantChoseName())){
                 this.glideRequest(workmates.getUrlPicture());
                 mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_no_choice_yet),workmates.getUsername()));
+                mRestaurantChose.setTextColor(mRestaurantChose.getContext().getResources().getColor(R.color.deactivated));
+                mRestaurantChose.setTypeface(null, Typeface.ITALIC);
             }else{
                 this.glideRequest(workmates.getUrlPicture());
                 mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.restaurant_chose_by_workmate),workmates.getUsername(),workmates.getRestaurantChoseName()));
+                mRestaurantChose.setTextColor(mRestaurantChose.getContext().getResources().getColor(R.color.black));
+                mRestaurantChose.setTypeface(null, Typeface.NORMAL);
             }
     }
 
@@ -40,6 +45,8 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
                 mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_joining),user.getUsername()));
 
     }
+
+
 
     private void glideRequest(String url){
         GlideApp.with(this.mRestaurantChose.getContext())

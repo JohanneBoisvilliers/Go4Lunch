@@ -36,7 +36,7 @@
     <string name="no_restaurant_chose">No workmate come here!</string>
     <!-- Restaurant recyclerview-->
     <string name="closed_status">Closed</string>
-    <string name="unknown_hours">Unknown timetable</string>
+    <string name="unknown_hours">Unknown Opening hours</string>
     <string name="closing_soon_status">Closing soon</string>
     <string name="open_status">Open until %s</string>
     <string name="distance_unit">%d m</string>
