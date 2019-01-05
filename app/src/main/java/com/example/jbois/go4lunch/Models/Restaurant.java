@@ -3,6 +3,9 @@ package com.example.jbois.go4lunch.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class Restaurant implements Parcelable {
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -16,6 +19,8 @@ public class Restaurant implements Parcelable {
     };
 
     private String mId;
+    @SerializedName("mName")
+    @Expose
     private String mName;
     private String mAdress;
     private String mUrl;

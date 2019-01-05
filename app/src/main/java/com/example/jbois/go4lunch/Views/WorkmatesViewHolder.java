@@ -46,8 +46,6 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
     }
 
-
-
     private void glideRequest(String url){
         GlideApp.with(this.mRestaurantChose.getContext())
                 .load(url)

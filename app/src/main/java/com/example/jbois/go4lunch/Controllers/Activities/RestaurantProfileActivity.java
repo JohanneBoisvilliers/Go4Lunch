@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -115,6 +116,8 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
         BaseUserActivity.setStars(mRestaurant.getRating(),mStars);
+        mCheckToChoose.setOnClickListener(this);
+        mLikeButton.setOnClickListener(this);
         this.checkStateOfFAB();
         this.checkIfRestaurantIsLiked();
         //this.fetchRestaurantPhoto();
@@ -130,7 +133,6 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mWebsiteUrl = mRestaurant.getUrl();
         mPhoneNumber = mRestaurant.getPhoneNumber();
         mPhotoReference = mRestaurant.getPhotoReference();
-        mRestaurantChose = mRestaurant.getName();
         mRating = mRestaurant.getRating();
     }
     //Open the restaurant website in browser
@@ -179,6 +181,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 break;
             case R.id.fab:
                 this.setStateOfFAB();
+                UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
                 EventBus.getDefault().postSticky(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
@@ -199,28 +202,27 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private void setStateOfFAB(){
         Boolean isChecked = mRestaurant.getFABChecked();
         if(!isChecked){
-            mCheckToChoose.setColorFilter(getResources().getColor(R.color.floatingButtonValidate));
-            mRestaurant.setFABChecked(true);
-            mRestaurantChose = mRestaurant.getName();
-            this.serializeRestaurantForNotification(mRestaurant);
+            this.FABevent(R.color.floatingButtonValidate,true,mRestaurant,mRestaurant.getName());
         }else{
-            mCheckToChoose.setColorFilter(getResources().getColor(R.color.colorPrimary));
-            mRestaurantChose="";
-            mRestaurant.setFABChecked(false);
-            this.serializeRestaurantForNotification(null);
+            this.FABevent(R.color.colorPrimary,false,null,"");
         }
-        UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
+    }
+    private void FABevent(int color,Boolean isChecked,Restaurant restaurant,String restaurantName){
+        mCheckToChoose.setColorFilter(getResources().getColor(color));
+        mRestaurant.setFABChecked(isChecked);
+        mRestaurantChose = restaurantName;
+        this.serializeRestaurantForNotification(restaurant);
     }
     private void checkStateOfFAB(){
         Gson gson = new Gson();
-        try{
-            String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
-            Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
-            mRestaurant.setFABChecked(restaurant.getFABChecked());
-        }catch (Exception e){
-            Log.e("SP_RESTAURANT","no restaurant available!");
+        String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
+        Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
+        if (restaurant != null){
+            if(restaurant.getId().equals(mRestaurant.getId())){
+                mRestaurant.setFABChecked(restaurant.getFABChecked());
+                this.FABevent(R.color.floatingButtonValidate,true,mRestaurant,mRestaurant.getName());
+            }
         }
-
     }
     //save the restaurant into sharedpreferences to set the notification click
     private void serializeRestaurantForNotification(@Nullable Restaurant restaurant){
@@ -232,7 +234,6 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     }
     //save that user like this restaurant
     private void buttonLikelistener(){
-        mLikeButton.setOnClickListener(this);
         if(mIsLiked){
             mIsLiked=false;
             UserHelper.UnlikeRestaurant(this.getCurrentUser().getUid(),mRestaurant.getId()).addOnFailureListener(this.onFailureListener());
