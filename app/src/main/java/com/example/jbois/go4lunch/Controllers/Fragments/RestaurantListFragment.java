@@ -52,7 +52,6 @@ public class RestaurantListFragment extends Fragment {
         super.onStart();
         EventBus.getDefault().register(this);
     }
-
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
@@ -88,6 +87,9 @@ public class RestaurantListFragment extends Fragment {
                     }
                 });
     }
+    /*
+        --------------------------- Callbacks Methods -----------------------------------------
+    */
     //Callback method to fetch restaurant list
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
@@ -95,7 +97,7 @@ public class RestaurantListFragment extends Fragment {
         this.configureRecyclerView();
     }
     //Callback method to fetch user's position
-    @Subscribe(sticky = true)
+    @Subscribe
     public void onLocationFetch(LunchActivity.getLocation event) {
         mLocation = event.location;
         //mRecyclerView.getAdapter().notifyDataSetChanged();

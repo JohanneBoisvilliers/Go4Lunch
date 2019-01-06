@@ -5,6 +5,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorSpace;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -125,8 +133,8 @@ public class MapFragment extends Fragment
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         this.disposeWhenDestroy();
+        super.onDestroy();
     }
 
     @Override
@@ -223,24 +231,19 @@ public class MapFragment extends Fragment
 
     //Set and add a new marker
     public void createMarker(LatLng latLng, Restaurant restaurant) {
+        String color = getResources().getString(0+R.color.colorPrimary);
+        Bitmap ob = BitmapFactory.decodeResource(this.getResources(),R.drawable.restaurant_location_32);
+        Bitmap obm = Bitmap.createBitmap(ob.getWidth(), ob.getHeight(), ob.getConfig());
+        Canvas canvas = new Canvas(obm);
+        Paint paint = new Paint();
+        paint.setColorFilter(new PorterDuffColorFilter(Color.parseColor(color),PorterDuff.Mode.SRC_ATOP));
+        canvas.drawBitmap(ob, 0f, 0f, paint);
+
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
+                .icon(BitmapDescriptorFactory.fromBitmap(obm)));
         marker.setTag(restaurant);
     }
-    //public void createMarkerFAKE() {
-    //    Restaurant restaurant = new Restaurant();
-    //    restaurant.setLat(48.87509379999999);
-    //    restaurant.setLng(2.3509834);
-    //    restaurant.setId("ChIJAQAUmBRu5kcRbcbXozJtU-g");
-    //    restaurant.setName("Au Paradis");
-    //    Marker marker = mMap.addMarker(new MarkerOptions()
-    //            .position(new LatLng(restaurant.getLat(),restaurant.getLng()))
-    //            .icon(BitmapDescriptorFactory.fromResource(R.drawable.restaurant_location_32)));
-    //    marker.setTag(restaurant);
-    //    mRestaurantsAroundUser.add(restaurant);
-    //    EventBus.getDefault().postSticky(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
-    //}
 
     // Turn on the My Location layer and the related control on the map.
     private void updateLocationUI() {
@@ -272,7 +275,7 @@ public class MapFragment extends Fragment
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
                             moveCamera(mLastKnownLocation);
-                            EventBus.getDefault().postSticky(new LunchActivity.getLocation(mLastKnownLocation));
+                            EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
                             executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
                             mMap.moveCamera(CameraUpdateFactory
@@ -302,6 +305,7 @@ public class MapFragment extends Fragment
                     public void onNext(List<Restaurant> restaurantList) {
                         mRestaurantsAroundUser.clear();
                         mRestaurantsAroundUser.addAll(restaurantList);
+                        Log.d(TAG, "SIZERESTASURANTLIST"+mRestaurantsAroundUser.size());
                         for (Restaurant restaurant : restaurantList) {
                             Double lat = restaurant.getLat();
                             Double lng = restaurant.getLng();

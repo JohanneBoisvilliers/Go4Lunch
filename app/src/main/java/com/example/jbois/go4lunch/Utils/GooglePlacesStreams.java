@@ -52,31 +52,31 @@ public class GooglePlacesStreams {
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
-                //.flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
-                //    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //    return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //})
-                //.delay(1, TimeUnit.SECONDS)
-                //.flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
-                //    if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
-                //        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
-                //                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
-                //                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //                });
-                //    }
-                //    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //})
-                //.delay(1, TimeUnit.SECONDS)
-                //.flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
-                //if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
-                // return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
+                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {//hide from this...
+                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
+                    return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                })
+                .delay(1, TimeUnit.SECONDS)
+                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
+                    if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
+                        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
+                                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
+                                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
+                                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                                });
+                    }
+                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                })
+                .delay(1, TimeUnit.SECONDS)
+                .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
+                if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
+                 return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())//...to this to light the request and have only 20 restaurants
                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJson -> {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                     return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                    //});
-                    //}
-                    //return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                    });//hide this to to light request
+                    }//hide this to to light request
+                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());//hide this to to light request
                 })
                 .flatMapIterable(restaurants ->restaurants)
                 .flatMap((Function<Restaurant, Observable<List<RestaurantDetailsJson>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
@@ -87,7 +87,9 @@ public class GooglePlacesStreams {
 
     }
 
-    //-------Private methods---------
+    /*
+    -------Private methods---------
+     */
     //extrude place api info for restaurants
     private void extrudePlaceInfo(RestaurantListJson restList, List<Restaurant> list){
         for(int i=0;i<restList.getResults().size();i++){
@@ -164,7 +166,7 @@ public class GooglePlacesStreams {
     }
 
     //extrude from Json a compact adress ( street number + road )
-    private String extrudeAdressFromJson(RestaurantDetailsJson restaurantDetailsJson){
+    private static String extrudeAdressFromJson(RestaurantDetailsJson restaurantDetailsJson){
         List<RestaurantDetailsJson.AddressComponent> addressComponentList = restaurantDetailsJson.getResult().getAddressComponents();
         String road = "";
         String streetNumber = "";

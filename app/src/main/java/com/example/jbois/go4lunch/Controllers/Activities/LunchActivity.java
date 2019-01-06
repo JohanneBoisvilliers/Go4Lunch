@@ -22,12 +22,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.Controllers.Adapters.PlaceAutocompleteAdapter;
+import com.example.jbois.go4lunch.Controllers.Adapters.SearchViewAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
@@ -65,6 +67,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -86,6 +89,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     public static final String USERID="user_id";
     public static final String TAG_ERROR_FIREBASE="LunchActivity_auth";
     private Restaurant mRestaurant;
+    private List<Restaurant> mRestaurantList = new ArrayList<>();
     private Location mLocation;
     private PlaceAutocompleteFragment mAutocompleteFragment;
     private GoogleApiClient mGoogleApiClient;
@@ -144,10 +148,10 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     }
     @Override
     public void onStop() {
-        super.onStop();
         mGoogleApiClient.stopAutoManage(this);
         mGoogleApiClient.disconnect();
         EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -171,22 +175,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
                 .enableAutoManage(this, this)
                 .build();
 
-        FirebaseInstanceId.getInstance().getInstanceId()
-                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("ERROR", "getInstanceId failed", task.getException());
-                            return;
-                        }
-
-                        // Get new Instance ID token
-                        String token = task.getResult().getToken();
-
-                        Log.d("TOKEN", token);
-
-                    }
-                });
         this.configureToolbar();
         this.configureViewPager();
         this.configureBottomView();
@@ -207,10 +195,16 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
+                String dataName[] = new String[mRestaurantList.size()];
+                for (int i = 0; i < mRestaurantList.size(); i++) {
+                    dataName[i] = mRestaurantList.get(i).getName();
+                }
+                //ArrayAdapter<String> adapterString = new ArrayAdapter<String>(this,R.layout.searchview_list_item,R.id.search_text,dataName);
+                SearchViewAdapter searchViewAdapter = new SearchViewAdapter(this,mRestaurantList);
                 // Construct a GeoDataClient.
                 mGeoDataClient = Places.getGeoDataClient(this, null);
                 mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this,mGeoDataClient,this.boundsCalculation(),null);
-                mSearchAutoComplete.setAdapter(mPlaceAutocompleteAdapter);
+                mSearchAutoComplete.setAdapter(searchViewAdapter);
                 mSearchAutoComplete.setOnItemClickListener(mAutocompleteClickListener);
                 return true;
             default:
@@ -230,34 +224,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         // Sets the Toolbar
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(mTitleList[0]);
-    }
-
-    private void configureSearchToolbar(){
-        AutocompleteFilter typeFilter = new AutocompleteFilter.Builder()
-                .setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE)
-                .setCountry("FR")
-                .build();
-
-        mAutocompleteFragment.setFilter(typeFilter);
-        mAutocompleteFragment.setBoundsBias(this.boundsCalculation());
-        mAutocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_input).setVisibility(View.GONE);
-        mAutocompleteFragment.getView().findViewById(R.id.place_autocomplete_search_button).setDrawingCacheBackgroundColor(getResources().getColor(R.color.floatingButton));
-        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                if (mViewPager.getCurrentItem()==0){
-                    Location location = new Location("");
-                    location.setLatitude(place.getLatLng().latitude);
-                    location.setLongitude(place.getLatLng().longitude);
-                    EventBus.getDefault().postSticky(new LunchActivity.getPlaceLocation(location));
-                }
-            }
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("BLA", "An error occurred: " + status);
-            }
-        });
     }
     //set bounds to filter results in autocomplete widget
     private LatLngBounds boundsCalculation(){
@@ -420,7 +386,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     }
 
      /*
-        --------------------------- google places API autocomplete suggestions -----------------
+        ------------------ google places API autocomplete suggestions -------------------------
      */
      private void hideSoftKeyboard(){
          this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -461,15 +427,24 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         }
     };
     //Callback method to fetch restaurant
+
+    /*
+        --------------------------- Callbacks Methods -----------------------------------------
+     */
     @Subscribe(sticky = true)
     public void ongetRestaurant(RestaurantProfileActivity.getRestaurant event) {
         mRestaurant=event.restaurant;
     }
-    //Callback method to fetch restaurant
+    //Callback method to fetch Location
     @Subscribe(sticky = true)
     public void onGetLocation(LunchActivity.getLocation event) {
         mLocation=event.location;
        // this.configureSearchToolbar();
+    }
+    //Callback method to fetch restaurant list
+    @Subscribe
+    public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
+        mRestaurantList.addAll(event.restaurantList);
     }
 }
 
