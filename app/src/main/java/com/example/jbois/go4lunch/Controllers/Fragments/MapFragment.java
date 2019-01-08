@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -162,16 +164,32 @@ public class MapFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
+        this.settingsForMap(map);
 
         checkPermissionToLocation();
         updateLocationUI();
         getDeviceLocation();
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-        //this.createMarkerFAKE();
         mMap.setOnMarkerClickListener(this);
     }
+    //set style for map
+    private void settingsForMap(GoogleMap map){
+        map.setBuildingsEnabled(false);
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = map.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            getContext(), R.raw.style_json));
 
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
+        }
+    }
     //Check permission for location and ask for it if user didn't allowed it
     public void checkPermissionToLocation() {
         //Permission for user's location
@@ -274,7 +292,7 @@ public class MapFragment extends Fragment
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            moveCamera(mLastKnownLocation);
+                            moveCamera(mLastKnownLocation,15);
                             EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
                             executeRequestToShowCurrentPlace(mLastKnownLocation);
                         } else {
@@ -289,12 +307,14 @@ public class MapFragment extends Fragment
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
     //center the map on selected item and zoom
-    private void moveCamera(Location location){
+    private void moveCamera(Location location,int zoomLevel){
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                 new LatLng(location.getLatitude(),
-                        location.getLongitude()), 15));
+                        location.getLongitude()), zoomLevel));
     }
+
     // Get places around user and put marker on this places
     private void executeRequestToShowCurrentPlace(Location location) {
         this.mDisposable = GooglePlacesStreams.streamFetchRestaurantsWithNeededInfos(location.getLatitude() + "," + location.getLongitude())
@@ -332,11 +352,12 @@ public class MapFragment extends Fragment
                 .addApi(LocationServices.API)
                 .build();
     }
+
     //Callback method to fetch place position into autocomplete widget
-    @Subscribe(sticky = true)
+    @Subscribe
     public void onGetLocation(LunchActivity.getPlaceLocation event) {
         mLastKnownLocation=event.location;
-        this.moveCamera(mLastKnownLocation);
+        this.moveCamera(mLastKnownLocation,20);
     }
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {

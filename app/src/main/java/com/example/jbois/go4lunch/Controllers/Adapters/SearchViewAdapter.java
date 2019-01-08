@@ -5,6 +5,7 @@ import android.content.RestrictionEntry;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,33 +17,33 @@ import com.example.jbois.go4lunch.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.Inflater;
 
-public class SearchViewAdapter extends ArrayAdapter<Restaurant> {
+public class SearchViewAdapter extends ArrayAdapter {
 
-    private Context mContext;
-    private List<Restaurant> mRestaurantList =new  ArrayList<>();
+    private int mContainer;
 
-    public SearchViewAdapter(@NonNull Context context, ArrayList<Restaurant> restaurantList) {
-        super(context,0, restaurantList);
-        mContext = context;
-        mRestaurantList = restaurantList;
+    public SearchViewAdapter(@NonNull Context context,int resource ,Restaurant[]restaurantList) {
+        super(context,resource, restaurantList);
+
+        mContainer = resource;
     }
 
-    @NonNull
-    @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View listItem = convertView;
-        if(listItem == null)
-            listItem = LayoutInflater.from(mContext).inflate(R.layout.searchview_list_item,parent,false);
-
-        Restaurant currentRestaurant = mRestaurantList.get(position);
-
-        TextView restaurantName = (TextView) listItem.findViewById(R.id.search_text);
-        restaurantName.setText(currentRestaurant.getName());
-
-        TextView restaurantAdress = (TextView) listItem.findViewById(R.id.search_adress);
-        restaurantAdress.setText(currentRestaurant.getAdress());
-
-        return listItem;
-    }
+    //@NonNull
+    //@Override
+    //public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    //    LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//
+    //    View listItem = inflater.inflate(mContainer,parent,false);
+//
+    //    Restaurant currentRestaurant = (Restaurant)getItem(position);
+//
+    //    TextView restaurantName = (TextView) listItem.findViewById(R.id.search_text);
+    //    //TextView restaurantAdress = (TextView) listItem.findViewById(R.id.search_adress);
+//
+    //    restaurantName.setText(currentRestaurant.getName());
+    //    //restaurantAdress.setText(currentRestaurant.getAdress());
+//
+    //    return listItem;
+    //}
 }

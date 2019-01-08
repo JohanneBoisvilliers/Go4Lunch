@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.jbois.go4lunch.Models.DistanceJson;
@@ -56,9 +57,9 @@ public class GooglePlacesStreams {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                     return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 })
-                .delay(1, TimeUnit.SECONDS)
+                .delay(2, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
-                    if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
+                    if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
                         return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                                 .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
                                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
@@ -67,9 +68,9 @@ public class GooglePlacesStreams {
                     }
                     return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 })
-                .delay(1, TimeUnit.SECONDS)
+                .delay(2, TimeUnit.SECONDS)
                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
-                if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
+                if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
                  return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())//...to this to light the request and have only 20 restaurants
                 .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJson -> {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);

@@ -1,6 +1,7 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -73,6 +75,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.view.View.inflate;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 import static com.google.android.gms.location.places.AutocompleteFilter.TYPE_FILTER_NONE;
 
@@ -196,15 +199,16 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.action_search:
                 String dataName[] = new String[mRestaurantList.size()];
+                Restaurant dataRestaurant[] = mRestaurantList.toArray(new Restaurant[0]);
                 for (int i = 0; i < mRestaurantList.size(); i++) {
                     dataName[i] = mRestaurantList.get(i).getName();
                 }
-                //ArrayAdapter<String> adapterString = new ArrayAdapter<String>(this,R.layout.searchview_list_item,R.id.search_text,dataName);
-                SearchViewAdapter searchViewAdapter = new SearchViewAdapter(this,mRestaurantList);
+                ArrayAdapter<String> adapterString = new ArrayAdapter<String>(this,R.layout.searchview_list_item,R.id.search_text,dataName);
+                //SearchViewAdapter searchViewAdapter = new SearchViewAdapter(this, R.layout.searchview_list_item,dataRestaurant);
                 // Construct a GeoDataClient.
                 mGeoDataClient = Places.getGeoDataClient(this, null);
-                mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this,mGeoDataClient,this.boundsCalculation(),null);
-                mSearchAutoComplete.setAdapter(searchViewAdapter);
+                //mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this,mGeoDataClient,this.boundsCalculation(),null);
+                mSearchAutoComplete.setAdapter(adapterString);
                 mSearchAutoComplete.setOnItemClickListener(mAutocompleteClickListener);
                 return true;
             default:
@@ -226,13 +230,13 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mToolbar.setTitle(mTitleList[0]);
     }
     //set bounds to filter results in autocomplete widget
-    private LatLngBounds boundsCalculation(){
-        LatLng southWest = new LatLng(mLocation.getLatitude()-0.0045,(mLocation.getLongitude()-(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
-        LatLng northEast = new LatLng(mLocation.getLatitude()+0.0045,(mLocation.getLongitude()+(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
+   //private LatLngBounds boundsCalculation(){
+   //    LatLng southWest = new LatLng(mLocation.getLatitude()-0.0045,(mLocation.getLongitude()-(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
+   //    LatLng northEast = new LatLng(mLocation.getLatitude()+0.0045,(mLocation.getLongitude()+(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
 
-        LatLngBounds bounds = new LatLngBounds(southWest,northEast );
-        return bounds;
-    }
+   //    LatLngBounds bounds = new LatLngBounds(southWest,northEast );
+   //    return bounds;
+   //}
 
     private void configureViewPager(){
         // Get ViewPager from layout
@@ -388,19 +392,43 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
      /*
         ------------------ google places API autocomplete suggestions -------------------------
      */
-     private void hideSoftKeyboard(){
-         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+     private void hideSoftKeyboard(View view){
+         InputMethodManager in = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+         if (in != null) {
+             in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+         }
      }
     //on item click listener for searchview
     private AdapterView.OnItemClickListener mAutocompleteClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-            hideSoftKeyboard();
+            hideSoftKeyboard(view);
+            Log.e("CLICK", "onItemClick: ");
+            //final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
+            final String itemName =(String) mSearchAutoComplete.getAdapter().getItem(i);
 
-            final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
-            final String placeID = item.getPlaceId();
-            Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeID);
-            placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
+            //final String placeID = item.getPlaceId();
+            if (mViewPager.getCurrentItem()==0){
+                for (int j = 0; j < mRestaurantList.size(); j++) {
+                    if (itemName.equals(mRestaurantList.get(j).getName())){
+                        Location location = new Location("");
+                        location.setLatitude(mRestaurantList.get(j).getLat());
+                        location.setLongitude(mRestaurantList.get(j).getLng());
+                        EventBus.getDefault().post(new LunchActivity.getPlaceLocation(location));
+                    }
+                }
+            }
+            if (mViewPager.getCurrentItem()==1){
+                for (int j = 0; j < mRestaurantList.size(); j++) {
+                    if (itemName.equals(mRestaurantList.get(j).getName())){
+                        Intent intentRestaurant = new Intent(getBaseContext(),RestaurantProfileActivity.class);
+                        intentRestaurant.putExtra(RESTAURANT_IN_TAG, mRestaurantList.get(j));
+                        startActivity(intentRestaurant);
+                    }
+                }
+            }
+            //Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeID);
+            //placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
         }
     };
     //move camera when user click on an item of searchview
@@ -436,11 +464,11 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mRestaurant=event.restaurant;
     }
     //Callback method to fetch Location
-    @Subscribe(sticky = true)
-    public void onGetLocation(LunchActivity.getLocation event) {
-        mLocation=event.location;
-       // this.configureSearchToolbar();
-    }
+    //@Subscribe(sticky = true)
+    //public void onGetLocation(LunchActivity.getLocation event) {
+    //    mLocation=event.location;
+    //   // this.configureSearchToolbar();
+    //}
     //Callback method to fetch restaurant list
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
