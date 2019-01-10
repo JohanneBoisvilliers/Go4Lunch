@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -20,6 +19,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -33,6 +33,7 @@ import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivi
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
+import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -48,6 +49,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -73,6 +79,8 @@ public class MapFragment extends Fragment
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private final LatLng mDefaultLocation = new LatLng(-48.874949, 2.350520);
     private Location mLastKnownLocation;
+    private List<Marker> mMarkers = new ArrayList<>();
+    private List<String> mRestaurantsChosenList = new ArrayList<>();
     private boolean mLocationPermissionGranted;
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
     public final static String RESTAURANT_IN_TAG = "restaurant";
@@ -165,7 +173,7 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap map) {
         mMap = map;
         this.settingsForMap(map);
-
+        this.getRestaurantChosen();
         checkPermissionToLocation();
         updateLocationUI();
         getDeviceLocation();
@@ -241,6 +249,7 @@ public class MapFragment extends Fragment
     //Method to open restaurant profile when user click on a marker
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        this.RestaurantsChosenListener(marker);
         Intent intent = new Intent(getActivity(), RestaurantProfileActivity.class);
         intent.putExtra(RESTAURANT_IN_TAG, (Restaurant) marker.getTag());
         startActivity(intent);
@@ -249,7 +258,22 @@ public class MapFragment extends Fragment
 
     //Set and add a new marker
     public void createMarker(LatLng latLng, Restaurant restaurant) {
-        String color = getResources().getString(0+R.color.colorPrimary);
+        String color = getResources().getString(0 + R.color.colorPrimary);;
+        for (String restaurantChosenId : mRestaurantsChosenList) {
+            if (restaurant.getId().equals(restaurantChosenId)) {
+                color = getResources().getString(0 + R.color.floatingButtonValidate);
+            }
+        }
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title(restaurant.getId())
+                .icon(BitmapDescriptorFactory.fromBitmap(this.setMarkerColor(color))));
+        marker.setTag(restaurant);
+        mMarkers.add(marker);
+        Log.e(TAG, "liste de marker : "+mMarkers.size());
+    }
+    //set the color of markers
+    private Bitmap setMarkerColor(String color){
         Bitmap ob = BitmapFactory.decodeResource(this.getResources(),R.drawable.restaurant_location_32);
         Bitmap obm = Bitmap.createBitmap(ob.getWidth(), ob.getHeight(), ob.getConfig());
         Canvas canvas = new Canvas(obm);
@@ -257,10 +281,7 @@ public class MapFragment extends Fragment
         paint.setColorFilter(new PorterDuffColorFilter(Color.parseColor(color),PorterDuff.Mode.SRC_ATOP));
         canvas.drawBitmap(ob, 0f, 0f, paint);
 
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(obm)));
-        marker.setTag(restaurant);
+        return obm;
     }
 
     // Turn on the My Location layer and the related control on the map.
@@ -345,12 +366,44 @@ public class MapFragment extends Fragment
 
     }
 
-    // Create google api client
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
-                .enableAutoManage(getActivity(), this)
-                .addApi(LocationServices.API)
-                .build();
+    //check on database if restaurant is chose by someone
+    private void RestaurantsChosenListener(Marker marker){
+        UserHelper.getRestaurantChosen()
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        if(value != null){
+                            for (QueryDocumentSnapshot document : value) {
+                                Log.e(TAG, "doc snapshot " + document.getId());
+                                if (marker.getTitle().equals(document.getId())){
+                                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.floatingButtonValidate))));
+                                }
+                        }
+                    }
+                }
+                });
+    }
+    //check on database if user liked this restaurant
+    private void getRestaurantChosen(){
+        mRestaurantsChosenList.clear();
+        UserHelper.getRestaurantListChosen()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                mRestaurantsChosenList.add(document.getId());
+                            }
+                        } else {
+                            Log.w("LIKEBUTTON","can't receive if restaurant is liked");
+                        }
+                    }
+                });
     }
 
     //Callback method to fetch place position into autocomplete widget
@@ -359,6 +412,8 @@ public class MapFragment extends Fragment
         mLastKnownLocation=event.location;
         this.moveCamera(mLastKnownLocation,20);
     }
+
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }

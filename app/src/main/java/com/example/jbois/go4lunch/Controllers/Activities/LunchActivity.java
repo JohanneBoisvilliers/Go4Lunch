@@ -1,6 +1,5 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -21,7 +20,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,7 +29,6 @@ import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
 import com.example.jbois.go4lunch.Controllers.Adapters.PlaceAutocompleteAdapter;
-import com.example.jbois.go4lunch.Controllers.Adapters.SearchViewAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
@@ -40,31 +37,18 @@ import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.PlaceBufferResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -75,9 +59,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.view.View.inflate;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
-import static com.google.android.gms.location.places.AutocompleteFilter.TYPE_FILTER_NONE;
 
 public class LunchActivity extends BaseUserActivity implements NavigationView.OnNavigationItemSelectedListener,
         GoogleApiClient.OnConnectionFailedListener{
@@ -199,15 +181,12 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.action_search:
                 String dataName[] = new String[mRestaurantList.size()];
-                Restaurant dataRestaurant[] = mRestaurantList.toArray(new Restaurant[0]);
                 for (int i = 0; i < mRestaurantList.size(); i++) {
                     dataName[i] = mRestaurantList.get(i).getName();
                 }
                 ArrayAdapter<String> adapterString = new ArrayAdapter<String>(this,R.layout.searchview_list_item,R.id.search_text,dataName);
-                //SearchViewAdapter searchViewAdapter = new SearchViewAdapter(this, R.layout.searchview_list_item,dataRestaurant);
                 // Construct a GeoDataClient.
                 mGeoDataClient = Places.getGeoDataClient(this, null);
-                //mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this,mGeoDataClient,this.boundsCalculation(),null);
                 mSearchAutoComplete.setAdapter(adapterString);
                 mSearchAutoComplete.setOnItemClickListener(mAutocompleteClickListener);
                 return true;
@@ -229,14 +208,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(mTitleList[0]);
     }
-    //set bounds to filter results in autocomplete widget
-   //private LatLngBounds boundsCalculation(){
-   //    LatLng southWest = new LatLng(mLocation.getLatitude()-0.0045,(mLocation.getLongitude()-(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
-   //    LatLng northEast = new LatLng(mLocation.getLatitude()+0.0045,(mLocation.getLongitude()+(0.0045/(Math.cos(mLocation.getLatitude() * 0.018)))));
-
-   //    LatLngBounds bounds = new LatLngBounds(southWest,northEast );
-   //    return bounds;
-   //}
 
     private void configureViewPager(){
         // Get ViewPager from layout
@@ -403,7 +374,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
             hideSoftKeyboard(view);
-            Log.e("CLICK", "onItemClick: ");
             //final AutocompletePrediction item = mPlaceAutocompleteAdapter.getItem(i);
             final String itemName =(String) mSearchAutoComplete.getAdapter().getItem(i);
 
@@ -427,38 +397,13 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
                     }
                 }
             }
-            //Task<PlaceBufferResponse> placeResult = mGeoDataClient.getPlaceById(placeID);
-            //placeResult.addOnCompleteListener(mUpdatePlaceDetailsCallback);
         }
     };
-    //move camera when user click on an item of searchview
-    private OnCompleteListener<PlaceBufferResponse> mUpdatePlaceDetailsCallback = new OnCompleteListener<PlaceBufferResponse>() {
-        @Override
-        public void onComplete(@NonNull Task<PlaceBufferResponse> task) {
-            if(task.isSuccessful()){
-                PlaceBufferResponse places = task.getResult();
-                final Place place = places.get(0);
-                try{
-                    if (mViewPager.getCurrentItem()==0){
-                        Location location = new Location("");
-                        location.setLatitude(place.getLatLng().latitude);
-                        location.setLongitude(place.getLatLng().longitude);
-                        EventBus.getDefault().postSticky(new LunchActivity.getPlaceLocation(location));
-                    }
-                }catch (NullPointerException e){
-                    Log.e("ERROR",e.getMessage());
-                }
-                places.release();
-            }else{
-                Log.e("ERROR","Place not Found");
-            }
-        }
-    };
-    //Callback method to fetch restaurant
 
     /*
         --------------------------- Callbacks Methods -----------------------------------------
      */
+    //Callback method to fetch restaurant
     @Subscribe(sticky = true)
     public void ongetRestaurant(RestaurantProfileActivity.getRestaurant event) {
         mRestaurant=event.restaurant;

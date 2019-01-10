@@ -32,7 +32,7 @@ public class Restaurant implements Parcelable {
     private String mOpeningHours;
     private Boolean mFABChecked = false;
     private Boolean mClosingSoon = false;
-    private Boolean mLikeOrNot = false;
+    private Boolean mChoseOrNot = false;
     private int mDistance;
 
     public Restaurant(){}
@@ -90,9 +90,7 @@ public class Restaurant implements Parcelable {
         mId = id;
     }
 
-    public String getAdress() {
-        return mAdress;
-    }
+    public String getAdress() { return mAdress; }
 
     public void setAdress(String adress) {
         mAdress = adress;
@@ -138,9 +136,7 @@ public class Restaurant implements Parcelable {
         mLng = lng;
     }
 
-    public String getOpeningHours() {
-        return mOpeningHours;
-    }
+    public String getOpeningHours() { return mOpeningHours; }
 
     public void setOpeningHours(String openingHours) {
         mOpeningHours = openingHours;
@@ -176,5 +172,13 @@ public class Restaurant implements Parcelable {
 
     public void setClosingSoon(Boolean closingSoon) {
         mClosingSoon = closingSoon;
+    }
+
+    public Boolean getChoseOrNot() {
+        return mChoseOrNot;
+    }
+
+    public void setChoseOrNot(Boolean choseOrNot) {
+        mChoseOrNot = choseOrNot;
     }
 }

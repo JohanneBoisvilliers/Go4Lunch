@@ -182,7 +182,8 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             case R.id.fab:
                 this.setStateOfFAB();
                 UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
-                EventBus.getDefault().postSticky(new RestaurantProfileActivity.getRestaurant(mRestaurant));
+                UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid()).addOnFailureListener(this.onFailureListener());
+                //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
     }
