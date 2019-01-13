@@ -82,6 +82,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private Restaurant mRestaurant;
     private List<Restaurant> mRestaurantList = new ArrayList<>();
     private Location mLocation;
+    private MenuItem mItem;
     private PlaceAutocompleteFragment mAutocompleteFragment;
     private GoogleApiClient mGoogleApiClient;
     private GeoDataClient mGeoDataClient;
@@ -176,8 +177,8 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
-        MenuItem item=menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) MenuItemCompat.getActionView(item);
+        mItem=menu.findItem(R.id.action_search);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(mItem);
         mSearchAutoComplete = (SearchView.SearchAutoComplete) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         return super.onCreateOptionsMenu(menu);
     }
@@ -232,6 +233,15 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
             public void onPageSelected(int position) {
                 mBottomNavigationView.getMenu().getItem(position).setChecked(true);
                 mToolbar.setTitle(mTitleList[position]);
+                switch (position){
+                    case 0: case 1:mItem.setVisible(true);
+                        break;
+                    case 2:mItem.setVisible(false);
+                }
+                if (position==2){
+                    mSearchView.setQuery("",false);
+                    MenuItemCompat.collapseActionView(mItem);
+                }
             }
 
             @Override
