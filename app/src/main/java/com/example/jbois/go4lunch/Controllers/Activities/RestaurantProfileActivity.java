@@ -5,6 +5,7 @@ import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,8 +28,16 @@ import com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 //import com.example.jbois.go4lunch.Utils.GlideApp;
+import com.example.jbois.go4lunch.Utils.ApplicationContext;
+import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
+import com.google.android.gms.location.places.PlacePhotoResponse;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -66,6 +75,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private String mRestaurantChose;
     private Double mRating;
     private Restaurant mRestaurant;
+    private Bitmap mBitmap = null;
     private Boolean mIsLiked=false;
     private SharedPreferences mMySharedPreferences;
     private SharedPreferences.Editor mEditor;
@@ -120,8 +130,8 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mLikeButton.setOnClickListener(this);
         this.checkStateOfFAB();
         this.checkIfRestaurantIsLiked();
-        //this.fetchRestaurantPhoto();
-
+        this.fetchRestaurantPhoto(mRestaurant);
+        //this.glideToSetPhoto();
     }
 
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
@@ -157,16 +167,42 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
         return metrics.widthPixels;
     }
-    //Use Glide to fetch restaurant's photo and set it into the imageview on top of view
-    //private void fetchRestaurantPhoto(){
-    //    GlideApp.with(this)
-    //            .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth="
-    //                    +getScreenWidth(this)
-    //                    +"&photoreference="+mPhotoReference+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
-    //            .centerInside()
-    //            .error(R.drawable.no_photo_profile)
-    //            .into(mRestaurantPhoto);
-    //}
+    //fetch restaurant's photo
+    private void fetchRestaurantPhoto(Restaurant restaurant){
+            String placeId = restaurant.getId();
+            GeoDataClient mGeoDataClient = Places.getGeoDataClient(this, null);
+            final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(placeId);
+            photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                    // Get the list of photos.
+                    PlacePhotoMetadataResponse photos = task.getResult();
+                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                    // Get the first photo in the list.
+                    PlacePhotoMetadata photoMetadata = null;
+                    if (photoMetadataBuffer.getCount() > 0) {
+                        photoMetadata = photoMetadataBuffer.get(0);
+                        // Get a full-size bitmap for the photo.
+                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                            @Override
+                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                PlacePhotoResponse photo = task.getResult();
+                                if(photo.getBitmap()!=null) {
+                                    mBitmap = photo.getBitmap();
+                                    mRestaurantPhoto.setImageBitmap(mBitmap);
+                                }
+                            }
+                        });
+                    }else{
+                        mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
+                    }
+                    photoMetadataBuffer.release();
+                }
+            });
+    }
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -181,8 +217,17 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 break;
             case R.id.fab:
                 this.setStateOfFAB();
-                UserHelper.updateRestaurantChose(this.getCurrentUser().getUid(), mRestaurantChose);
-                UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid()).addOnFailureListener(this.onFailureListener());
+                if (this.getRestaurantInSharedPreferences()!=null){
+                    if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
+                        if(!mRestaurant.getFABChecked()){
+                            UserHelper.unCheckRestaurantDestination(mRestaurant.getId());
+                        }else{
+                            UserHelper.createRestaurantChosen(mRestaurant.getId(),mRestaurant.getName());
+                        }
+                    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId());}
+                }
+
+                this.checkStateOfFAB();
                 //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
@@ -215,9 +260,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         this.serializeRestaurantForNotification(restaurant);
     }
     private void checkStateOfFAB(){
-        Gson gson = new Gson();
-        String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
-        Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
+        Restaurant restaurant = this.getRestaurantInSharedPreferences();
         if (restaurant != null){
             if(restaurant.getId().equals(mRestaurant.getId())){
                 mRestaurant.setFABChecked(restaurant.getFABChecked());
@@ -232,6 +275,11 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mEditor.putString(RESTAURANT_SAVED,restaurantToList);
         mEditor.apply();
         UserHelper.updateEntireRestaurant(this.getCurrentUser().getUid(), restaurantToList);
+    }
+    private Restaurant getRestaurantInSharedPreferences(){
+        Gson gson = new Gson();
+        String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
+        return gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
     }
     //save that user like this restaurant
     private void buttonLikelistener(){

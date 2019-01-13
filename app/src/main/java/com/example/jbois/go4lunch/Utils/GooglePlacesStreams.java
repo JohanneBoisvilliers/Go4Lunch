@@ -1,15 +1,29 @@
 package com.example.jbois.go4lunch.Utils;
 
+import android.app.Activity;
+import android.app.Application;
+import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
 import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
+import com.example.jbois.go4lunch.R;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
+import com.google.android.gms.location.places.PlacePhotoResponse;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.Minutes;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -21,10 +35,12 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class GooglePlacesStreams {
+public class GooglePlacesStreams extends Application {
 
     private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
     private static final String rankby = "distance";
@@ -43,7 +59,7 @@ public class GooglePlacesStreams {
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurantDetails(placeId,apiKey)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                //.observeOn(AndroidSchedulers.mainThread())
                 .timeout(20, TimeUnit.SECONDS);
     }
 
@@ -57,9 +73,9 @@ public class GooglePlacesStreams {
                 //    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                 //    return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 //})
-                //.delay(2, TimeUnit.SECONDS)
+                //.delay(1, TimeUnit.SECONDS)
                 //.flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
-                //    if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
+                //    if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                 //        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
                 //                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
                 //                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
@@ -68,23 +84,32 @@ public class GooglePlacesStreams {
                 //    }
                 //    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
                 //})
-                //.delay(2, TimeUnit.SECONDS)
+                //.delay(1, TimeUnit.SECONDS)
                 //.flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
-                //if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
+                //if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
                 // return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())//...to this to light the request and have only 20 restaurants
-                .flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJson -> {
+                .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //    });//hide this to to light request
-                //    }//hide this to to light request
-                //    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());//hide this to to light request
+                    Log.e("STREAMS", "size in stream :"+restaurantList.size());
+                    //return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                    //});//hide this to to light request
+                    //}//hide this to to light request
+                    return restaurantList;//hide this to to light request
                 })
-                .flatMapIterable(restaurants ->restaurants)
-                .flatMap((Function<Restaurant, Observable<List<RestaurantDetailsJson>>>) restaurant -> streamFetchRestaurantDetails(restaurant.getId()).toList().toObservable())
-                .flatMap ((Function<List<RestaurantDetailsJson>, Observable<List<Restaurant>>>) finalrestaurantDetailsList -> {
-                    googlePlacesStreams.compareAndSetList(restaurantList,finalrestaurantDetailsList);
-                    return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {
+                    Log.e("MAP", "size in stream :"+restaurantList.size());
+                    for (Restaurant rest:restaurantListTemp) {
+                        googlePlacesStreams.compareAndSetList(rest,streamFetchRestaurantDetails(rest.getId()).blockingFirst());
+                    }
+                    return restaurantList;
                 });
+                //.map(restaurants -> {
+                //    for (Restaurant restaurant : restaurants) {
+                //        Log.e("PHOTO", "Boucle photo");
+                //        googlePlacesStreams.getPhotoMetadata(restaurant);
+                //    }
+                //    return restaurantList;
+                //});
 
     }
 
@@ -105,22 +130,20 @@ public class GooglePlacesStreams {
         }
     }
     //extrude place Details api infos for restaurants
-    private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
-        for (int i=0;i<restaurantList.size();i++){
-            for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
-                if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
-                    restaurantList.get(i).setName(restaurantDetailsJsonList.get(j).getResult().getName());
-                    restaurantList.get(i).setAdress(extrudeAdressFromJson(restaurantDetailsJsonList.get(j)));
-                    restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
-                    restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
-                    restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j),restaurantList.get(i)));
-                    double rating = restaurantDetailsJsonList.get(j).getResult().getRating() != null ?
-                            restaurantDetailsJsonList.get(j).getResult().getRating()
+    private void compareAndSetList(Restaurant restaurantList,RestaurantDetailsJson restaurantDetailsJsonList){
+
+                if(restaurantDetailsJsonList.getResult().getPlaceId().equals(restaurantList.getId())){
+                    restaurantList.setName(restaurantDetailsJsonList.getResult().getName());
+                    restaurantList.setAdress(extrudeAdressFromJson(restaurantDetailsJsonList));
+                    restaurantList.setUrl(restaurantDetailsJsonList.getResult().getWebsite());
+                    restaurantList.setPhoneNumber(restaurantDetailsJsonList.getResult().getFormattedPhoneNumber());
+                    restaurantList.setOpeningHours(checkOpeningHours(restaurantDetailsJsonList,restaurantList));
+                    double rating = restaurantDetailsJsonList.getResult().getRating() != null ?
+                            restaurantDetailsJsonList.getResult().getRating()
                             : 0.0;
-                    restaurantList.get(i).setRating(rating);
+                    restaurantList.setRating(rating);
                 }
-            }
-        }
+
     }
     //Get openingHours for each restaurant
     private String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson, Restaurant restaurant){
@@ -138,9 +161,13 @@ public class GooglePlacesStreams {
                             if(open.isBeforeNow()){
                                 openingHours = convertHoursInString(convertHoursInDateTime(periodList.get(i).getClose().getTime()));
                                 DateTime close = convertHoursInDateTime(periodList.get(i).getClose().getTime());
-
-                                int timeToClose = Minutes.minutesBetween(close,new DateTime()).getMinutes();
-                                int closingSoon = 30;
+                                DateTime now = new DateTime();
+                                Duration duration = new Duration(now, close);
+                                //int timeToClose = Minutes.minutesBetween(new DateTime(),close).getMinutes();
+                                long timeToClose = duration.getStandardMinutes();
+                                //long diffInMillis =  new DateTime().getMillis() - close.getMillis();
+                                Log.e("GOOGLESTREAMS", "timetoclose :"+timeToClose);
+                                int closingSoon = 120;
 
                                 if (timeToClose<closingSoon){
                                     restaurant.setClosingSoon(true);
@@ -180,4 +207,5 @@ public class GooglePlacesStreams {
         }
         return road+" "+streetNumber;
     }
-}
+
+ }

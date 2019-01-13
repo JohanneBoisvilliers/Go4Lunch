@@ -1,8 +1,11 @@
 package com.example.jbois.go4lunch.Views;
 
+import android.graphics.Bitmap;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,6 +18,14 @@ import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.GlideApp;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.PlacePhotoMetadata;
+import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
+import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
+import com.google.android.gms.location.places.PlacePhotoResponse;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.List;
 
@@ -39,20 +50,12 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     public void updateRestaurantInfos(Restaurant restaurant){
         this.mRestaurantName.setText(restaurant.getName());
         this.mRestaurantLocation.setText(restaurant.getAdress());
-       // this.glideRequest(restaurant);
+        this.fetchRestaurantPhoto(restaurant);
         this.setOpeningHours(restaurant);
         this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
         if(restaurant.getRating()!=null){
             BaseUserActivity.setStars(restaurant.getRating(),mStars);
         }
-    }
-    //Use glide to fetch restaurant photo and set it into the recyclerview
-    private void glideRequest(Restaurant restaurant){
-            GlideApp.with(this.mRestaurantImage.getContext())
-                    .load("https://maps.googleapis.com/maps/api/place/photo?maxwidth=128&photoreference="+restaurant.getPhotoReference()+"&key=AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4")
-                    .apply(new RequestOptions().transforms(new CenterCrop(),new RoundedCorners(10)))
-                    .error(R.drawable.no_image_small_icon)
-                    .into(mRestaurantImage);
     }
     //check openingHours value and set hours in recyclerview
     private void setOpeningHours(Restaurant restaurant){
@@ -62,15 +65,54 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         }else{
             if(restaurant.getOpeningHours().equals("Closed")){
                 this.mClosingTime.setText(restaurant.getOpeningHours());
+                mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.deactivated));
             } else{
                 if (!restaurant.getClosingSoon()){
                     this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
+                    mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.black));
                 }else{
                     this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.closing_soon_status)));
                     mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.colorPrimaryDark));
                 }
             }
         }
+    }
+    //Use Glide to fetch restaurant's photo and set it into the imageview on top of view
+    private void fetchRestaurantPhoto(Restaurant restaurant){
+        String placeId = restaurant.getId();
+        GeoDataClient mGeoDataClient = Places.getGeoDataClient(this.mRestaurantImage.getContext(), null);
+        final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(placeId);
+        photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+            @Override
+            public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                // Get the list of photos.
+                PlacePhotoMetadataResponse photos = task.getResult();
+                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                // Get the first photo in the list.
+                PlacePhotoMetadata photoMetadata = null;
+                if (photoMetadataBuffer.getCount() > 0) {
+                    photoMetadata = photoMetadataBuffer.get(0);
+                    // Get a full-size bitmap for the photo.
+                    Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                    photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                        @Override
+                        public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                            PlacePhotoResponse photo = task.getResult();
+                            if(photo.getBitmap()!=null) {
+                                Bitmap bitmap = photo.getBitmap();
+                                Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
+                                mRestaurantImage.setImageBitmap(bitmapResize);
+                            }
+                        }
+                    });
+                }else{
+                    mRestaurantImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    mRestaurantImage.setImageDrawable(mRestaurantImage.getResources().getDrawable(R.drawable.no_photo_profile));
+                }
+                photoMetadataBuffer.release();
+            }
+        });
     }
 
 }

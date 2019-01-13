@@ -93,6 +93,7 @@ public class RestaurantListFragment extends Fragment {
     //Callback method to fetch restaurant list
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
+        mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
         this.configureRecyclerView();
     }

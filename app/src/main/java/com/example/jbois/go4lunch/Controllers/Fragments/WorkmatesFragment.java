@@ -87,8 +87,8 @@ public class WorkmatesFragment extends Fragment {
                     @Override
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
                         User user = snapshot.toObject(User.class);
-                        if(!TextUtils.isEmpty(user.getRestaurantChoseName())){
-                            if(user.getRestaurantChoseName().equals(mRestaurantInRestaurantProfile)){
+                        if(!TextUtils.isEmpty(user.getRestaurantChose())){
+                            if(user.getRestaurantChose().equals(mRestaurantInRestaurantProfile)){
                                 users.add(user);
                                 Log.e("LISTSIZE",users.size()+"");
                             }

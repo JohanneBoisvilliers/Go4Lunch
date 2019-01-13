@@ -14,16 +14,20 @@ import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.disposables.Disposable;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
-    private List<Restaurant> mRestaurantList;
+    private List<Restaurant> mRestaurantList=new ArrayList<>();;
     private Location mLocation;
 
     public RestaurantAdapter(List<Restaurant> restaurantList,Location location){
+        if (!mRestaurantList.isEmpty()){
+            this.mRestaurantList.clear();
+        }
         this.mRestaurantList = restaurantList;
         this.mLocation = location;
     }

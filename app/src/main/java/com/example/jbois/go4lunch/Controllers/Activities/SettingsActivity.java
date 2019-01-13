@@ -93,12 +93,12 @@ public class SettingsActivity extends PreferenceActivity {
             if (preference == null) return;
             if (preference instanceof EditTextPreference) {
                 EditTextPreference editTextPref = (EditTextPreference) preference;
-                mNewName = editTextPref.getText().toString();
+                mNewName = editTextPref.getEditText().getText().toString();
                 if(!TextUtils.isEmpty(mNewName)){
                     UserHelper.updateUsername(mUid, mNewName);
                 }
                 SharedPreferences sharedPrefs = getPreferenceManager().getSharedPreferences();
-                preference.setSummary(sharedPrefs.getString(key, "Default"));
+                preference.setSummary(sharedPrefs.getString(key, "Your name"));
             }
             if (preference instanceof CheckBoxPreference) {
                 CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;

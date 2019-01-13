@@ -1,5 +1,6 @@
 package com.example.jbois.go4lunch.Models;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,6 +27,7 @@ public class Restaurant implements Parcelable {
     private String mUrl;
     private String mPhoneNumber;
     private String mPhotoReference;
+    private Bitmap mPhoto;
     private Double mLat;
     private Double mLng;
     private Double mRating;
@@ -51,6 +53,7 @@ public class Restaurant implements Parcelable {
         this.mFABChecked = (Boolean)in.readValue(null);
         this.mClosingSoon = (Boolean)in.readValue(null);
         this.mRating = in.readDouble();
+        this.mPhoto = in.readParcelable(null);
     }
     @Override
     public int describeContents() {
@@ -72,6 +75,7 @@ public class Restaurant implements Parcelable {
         dest.writeValue(this.mFABChecked);
         dest.writeValue(this.mClosingSoon);
         dest.writeDouble(this.mRating);
+        dest.writeParcelable(this.mPhoto,flags);
     }
 
     public String getName() {
@@ -180,5 +184,13 @@ public class Restaurant implements Parcelable {
 
     public void setChoseOrNot(Boolean choseOrNot) {
         mChoseOrNot = choseOrNot;
+    }
+
+    public Bitmap getPhoto() {
+        return mPhoto;
+    }
+
+    public void setPhoto(Bitmap photo) {
+        mPhoto = photo;
     }
 }

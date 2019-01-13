@@ -8,6 +8,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class UserHelper {
 
     public static final String COLLECTION_USERS = "users";
@@ -38,10 +41,10 @@ public class UserHelper {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).set(restaurant);
     }
 
-    public static Task<Void> createRestaurantChosen(String placeId, String uid) {
-        User userToCreate = new User();
-        userToCreate.setUid(uid);
-        return UserHelper.getRestaurantChosen().document(placeId).set(userToCreate);
+    public static Task<Void> createRestaurantChosen(String placeId, String placeName) {
+        Map<String,Object> restaurantData = new HashMap<>();
+        restaurantData.put("restaurantName",placeName);
+        return UserHelper.getRestaurantChosen().document(placeId).set(restaurantData);
     }
 
     // --- GET ---
@@ -67,7 +70,7 @@ public class UserHelper {
     }
 
     public static Task<Void> updateEntireRestaurant(String uid, String restaurant) {
-        return UserHelper.getUsersCollection().document(uid).update("restaurant", restaurant);
+        return UserHelper.getUsersCollection().document(uid).update("restaurantChose", restaurant);
     }
 
 
@@ -78,6 +81,9 @@ public class UserHelper {
     }
     public static Task<Void> UnlikeRestaurant(String uid,String placeId) {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).delete();
+    }
+    public static Task<Void> unCheckRestaurantDestination(String placeId) {
+        return UserHelper.getRestaurantChosen().document(placeId).delete();
     }
 
 }
