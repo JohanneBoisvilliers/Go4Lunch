@@ -28,7 +28,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
         if (!mRestaurantList.isEmpty()){
             this.mRestaurantList.clear();
         }
-        this.mRestaurantList = restaurantList;
+        this.mRestaurantList.addAll(restaurantList);
         this.mLocation = location;
     }
     @NonNull
@@ -47,7 +47,7 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
             mRestaurantList.get(position).setDistance(this.extrudeDistance(mRestaurantList,position));
             holder.updateRestaurantInfos(mRestaurantList.get(position));
         }catch (Exception e){
-            Log.e("NORESTAURANT", "onBindViewHolder: ");
+            Log.e("NORESTAURANT", "onBindViewHolder: "+e.getMessage()+"on :"+mRestaurantList.get(position).getPhotoReference());
         }
 
     }

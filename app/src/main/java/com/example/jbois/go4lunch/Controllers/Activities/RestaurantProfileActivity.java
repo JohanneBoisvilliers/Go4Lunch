@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -169,39 +171,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     }
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
-            String placeId = restaurant.getId();
-            GeoDataClient mGeoDataClient = Places.getGeoDataClient(this, null);
-            final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(placeId);
-            photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
-                @Override
-                public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
-                    // Get the list of photos.
-                    PlacePhotoMetadataResponse photos = task.getResult();
-                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                    // Get the first photo in the list.
-                    PlacePhotoMetadata photoMetadata = null;
-                    if (photoMetadataBuffer.getCount() > 0) {
-                        photoMetadata = photoMetadataBuffer.get(0);
-                        // Get a full-size bitmap for the photo.
-                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
-                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                            @Override
-                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                                PlacePhotoResponse photo = task.getResult();
-                                if(photo.getBitmap()!=null) {
-                                    mBitmap = photo.getBitmap();
-                                    mRestaurantPhoto.setImageBitmap(mBitmap);
-                                }
-                            }
-                        });
-                    }else{
-                        mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                        mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
-                    }
-                    photoMetadataBuffer.release();
-                }
-            });
+        Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
+            if (TextUtils.isEmpty(restaurant.getPhotoReference())) {
+                mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
+            }else{
+                mRestaurantPhoto.setImageBitmap(bitmap);
+            }
     }
     @Override
     public void onClick(View v) {
@@ -217,16 +193,15 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 break;
             case R.id.fab:
                 this.setStateOfFAB();
-                if (this.getRestaurantInSharedPreferences()!=null){
-                    if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
+                //if (this.getRestaurantInSharedPreferences()!=null){
+                    //if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
                         if(!mRestaurant.getFABChecked()){
-                            UserHelper.unCheckRestaurantDestination(mRestaurant.getId());
+                            UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }else{
-                            UserHelper.createRestaurantChosen(mRestaurant.getId(),mRestaurant.getName());
+                            UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }
-                    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId());}
-                }
-
+                    //}else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
+                //}
                 this.checkStateOfFAB();
                 //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
@@ -320,6 +295,16 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             }else{
             DrawableCompat.setTint(mLikeButton.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.colorPrimary));
             mLikeButton.setTextColor(getResources().getColor(R.color.colorPrimary));
+        }
+    }
+    public Bitmap StringToBitMap(String encodedString){
+        try {
+            byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
+            Bitmap bitmap=BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+            return bitmap;
+        } catch(Exception e) {
+            e.getMessage();
+            return null;
         }
     }
     //Callback method to fetch restaurant

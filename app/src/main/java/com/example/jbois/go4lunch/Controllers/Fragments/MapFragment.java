@@ -140,6 +140,21 @@ public class MapFragment extends Fragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        this.getRestaurantChosenFromUsers();
+        for (Restaurant restaurant : mRestaurantsChosenList){
+            for (Marker marker : mMarkers) {
+                if (marker.getTitle().equals(restaurant.getId())){
+                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.floatingButtonValidate))));
+                }else{
+                    marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
+                }
+            }
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
@@ -163,6 +178,7 @@ public class MapFragment extends Fragment
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
         mLocationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
 
+        this.getRestaurantChosenFromUsers();
        // this.setLocationManager();
         //this.buildGoogleApiClient();
         return result;
@@ -177,12 +193,9 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap map) {
         mMap = map;
         this.settingsForMap(map);
-        this.getRestaurantChosenFromUsers();
-        this.usersListener();
         checkPermissionToLocation();
         updateLocationUI();
         getDeviceLocation();
-        this.RestaurantsChosenListener(mMarkers);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
@@ -255,6 +268,7 @@ public class MapFragment extends Fragment
     //Method to open restaurant profile when user click on a marker
     @Override
     public boolean onMarkerClick(final Marker marker) {
+        marker.hideInfoWindow();
         Intent intent = new Intent(getActivity(), RestaurantProfileActivity.class);
         intent.putExtra(RESTAURANT_IN_TAG, (Restaurant) marker.getTag());
         startActivity(intent);
@@ -359,6 +373,7 @@ public class MapFragment extends Fragment
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e(TAG, "error on main stream(in Mapfragment): " + e);
                     }
 
                     @Override
@@ -457,42 +472,42 @@ public class MapFragment extends Fragment
                 });
     }
     //check on database if restaurant is chose by someone
-    private void usersListener(){
-        UserHelper.getUsersCollection()
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        Log.d("EVENTUSER", "onEvent: ");
-                        if (e != null) { Log.w("TAG", "Listen failed.", e); }
-                        if(value != null){
-                            List<Restaurant> tempRestaurantToAdd = new ArrayList<>();
-                            List<String> tempRestaurantToDelete = new ArrayList<>();
-                            getRestaurantChosenFromUsers();
-                            getCollectionRestaurantChosen();
-
-                            for (int i = 0; i < mRestaurantsChosenList.size(); i++) {
-                                if(!mCollectionRestaurantsChosenList.contains(mRestaurantsChosenList.get(i).getId())){
-                                    tempRestaurantToAdd.add(mRestaurantsChosenList.get(i));
-                                }
-                            }
-                            for (int i = 0; i < mCollectionRestaurantsChosenList.size(); i++) {
-                                for (int j = 0; j < mRestaurantsChosenList.size(); j++) {
-                                    if(!mRestaurantsChosenList.get(j).getId().equals(mCollectionRestaurantsChosenList.get(i))){
-                                        tempRestaurantToDelete.add(mCollectionRestaurantsChosenList.get(i));
-                                    }
-                                }
-                            }
-                            for (int i = 0; i < tempRestaurantToAdd.size(); i++) {
-                                    UserHelper.createRestaurantChosen(tempRestaurantToAdd.get(i).getId(),tempRestaurantToAdd.get(i).getName());
-                            }
-                            for (int i = 0; i < tempRestaurantToAdd.size(); i++) {
-                                UserHelper.unCheckRestaurantDestination(tempRestaurantToDelete.get(i));
-                            }
-                        }
-                    }
-                });
-    }
+    //private void usersListener(){
+    //    UserHelper.getUsersCollection()
+    //            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+    //                @Override
+    //                public void onEvent(@Nullable QuerySnapshot value,
+    //                                    @Nullable FirebaseFirestoreException e) {
+    //                    Log.d("EVENTUSER", "onEvent: ");
+    //                    if (e != null) { Log.w("TAG", "Listen failed.", e); }
+    //                    if(value != null){
+    //                        List<Restaurant> tempRestaurantToAdd = new ArrayList<>();
+    //                        List<String> tempRestaurantToDelete = new ArrayList<>();
+    //                        getRestaurantChosenFromUsers();
+    //                        getCollectionRestaurantChosen();
+//
+    //                        for (int i = 0; i < mRestaurantsChosenList.size(); i++) {
+    //                            if(!mCollectionRestaurantsChosenList.contains(mRestaurantsChosenList.get(i).getId())){
+    //                                tempRestaurantToAdd.add(mRestaurantsChosenList.get(i));
+    //                            }
+    //                        }
+    //                        for (int i = 0; i < mCollectionRestaurantsChosenList.size(); i++) {
+    //                            for (int j = 0; j < mRestaurantsChosenList.size(); j++) {
+    //                                if(!mRestaurantsChosenList.get(j).getId().equals(mCollectionRestaurantsChosenList.get(i))){
+    //                                    tempRestaurantToDelete.add(mCollectionRestaurantsChosenList.get(i));
+    //                                }
+    //                            }
+    //                        }
+    //                        for (int i = 0; i < tempRestaurantToAdd.size(); i++) {
+    //                                UserHelper.createRestaurantChosen(tempRestaurantToAdd.get(i).getId(),tempRestaurantToAdd.get(i).getName());
+    //                        }
+    //                        for (int i = 0; i < tempRestaurantToAdd.size(); i++) {
+    //                            UserHelper.unCheckRestaurantDestination(tempRestaurantToDelete.get(i),);
+    //                        }
+    //                    }
+    //                }
+    //            });
+    //}
 
     //Callback method to fetch place position into autocomplete widget
     @Subscribe

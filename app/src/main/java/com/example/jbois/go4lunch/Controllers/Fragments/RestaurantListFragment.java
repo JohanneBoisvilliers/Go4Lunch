@@ -95,6 +95,7 @@ public class RestaurantListFragment extends Fragment {
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
+        mRecyclerView.getAdapter().notifyDataSetChanged();
         this.configureRecyclerView();
     }
     //Callback method to fetch user's position

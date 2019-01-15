@@ -5,6 +5,8 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
@@ -28,6 +30,7 @@ import org.joda.time.Minutes;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -40,7 +43,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class GooglePlacesStreams extends Application {
+public class GooglePlacesStreams {
 
     private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
     private static final String rankby = "distance";
@@ -51,7 +54,7 @@ public class GooglePlacesStreams extends Application {
         GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurants(location,rankby,type,pageToken,apiKey)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                //.observeOn(AndroidSchedulers.mainThread())
                 .timeout(20, TimeUnit.SECONDS);
     }
     //Observable to fetch Restaurants Details
@@ -69,47 +72,40 @@ public class GooglePlacesStreams extends Application {
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
-                //.flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {//hide from this...
+                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJson -> {//hide from this...
                 //    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //    return Observable.fromCallable(() -> restaurantListJson).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
+                //    return  restaurantListJson;
                 //})
                 //.delay(1, TimeUnit.SECONDS)
-                //.flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJsonNextPage -> {
-                //    if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
+                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJsonNextPage -> {
+                //    if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
                 //        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
-                //                .flatMap((Function<RestaurantListJson, Observable<RestaurantListJson>>) restaurantListJson -> {
+                //                .map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJson -> {
                 //                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //                    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //                });
+                //                    return  restaurantListJson;
+                //                }).blockingFirst();
+                //    }else{
+                //        return restaurantListJsonNextPage;
                 //    }
-                //    return Observable.fromCallable(() -> restaurantListJsonNextPage).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                //})
-                //.delay(1, TimeUnit.SECONDS)
-                //.flatMap((Function<RestaurantListJson, Observable<List<Restaurant>>>) restaurantListJsonNextPage -> {
-                //if(restaurantListJsonNextPage.getNextPageToken()!=null||!restaurantListJsonNextPage.getNextPageToken().equals("")){
-                // return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())//...to this to light the request and have only 20 restaurants
-                .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {
+                //})//...to this to light the request and have only 20 restaurants
+                .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {/*---------------Google Place------------------*/
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                    Log.e("STREAMS", "size in stream :"+restaurantList.size());
-                    //return Observable.fromCallable(() -> restaurantList).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
-                    //});//hide this to to light request
-                    //}//hide this to to light request
+                    //hide this to to light request
+                    //hide this to to light request
                     return restaurantList;//hide this to to light request
                 })
-                .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {
-                    Log.e("MAP", "size in stream :"+restaurantList.size());
+                .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
                     for (Restaurant rest:restaurantListTemp) {
                         googlePlacesStreams.compareAndSetList(rest,streamFetchRestaurantDetails(rest.getId()).blockingFirst());
                     }
                     return restaurantList;
+                })
+                .map(restaurants -> {/*---------------Google photos------------------*/
+                    for (Restaurant restaurant : restaurants) {
+                        googlePlacesStreams.getPhotoMetadata(restaurant);
+                    }
+                    return restaurantList;
                 });
-                //.map(restaurants -> {
-                //    for (Restaurant restaurant : restaurants) {
-                //        Log.e("PHOTO", "Boucle photo");
-                //        googlePlacesStreams.getPhotoMetadata(restaurant);
-                //    }
-                //    return restaurantList;
-                //});
 
     }
 
@@ -161,13 +157,11 @@ public class GooglePlacesStreams extends Application {
                             if(open.isBeforeNow()){
                                 openingHours = convertHoursInString(convertHoursInDateTime(periodList.get(i).getClose().getTime()));
                                 DateTime close = convertHoursInDateTime(periodList.get(i).getClose().getTime());
-                                DateTime now = new DateTime();
-                                Duration duration = new Duration(now, close);
-                                //int timeToClose = Minutes.minutesBetween(new DateTime(),close).getMinutes();
-                                long timeToClose = duration.getStandardMinutes();
-                                //long diffInMillis =  new DateTime().getMillis() - close.getMillis();
+
+                                int timeToClose = Minutes.minutesBetween(new DateTime(),close).getMinutes();
+
                                 Log.e("GOOGLESTREAMS", "timetoclose :"+timeToClose);
-                                int closingSoon = 120;
+                                int closingSoon = 30;
 
                                 if (timeToClose<closingSoon){
                                     restaurant.setClosingSoon(true);
@@ -207,5 +201,45 @@ public class GooglePlacesStreams extends Application {
         }
         return road+" "+streetNumber;
     }
+    private void getPhotoMetadata(Restaurant restaurant){
+        String placeId = restaurant.getId();
 
+            GeoDataClient mGeoDataClient = Places.getGeoDataClient(ApplicationContext.getContext(), null);
+            final Task<PlacePhotoMetadataResponse> photoMetadataResponse = mGeoDataClient.getPlacePhotos(placeId);
+            photoMetadataResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoMetadataResponse>() {
+                @Override
+                public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
+                    // Get the list of photos.
+                    PlacePhotoMetadataResponse photos = task.getResult();
+                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                    // Get the first photo in the list.
+                    PlacePhotoMetadata photoMetadata = null;
+                    if (photoMetadataBuffer.getCount() > 0) {
+                        photoMetadata = photoMetadataBuffer.get(0);
+                        // Get a full-size bitmap for the photo.
+                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                            @Override
+                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                PlacePhotoResponse photo = task.getResult();
+                                Bitmap bitmap = photo.getBitmap();
+                                String photoAsString = BitMapToString(bitmap);
+                                restaurant.setPhotoReference(photoAsString);
+                            }
+                        });
+                    }else{
+                        restaurant.setPhotoReference("");
+                    }
+                    photoMetadataBuffer.release();
+                }
+            });
+    }
+    public String BitMapToString(Bitmap bitmap){
+        ByteArrayOutputStream baos= new  ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG,100, baos);
+        byte [] b=baos.toByteArray();
+        String temp=Base64.encodeToString(b, Base64.DEFAULT);
+        return temp;
+    }
  }

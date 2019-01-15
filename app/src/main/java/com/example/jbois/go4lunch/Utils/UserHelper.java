@@ -16,6 +16,7 @@ public class UserHelper {
     public static final String COLLECTION_USERS = "users";
     public static final String COLLECTION_RESTAURANT_CHOSEN = "restaurantChosen";
     public static final String COLLECTION_RESTAURANT_LIKED = "restaurantsLiked";
+    public static final String COLLECTION_USERS_WHO_CHOSE = "usersWhoChose";
 
     // --- COLLECTION REFERENCE ---
 
@@ -30,6 +31,10 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).collection(COLLECTION_RESTAURANT_LIKED);
     }
 
+    public static CollectionReference getUsersWhoChose(String placeId){
+        return UserHelper.getRestaurantChosen().document(placeId).collection(COLLECTION_USERS_WHO_CHOSE);
+    }
+
     // --- CREATE ---
 
     public static Task<Void> createUser(String uid, String username, String urlPicture) {
@@ -41,10 +46,10 @@ public class UserHelper {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).set(restaurant);
     }
 
-    public static Task<Void> createRestaurantChosen(String placeId, String placeName) {
-        Map<String,Object> restaurantData = new HashMap<>();
-        restaurantData.put("restaurantName",placeName);
-        return UserHelper.getRestaurantChosen().document(placeId).set(restaurantData);
+    public static Task<Void> createRestaurantChosen(String placeId, String uid) {
+        User userToCreate = new User();
+        userToCreate.setUid(uid);
+        return UserHelper.getUsersWhoChose(placeId).document(uid).set(userToCreate);
     }
 
     // --- GET ---
@@ -65,10 +70,6 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).update("username", username);
     }
 
-    public static Task<Void> updateRestaurantChose(String uid, String restaurantChose) {
-        return UserHelper.getUsersCollection().document(uid).update("restaurantChoseName", restaurantChose);
-    }
-
     public static Task<Void> updateEntireRestaurant(String uid, String restaurant) {
         return UserHelper.getUsersCollection().document(uid).update("restaurantChose", restaurant);
     }
@@ -76,14 +77,11 @@ public class UserHelper {
 
     // --- DELETE ---
 
-    public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
-    }
     public static Task<Void> UnlikeRestaurant(String uid,String placeId) {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).delete();
     }
-    public static Task<Void> unCheckRestaurantDestination(String placeId) {
-        return UserHelper.getRestaurantChosen().document(placeId).delete();
+    public static Task<Void> unCheckRestaurantDestination(String placeId, String uid) {
+        return UserHelper.getUsersWhoChose(placeId).document(uid).delete();
     }
 
 }

@@ -34,7 +34,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
         Gson gson = new Gson();
         String restaurantToString = workmates.getRestaurantChose();
         Restaurant restaurant= gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
-        if(TextUtils.isEmpty(workmates.getRestaurantChose())){
+        if(restaurant==null){
             this.glideRequest(workmates.getUrlPicture());
             mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_no_choice_yet),workmates.getUsername()));
             mRestaurantChose.setTextColor(mRestaurantChose.getContext().getResources().getColor(R.color.deactivated));
