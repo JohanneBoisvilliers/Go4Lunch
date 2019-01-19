@@ -30,6 +30,7 @@ public class MainActivity extends BaseUserActivity {
         setContentView(R.layout.activity_main);
 
         this.startSignInActivity();
+       // this.startLunchActivity();
     }
 
     @Override

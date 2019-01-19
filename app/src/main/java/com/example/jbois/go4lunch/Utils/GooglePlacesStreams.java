@@ -1,16 +1,12 @@
 package com.example.jbois.go4lunch.Utils;
 
-import android.app.Activity;
-import android.app.Application;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
+import android.support.annotation.RawRes;
 import android.util.Base64;
 import android.util.Log;
 
-import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
-import com.example.jbois.go4lunch.Models.DistanceJson;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
@@ -23,24 +19,32 @@ import com.google.android.gms.location.places.PlacePhotoResponse;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.joda.time.Minutes;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class GooglePlacesStreams {
@@ -48,6 +52,7 @@ public class GooglePlacesStreams {
     private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
     private static final String rankby = "distance";
     private static final String type = "restaurant";
+    public static final String TAG = "DEBUG_APPLICATION";
 
     //Observable to fetch Restaurants list from google
     private static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
@@ -72,17 +77,17 @@ public class GooglePlacesStreams {
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
-                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJson -> {//hide from this...
-                //    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //    return  restaurantListJson;
+                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantlistjson -> {//hide from this...
+                //    googlePlacesStreams.extrudePlaceInfo(restaurantlistjson,restaurantList);
+                //    return  restaurantlistjson;
                 //})
                 //.delay(1, TimeUnit.SECONDS)
                 //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJsonNextPage -> {
                 //    if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
                 //        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
-                //                .map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJson -> {
-                //                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                //                    return  restaurantListJson;
+                //                .map((Function<RestaurantListJson, RestaurantListJson>) restaurantlistjson -> {
+                //                    googlePlacesStreams.extrudePlaceInfo(restaurantlistjson,restaurantList);
+                //                    return  restaurantlistjson;
                 //                }).blockingFirst();
                 //    }else{
                 //        return restaurantListJsonNextPage;
@@ -100,12 +105,45 @@ public class GooglePlacesStreams {
                     }
                     return restaurantList;
                 })
-                .map(restaurants -> {/*---------------Google photos------------------*/
-                    for (Restaurant restaurant : restaurants) {
-                        googlePlacesStreams.getPhotoMetadata(restaurant);
-                    }
+                //.map(restaurants -> {/*---------------Google photos------------------*/
+                //    for (Restaurant restaurant : restaurants) {
+                //        googlePlacesStreams.getPhotoMetadata(restaurant);
+                //    }
+                //    return restaurantList;
+                //})
+                ;
+
+    }
+    public static Observable<List<Restaurant>> fakeStream() throws IOException {
+        List<Restaurant> restaurantList = new ArrayList<>();
+        GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
+        List<RestaurantDetailsJson> restaurantDetailsJsonList = new ArrayList<>();
+
+        Gson gson = new Gson();
+        RestaurantListJson restaurantListJson = gson.fromJson(googlePlacesStreams.serializeJson(R.raw.restaurantlistjson),new TypeToken<RestaurantListJson>(){}.getType());
+        restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.tesoroditalia),new TypeToken<RestaurantDetailsJson>(){}.getType()));
+        restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.larosedetunis),new TypeToken<RestaurantDetailsJson>(){}.getType()));
+        restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.camouflageveggie),new TypeToken<RestaurantDetailsJson>(){}.getType()));
+
+
+        return Observable.just(restaurantListJson)
+                .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson1 -> {/*---------------Google Place------------------*/
+                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
+                    //hide this to to light request
+                    //hide this to to light request
+                    return restaurantList;//hide this to to light request
+                })
+                .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
+                    googlePlacesStreams.fakecompareAndSetList(restaurantListTemp,restaurantDetailsJsonList);
                     return restaurantList;
-                });
+                })
+                //.map(restaurants -> {/*---------------Google photos------------------*/
+                //    for (Restaurant restaurant : restaurants) {
+                //        googlePlacesStreams.getPhotoMetadata(restaurant);
+                //    }
+                //    return restaurantList;
+                //})
+                ;
 
     }
 
@@ -141,33 +179,81 @@ public class GooglePlacesStreams {
                 }
 
     }
+    //extrude place Details api infos for restaurants
+    private void fakecompareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
+        for (int i=0;i<restaurantList.size();i++){
+            for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
+                if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
+                    restaurantList.get(i).setName(restaurantDetailsJsonList.get(j).getResult().getName());
+                    restaurantList.get(i).setAdress(extrudeAdressFromJson(restaurantDetailsJsonList.get(j)));
+                    restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
+                    restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
+                    restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j),restaurantList.get(i)));
+                    double rating = restaurantDetailsJsonList.get(j).getResult().getRating() != null ?
+                            restaurantDetailsJsonList.get(j).getResult().getRating()
+                            : 0.0;
+                    restaurantList.get(i).setRating(rating);
+                }
+            }
+        }
+    }
+    private String serializeJson(@RawRes int resources) throws IOException {
+        InputStream is = ApplicationContext.getContext().getResources().openRawResource(resources);
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } finally {
+            is.close();
+        }
+
+        return writer.toString();
+    }
     //Get openingHours for each restaurant
     private String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson, Restaurant restaurant){
         String openingHours="";
         List<RestaurantDetailsJson.Period> periodList=new ArrayList<>();
+        Boolean isGoodSchedule = false;
         if (restaurantDetailsJson.getResult().getOpeningHours() != null) {
             periodList = restaurantDetailsJson.getResult().getOpeningHours().getPeriods();
             if(restaurantDetailsJson.getResult().getOpeningHours().getOpenNow()){
                 for (int i = 0; i < periodList.size() ; i++) {
-                    if (periodList.get(i).getOpen().getDay() + 1 == Calendar.DAY_OF_WEEK) {
+                    if (periodList.get(i).getOpen().getDay()+1 == Calendar.DAY_OF_WEEK) {
+                        Log.d(TAG, "numéro de jour :"+Calendar.DAY_OF_WEEK);
+                        Log.d(TAG, "numéro de jour :"+(periodList.get(i).getOpen().getDay()));
                         if(periodList.get(i).getClose()==null){
                             openingHours ="Open 24/7";
                         }else{
-                            DateTime open= convertHoursInDateTime(periodList.get(i).getOpen().getTime());
+                            DateTime open= new DateTime().withHourOfDay(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getHourOfDay())
+                                    .withMinuteOfHour(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getMinuteOfHour());
+                            Log.d(TAG, "Opening hours :" + open);
                             if(open.isBeforeNow()){
                                 openingHours = convertHoursInString(convertHoursInDateTime(periodList.get(i).getClose().getTime()));
-                                DateTime close = convertHoursInDateTime(periodList.get(i).getClose().getTime());
+                                DateTime close = new DateTime().withHourOfDay(convertHoursInDateTime(periodList.get(i).getClose().getTime()).getHourOfDay())
+                                        .withMinuteOfHour(convertHoursInDateTime(periodList.get(i).getClose().getTime()).getMinuteOfHour());
 
                                 int timeToClose = Minutes.minutesBetween(new DateTime(),close).getMinutes();
-
-                                Log.e("GOOGLESTREAMS", "timetoclose :"+timeToClose);
+                                Log.d(TAG, "checkOpeningHours: of " +restaurant.getName()+":" + timeToClose);
+                                Log.d(TAG, "time now : " + new DateTime());
+                                Log.d(TAG, "time to close : " + close);
                                 int closingSoon = 30;
 
-                                if (timeToClose<closingSoon){
+                                if (timeToClose<closingSoon && timeToClose>=0){
                                     restaurant.setClosingSoon(true);
                                 }
+                                isGoodSchedule = true;
+                            }
+                            if (!isGoodSchedule) {
+                                openingHours = "Closed";
                             }
                         }
+                    }
+                    if(periodList.get(i).getOpen().getDay() == 0 && periodList.get(i).getClose()==null){
+                        openingHours = "Open 24/7";
                     }
                 }
             }else {

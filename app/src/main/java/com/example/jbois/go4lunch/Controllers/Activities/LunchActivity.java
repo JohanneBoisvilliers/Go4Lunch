@@ -51,6 +51,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
@@ -83,12 +84,11 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private List<Restaurant> mRestaurantList = new ArrayList<>();
     private Location mLocation;
     private MenuItem mItem;
-    private PlaceAutocompleteFragment mAutocompleteFragment;
     private GoogleApiClient mGoogleApiClient;
     private GeoDataClient mGeoDataClient;
     private SearchView mSearchView;
     private SearchView.SearchAutoComplete mSearchAutoComplete;
-    private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter;
+    private ListenerRegistration mUsernameListener;
 
 
     @Override
@@ -143,6 +143,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mGoogleApiClient.stopAutoManage(this);
         mGoogleApiClient.disconnect();
         EventBus.getDefault().unregister(this);
+        mUsernameListener.remove();
         super.onStop();
     }
 
@@ -363,8 +364,8 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     }
     //listener to know when user change his name to refresh the textview in navigation header
     private void usernameListener(String uid,TextView textView){
-        DocumentReference docRef = UserHelper.getUsersCollection().document(uid);
-        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        mUsernameListener = UserHelper.getUsersCollection().document(uid)
+        .addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot,
                                 @Nullable FirebaseFirestoreException e) {
@@ -433,6 +434,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     //Callback method to fetch restaurant list
     @Subscribe
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
+        mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
     }
 }

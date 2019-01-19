@@ -132,8 +132,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mLikeButton.setOnClickListener(this);
         this.checkStateOfFAB();
         this.checkIfRestaurantIsLiked();
-        this.fetchRestaurantPhoto(mRestaurant);
-        //this.glideToSetPhoto();
+        //this.fetchRestaurantPhoto(mRestaurant);
     }
 
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
@@ -157,11 +156,11 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     }
     //Open the dial page with the restaurant phone number
     public void dialPhoneNumber(String phoneNumber) {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + phoneNumber));
-            if (intent.resolveActivity(getPackageManager()) != null) {
-                startActivity(intent);
-            }
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
     //Get the screen width to optimize the google photo request
     private int getScreenWidth(Context context){
@@ -172,12 +171,12 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
         Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
-            if (TextUtils.isEmpty(restaurant.getPhotoReference())) {
-                mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
-            }else{
-                mRestaurantPhoto.setImageBitmap(bitmap);
-            }
+        if (TextUtils.isEmpty(restaurant.getPhotoReference())) {
+            mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
+        }else{
+            mRestaurantPhoto.setImageBitmap(bitmap);
+        }
     }
     @Override
     public void onClick(View v) {
@@ -194,15 +193,17 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             case R.id.fab:
                 this.setStateOfFAB();
                 //if (this.getRestaurantInSharedPreferences()!=null){
-                    //if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
+                //    if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
                         if(!mRestaurant.getFABChecked()){
                             UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }else{
                             UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }
-                    //}else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
+                //    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
+                //}else{
+                //    UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid());
                 //}
-                this.checkStateOfFAB();
+                //this.checkStateOfFAB();
                 //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
@@ -223,15 +224,14 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private void setStateOfFAB(){
         Boolean isChecked = mRestaurant.getFABChecked();
         if(!isChecked){
-            this.FABevent(R.color.floatingButtonValidate,true,mRestaurant,mRestaurant.getName());
+            this.FABevent(R.color.floatingButtonValidate,true,mRestaurant);
         }else{
-            this.FABevent(R.color.colorPrimary,false,null,"");
+            this.FABevent(R.color.colorPrimary,false,null);
         }
     }
-    private void FABevent(int color,Boolean isChecked,Restaurant restaurant,String restaurantName){
+    private void FABevent(int color,Boolean isChecked,@Nullable Restaurant restaurant){
         mCheckToChoose.setColorFilter(getResources().getColor(color));
         mRestaurant.setFABChecked(isChecked);
-        mRestaurantChose = restaurantName;
         this.serializeRestaurantForNotification(restaurant);
     }
     private void checkStateOfFAB(){
@@ -239,16 +239,22 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         if (restaurant != null){
             if(restaurant.getId().equals(mRestaurant.getId())){
                 mRestaurant.setFABChecked(restaurant.getFABChecked());
-                this.FABevent(R.color.floatingButtonValidate,true,mRestaurant,mRestaurant.getName());
+                this.FABevent(R.color.floatingButtonValidate,true,mRestaurant);
             }
         }
     }
     //save the restaurant into sharedpreferences to set the notification click
     private void serializeRestaurantForNotification(@Nullable Restaurant restaurant){
         Gson gson = new Gson();
-        String restaurantToList = gson.toJson(restaurant);
-        mEditor.putString(RESTAURANT_SAVED,restaurantToList);
-        mEditor.apply();
+        String restaurantToList ="";
+        if (restaurant == null){
+            mEditor.putString(RESTAURANT_SAVED,restaurantToList);
+            mEditor.apply();
+        }else{
+            restaurantToList = gson.toJson(restaurant);
+            mEditor.putString(RESTAURANT_SAVED,restaurantToList);
+            mEditor.apply();
+        }
         UserHelper.updateEntireRestaurant(this.getCurrentUser().getUid(), restaurantToList);
     }
     private Restaurant getRestaurantInSharedPreferences(){
@@ -272,27 +278,27 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private void checkIfRestaurantIsLiked(){
         UserHelper.getRestaurantsListLiked(this.getCurrentUser().getUid())
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (DocumentSnapshot document : task.getResult()) {
-                        if (mRestaurant.getId().equals(document.getId())){
-                            mIsLiked=true;
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                if (mRestaurant.getId().equals(document.getId())){
+                                    mIsLiked=true;
+                                }
+                            }
+                            EventBus.getDefault().postSticky(new BaseUserActivity.getLikedOrNot(mIsLiked));
+                        } else {
+                            Log.w("LIKEBUTTON","can't receive if restaurant is liked");
                         }
                     }
-                    EventBus.getDefault().postSticky(new BaseUserActivity.getLikedOrNot(mIsLiked));
-                } else {
-                    Log.w("LIKEBUTTON","can't receive if restaurant is liked");
-                }
-            }
-        });
+                });
     }
     //if user liked this restaurant, change like button color
     private void ifIsLikedChangeLikeButtonColor(){
         if(mIsLiked){
             DrawableCompat.setTint(mLikeButton.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.stars));
             mLikeButton.setTextColor(getResources().getColor(R.color.colorPrimary));
-            }else{
+        }else{
             DrawableCompat.setTint(mLikeButton.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.colorPrimary));
             mLikeButton.setTextColor(getResources().getColor(R.color.colorPrimary));
         }

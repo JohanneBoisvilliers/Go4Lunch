@@ -62,22 +62,29 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     //check openingHours value and set hours in recyclerview
     private void setOpeningHours(Restaurant restaurant){
         if (TextUtils.isEmpty(restaurant.getOpeningHours())) {
-            this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)));
-            mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.black));
+            this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)),
+                    mRestaurantImage.getContext().getResources().getColor(R.color.black));
         }else{
             if(restaurant.getOpeningHours().equals("Closed")){
-                this.mClosingTime.setText(restaurant.getOpeningHours());
-                mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.deactivated));
+                this.UiOpeningHours(restaurant.getOpeningHours(),mRestaurantImage.getContext().getResources().getColor(R.color.deactivated));
             } else{
                 if (!restaurant.getClosingSoon()){
-                    this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()));
-                    mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.black));
+                    this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()),
+                            mRestaurantImage.getContext().getResources().getColor(R.color.black));
                 }else{
-                    this.mClosingTime.setText(mRestaurantImage.getContext().getResources().getString((R.string.closing_soon_status)));
-                    mClosingTime.setTextColor(mRestaurantImage.getContext().getResources().getColor(R.color.colorPrimaryDark));
+                    this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.closing_soon_status)),
+                            mRestaurantImage.getContext().getResources().getColor(R.color.colorPrimaryDark));
+                }
+                if (restaurant.getOpeningHours().equals("Open 24/7")) {
+                    this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.always_open)),
+                            mRestaurantImage.getContext().getResources().getColor(R.color.black));
                 }
             }
         }
+    }
+    private void UiOpeningHours(String openingHours, int color){
+        this.mClosingTime.setText(openingHours);
+        mClosingTime.setTextColor(color);
     }
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){

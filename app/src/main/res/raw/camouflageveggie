@@ -1,0 +1,159 @@
+{
+  "html_attributions" : [],
+  "result" : {
+    "address_components" : [
+      {
+        "long_name" : "51",
+        "short_name" : "51",
+        "types" : [ "street_number" ]
+      },
+      {
+        "long_name" : "Rue de Paradis",
+        "short_name" : "Rue de Paradis",
+        "types" : [ "route" ]
+      },
+      {
+        "long_name" : "Paris",
+        "short_name" : "Paris",
+        "types" : [ "locality", "political" ]
+      },
+      {
+        "long_name" : "Paris",
+        "short_name" : "Paris",
+        "types" : [ "administrative_area_level_2", "political" ]
+      },
+      {
+        "long_name" : "Île-de-France",
+        "short_name" : "Île-de-France",
+        "types" : [ "administrative_area_level_1", "political" ]
+      },
+      {
+        "long_name" : "France",
+        "short_name" : "FR",
+        "types" : [ "country", "political" ]
+      },
+      {
+        "long_name" : "75010",
+        "short_name" : "75010",
+        "types" : [ "postal_code" ]
+      }
+    ],
+    "adr_address" : "\u003cspan class=\"street-address\"\u003e51 Rue de Paradis\u003c/span\u003e, \u003cspan class=\"postal-code\"\u003e75010\u003c/span\u003e \u003cspan class=\"locality\"\u003eParis\u003c/span\u003e, \u003cspan class=\"country-name\"\u003eFrance\u003c/span\u003e",
+    "formatted_address" : "51 Rue de Paradis, 75010 Paris, France",
+    "geometry" : {
+      "location" : {
+        "lat" : 48.8755424,
+        "lng" : 2.3492409
+      },
+      "viewport" : {
+        "northeast" : {
+          "lat" : 48.8769317302915,
+          "lng" : 2.350606580291501
+        },
+        "southwest" : {
+          "lat" : 48.8742337697085,
+          "lng" : 2.347908619708498
+        }
+      }
+    },
+    "icon" : "https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png",
+    "id" : "1a9832c0886a53dbb5e4cebc2853ab80e001347b",
+    "name" : "Camouflage vegie",
+    "opening_hours" : {
+      "open_now" : true,
+      "periods" : [
+        {
+          "close" : {
+            "day" : 0,
+            "time" : "1700"
+          },
+          "open" : {
+            "day" : 0,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 1,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 1,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 2,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 2,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 3,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 3,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 4,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 4,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 5,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 5,
+            "time" : "1200"
+          }
+        },
+        {
+          "close" : {
+            "day" : 6,
+            "time" : "1800"
+          },
+          "open" : {
+            "day" : 6,
+            "time" : "1200"
+          }
+        }
+      ],
+      "weekday_text" : [
+        "Monday: 12:00 – 6:00 PM",
+        "Tuesday: 12:00 – 6:00 PM",
+        "Wednesday: 12:00 – 6:00 PM",
+        "Thursday: 12:00 – 6:00 PM",
+        "Friday: 12:00 – 6:00 PM",
+        "Saturday: Closed",
+        "Sunday: 12:00 – 4:00 PM"
+      ]
+    },
+    "place_id" : "ChIJnymA2RRu5kcRQ4_FteS_218",
+    "plus_code" : {
+      "compound_code" : "V8GX+6M Paris, France",
+      "global_code" : "8FW4V8GX+6M"
+    },
+    "reference" : "ChIJnymA2RRu5kcRQ4_FteS_218",
+    "scope" : "GOOGLE",
+    "types" : [ "restaurant", "point_of_interest", "food", "establishment" ],
+    "url" : "https://maps.google.com/?cid=6907325442525859651",
+    "utc_offset" : 60,
+    "vicinity" : "51 Rue de Paradis, Paris"
+  },
+  "status" : "OK"
+}
