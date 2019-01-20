@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,10 @@ import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -46,7 +51,7 @@ public class RestaurantListFragment extends Fragment {
     private List<Restaurant> mRestaurantList=new ArrayList<>();
     private RestaurantAdapter adapter;
     private Location mLocation;
-    private List<String> mRestaurantChosenListId = new ArrayList<>();
+    private ListenerRegistration mRestaurantsChoseListener;
     private HashMap<String,Integer> mFinalRestaurantsChosen = new HashMap<>();
     public static final String TAG = "DEBUG_APPLICATION";
 
@@ -63,11 +68,13 @@ public class RestaurantListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        this.restaurantsChosenListener();
         EventBus.getDefault().register(this);
     }
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
+        mRestaurantsChoseListener.remove();
         super.onStop();
     }
     @Override
@@ -136,6 +143,35 @@ public class RestaurantListFragment extends Fragment {
             }
         });
     }
+    //check on database if restaurant is chose by someone
+    private void restaurantsChosenListener(){
+        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
+                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        Log.e(TAG, "onEvent:changement dans base de données");
+                        if (e != null) { Log.w(TAG, "Listen failed.", e); }
+
+                        if (value!=null){
+                            if(!value.isEmpty()){
+                                Log.e(TAG, "onEvent: post liste de restaurant");
+                                setNumberOfWorkmates();
+                                mRecyclerView.getAdapter().notifyDataSetChanged();
+                            }}
+                    }
+                });
+    }
+    //compare restaurant list with restaurants chosen by users and set number of users in each restaurant of recycler view
+    private void setNumberOfWorkmates(){
+        for (int i = 0; i < mRestaurantList.size(); i++) {
+            for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
+                if (entry.getKey().equals(mRestaurantList.get(i).getId())) {
+                    mRestaurantList.get(i).setNumberOfWorkmates(entry.getValue());
+                }
+            }
+        }
+    }
     /*
         --------------------------- Callbacks Methods -----------------------------------------
     */
@@ -144,14 +180,7 @@ public class RestaurantListFragment extends Fragment {
     public void onRefreshingRestaurantList(LunchActivity.refreshRestaurantsList event) {
         mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
-
-        for (int i = 0; i < mRestaurantList.size(); i++) {
-            for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
-                if (entry.getKey().equals(mRestaurantList.get(i).getId())) {
-                    mRestaurantList.get(i).setNumberOfWorkmates(entry.getValue());
-                }
-            }
-        }
+        this.setNumberOfWorkmates();
         this.configureRecyclerView();
     }
     //Callback method to fetch user's position

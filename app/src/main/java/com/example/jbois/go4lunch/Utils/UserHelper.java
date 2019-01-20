@@ -64,12 +64,7 @@ public class UserHelper {
         HashMap<String,String> restaurantName = new HashMap<>();
         restaurantName.put("name",restaurant.getName());
         batch.set(writingRestaurantName,restaurantName);
-        return batch.commit().addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e("TAG", "onFailure: "+e.getMessage() );
-            }
-        });
+        return batch.commit();
     }
 
     // --- GET ---
@@ -81,6 +76,9 @@ public class UserHelper {
         return UserHelper.getRestaurantsLikedCollection(uid).get();
     }
     public static Task<QuerySnapshot> getRestaurantListChosen(){
+        return UserHelper.getRestaurantChosen().get();
+    }
+    public static Task<QuerySnapshot> test(){
         return UserHelper.getRestaurantChosen().get();
     }
 
