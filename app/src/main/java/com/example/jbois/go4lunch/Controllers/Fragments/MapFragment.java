@@ -410,12 +410,14 @@ public class MapFragment extends Fragment
                                         @Nullable FirebaseFirestoreException e) {
                         getRestaurantChosenFromUsers();
                         if (e != null) { Log.w(TAG, "Listen failed.", e); }
-                        if(!value.isEmpty()){
+
+                        if (value!=null){
+                            if(!value.isEmpty()){
                             for (QueryDocumentSnapshot document : value) {
                                 Log.e(TAG, "onEvent: id de resto dans liste" + document.getId());
                                 browseMarkersList(document.getId());
                             }
-                        }
+                        }}
                     }
                 });
     }

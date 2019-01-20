@@ -52,6 +52,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
@@ -80,6 +81,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private String[] mTitleList = new String[3];
     public static final String USERID="user_id";
     public static final String TAG_ERROR_FIREBASE="LunchActivity_auth";
+    public static final String TAG = "DEBUG_APPLICATION";
     private Restaurant mRestaurant;
     private List<Restaurant> mRestaurantList = new ArrayList<>();
     private Location mLocation;
@@ -89,6 +91,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private SearchView mSearchView;
     private SearchView.SearchAutoComplete mSearchAutoComplete;
     private ListenerRegistration mUsernameListener;
+    private ListenerRegistration mRestaurantsChoseListener;
 
 
     @Override
@@ -136,6 +139,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+        this.RestaurantsChosenListener();
         EventBus.getDefault().register(this);
     }
     @Override
@@ -144,6 +148,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mGoogleApiClient.disconnect();
         EventBus.getDefault().unregister(this);
         mUsernameListener.remove();
+        mRestaurantsChoseListener.remove();
         super.onStop();
     }
 
@@ -376,7 +381,25 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
             }
         });
     }
+    //check on database if restaurant is chose by someone
+    private void RestaurantsChosenListener(){
+        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
+                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) { Log.w(TAG, "Listen failed.", e); }
 
+                        if (value!=null){
+                            if(!value.isEmpty()){
+                                for (QueryDocumentSnapshot document : value) {
+                                    Log.e(TAG, "onEvent: listener changement nombre de users pour ce restaurant :" + document.getId());
+
+                                }
+                            }}
+                    }
+                });
+    }
      /*
         ------------------ google places API autocomplete suggestions -------------------------
      */

@@ -1,12 +1,18 @@
 package com.example.jbois.go4lunch.Utils;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,10 +52,24 @@ public class UserHelper {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).set(restaurant);
     }
 
-    public static Task<Void> createRestaurantChosen(String placeId, String uid) {
+    public static Task<Void> createRestaurantChosen(Restaurant restaurant, String uid) {
+        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+        DocumentReference writingUser = UserHelper.getUsersWhoChose(restaurant.getId()).document(uid);
+        DocumentReference writingRestaurantName =UserHelper.getRestaurantChosen().document(restaurant.getId());
+
         User userToCreate = new User();
         userToCreate.setUid(uid);
-        return UserHelper.getUsersWhoChose(placeId).document(uid).set(userToCreate);
+        batch.set(writingUser,userToCreate);
+
+        HashMap<String,String> restaurantName = new HashMap<>();
+        restaurantName.put("name",restaurant.getName());
+        batch.set(writingRestaurantName,restaurantName);
+        return batch.commit().addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("TAG", "onFailure: "+e.getMessage() );
+            }
+        });
     }
 
     // --- GET ---

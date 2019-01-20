@@ -197,7 +197,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                         if(!mRestaurant.getFABChecked()){
                             UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }else{
-                            UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid());
+                            UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
                         }
                 //    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
                 //}else{

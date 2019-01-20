@@ -223,23 +223,17 @@ public class GooglePlacesStreams {
             if(restaurantDetailsJson.getResult().getOpeningHours().getOpenNow()){
                 for (int i = 0; i < periodList.size() ; i++) {
                     if (periodList.get(i).getOpen().getDay()+1 == Calendar.DAY_OF_WEEK) {
-                        Log.d(TAG, "numéro de jour :"+Calendar.DAY_OF_WEEK);
-                        Log.d(TAG, "numéro de jour :"+(periodList.get(i).getOpen().getDay()));
                         if(periodList.get(i).getClose()==null){
                             openingHours ="Open 24/7";
                         }else{
                             DateTime open= new DateTime().withHourOfDay(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getHourOfDay())
                                     .withMinuteOfHour(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getMinuteOfHour());
-                            Log.d(TAG, "Opening hours :" + open);
                             if(open.isBeforeNow()){
                                 openingHours = convertHoursInString(convertHoursInDateTime(periodList.get(i).getClose().getTime()));
                                 DateTime close = new DateTime().withHourOfDay(convertHoursInDateTime(periodList.get(i).getClose().getTime()).getHourOfDay())
                                         .withMinuteOfHour(convertHoursInDateTime(periodList.get(i).getClose().getTime()).getMinuteOfHour());
 
                                 int timeToClose = Minutes.minutesBetween(new DateTime(),close).getMinutes();
-                                Log.d(TAG, "checkOpeningHours: of " +restaurant.getName()+":" + timeToClose);
-                                Log.d(TAG, "time now : " + new DateTime());
-                                Log.d(TAG, "time to close : " + close);
                                 int closingSoon = 30;
 
                                 if (timeToClose<closingSoon && timeToClose>=0){

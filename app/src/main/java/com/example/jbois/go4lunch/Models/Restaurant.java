@@ -35,6 +35,7 @@ public class Restaurant implements Parcelable {
     private Boolean mClosingSoon = false;
     private Boolean mChoseOrNot = false;
     private int mDistance;
+    private int mNumberOfWorkmates = 0;
 
     public Restaurant(){}
 
@@ -52,6 +53,7 @@ public class Restaurant implements Parcelable {
         this.mFABChecked = (Boolean)in.readValue(null);
         this.mClosingSoon = (Boolean)in.readValue(null);
         this.mRating = in.readDouble();
+        this.mNumberOfWorkmates = in.readInt();
     }
     @Override
     public int describeContents() {
@@ -73,6 +75,7 @@ public class Restaurant implements Parcelable {
         dest.writeValue(this.mFABChecked);
         dest.writeValue(this.mClosingSoon);
         dest.writeDouble(this.mRating);
+        dest.writeInt(this.mNumberOfWorkmates);
     }
 
     public String getName() {
@@ -181,5 +184,13 @@ public class Restaurant implements Parcelable {
 
     public void setChoseOrNot(Boolean choseOrNot) {
         mChoseOrNot = choseOrNot;
+    }
+
+    public int getNumberOfWorkmates() {
+        return mNumberOfWorkmates;
+    }
+
+    public void setNumberOfWorkmates(int numberOfWorkmates) {
+        mNumberOfWorkmates = numberOfWorkmates;
     }
 }

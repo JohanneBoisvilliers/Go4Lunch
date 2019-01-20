@@ -11,18 +11,29 @@ import android.view.ViewGroup;
 
 import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
+import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.disposables.Disposable;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 
-    private List<Restaurant> mRestaurantList=new ArrayList<>();;
+    private List<Restaurant> mRestaurantList=new ArrayList<>();
     private Location mLocation;
+    public static final String TAG = "DEBUG_APPLICATION";
 
     public RestaurantAdapter(List<Restaurant> restaurantList,Location location){
         if (!mRestaurantList.isEmpty()){
@@ -38,6 +49,8 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
         Context context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.recyclerview_restaurant_list_item, parent, false);
+
+
         return new RestaurantViewHolder(view);
     }
 
@@ -62,7 +75,6 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
         distance = tempDistance.intValue();
         return distance;
     }
-
 
     @Override
     public int getItemCount() {

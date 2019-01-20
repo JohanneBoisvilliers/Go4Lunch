@@ -39,6 +39,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
     @BindView(R.id.restaurant_name)TextView mRestaurantName;
     @BindView(R.id.restaurant_location)TextView mRestaurantLocation;
+    @BindView(R.id.number_of_workmates)TextView mNumberOfWorkmates;
     @BindView(R.id.restaurant_image_recyclerview)ImageView mRestaurantImage;
     @BindView(R.id.closing_time)TextView mClosingTime;
     @BindView(R.id.how_far_is_it)TextView mDistance;
@@ -55,6 +56,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         //this.fetchRestaurantPhoto(restaurant);
         this.setOpeningHours(restaurant);
         this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
+        this.mNumberOfWorkmates.setText(mNumberOfWorkmates.getContext().getResources().getString((R.string.number_of_workmates),restaurant.getNumberOfWorkmates()));
         if(restaurant.getRating()!=null){
             BaseUserActivity.setStars(restaurant.getRating(),mStars);
         }
@@ -82,6 +84,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             }
         }
     }
+    //set text and text color for opening hours of each restaurant in recyclerview
     private void UiOpeningHours(String openingHours, int color){
         this.mClosingTime.setText(openingHours);
         mClosingTime.setTextColor(color);
@@ -97,6 +100,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             mRestaurantImage.setImageBitmap(bitmapResize);
         }
     }
+    //main stream return bitmap in string format and this method convert this string in bitmap
     public Bitmap StringToBitMap(String encodedString){
         try {
             byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
