@@ -50,19 +50,17 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.recyclerview_restaurant_list_item, parent, false);
 
-
         return new RestaurantViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
+        mRestaurantList.get(position).setDistance(this.extrudeDistance(mRestaurantList,position));
         try{
-            mRestaurantList.get(position).setDistance(this.extrudeDistance(mRestaurantList,position));
             holder.updateRestaurantInfos(mRestaurantList.get(position));
         }catch (Exception e){
-            Log.e("NORESTAURANT", "onBindViewHolder: "+e.getMessage()+"on :"+mRestaurantList.get(position).getPhotoReference());
+            Log.e(TAG, "onBindViewHolder: "+e.getMessage()+"on :"+mRestaurantList.get(position).getName());
         }
-
     }
 
     private int extrudeDistance(List<Restaurant> restaurantList,int index){

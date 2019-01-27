@@ -1,17 +1,24 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.multidex.MultiDex;
 import android.widget.Button;
 
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.ApplicationContext;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -19,15 +26,21 @@ import java.util.Arrays;
 
 import butterknife.BindView;
 
+import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.PREFS_NAME;
+import static com.example.jbois.go4lunch.Controllers.Activities.SettingsActivity.MyPreferenceFragment.NOTIF_UID;
+
 public class MainActivity extends BaseUserActivity {
 
     @BindView(R.id.main_activity_coordinator_layout) CoordinatorLayout mCoordinatorLayout;
 
     private static final int RC_SIGN_IN = 123;
+    private SharedPreferences mMySharedPreferences;
+    private SharedPreferences.Editor mEditor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         this.startSignInActivity();
        // this.startLunchActivity();
@@ -38,6 +51,11 @@ public class MainActivity extends BaseUserActivity {
         super.onActivityResult(requestCode, resultCode, data);
         // Handle SignIn Activity response on activity result
         this.handleResponseAfterSignIn(requestCode, resultCode, data);
+        EventBus.getDefault().postSticky(new LunchActivity.getUid(this.getCurrentUser().getUid()));
+        mMySharedPreferences = ApplicationContext.getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mEditor = mMySharedPreferences.edit();
+        mEditor.putString(NOTIF_UID,this.getCurrentUser().getUid());
+        mEditor.apply();
         this.startLunchActivity();
 
     }
@@ -90,17 +108,22 @@ public class MainActivity extends BaseUserActivity {
     }
 
     private void createUserInFirestore(){
-        if(!UserHelper.getUser(this.getCurrentUser().getUid()).isSuccessful()){
-            if (this.getCurrentUser() != null){
+        UserHelper.getUser(this.getCurrentUser().getUid()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                DocumentSnapshot documentSnapshot = task.getResult();
+                if (!documentSnapshot.exists()) {
 
-                String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-                String username = this.getCurrentUser().getDisplayName();
-                String uid = this.getCurrentUser().getUid();
+                        String urlPicture = (getCurrentUser().getPhotoUrl() != null) ? getCurrentUser().getPhotoUrl().toString() : null;
+                        String username = getCurrentUser().getDisplayName();
+                        String uid = getCurrentUser().getUid();
 
-                UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-                EventBus.getDefault().postSticky(new LunchActivity.getUid(uid));
+                        UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(onFailureListener());
+                }
             }
-        }
+        });
+
+
 
     }
 }

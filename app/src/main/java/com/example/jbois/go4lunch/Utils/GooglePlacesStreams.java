@@ -49,7 +49,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class GooglePlacesStreams {
 
-    private static final String apiKey = "AIzaSyCSxNwL3bdtJNrZuJEyc6L9yH84QjSjkU4";
+    private static final String apiKey = "AIzaSyDZvqeraNLOceysL3s7LNUInkaaZjq5bSE";
     private static final String rankby = "distance";
     private static final String type = "restaurant";
     public static final String TAG = "DEBUG_APPLICATION";
@@ -74,6 +74,7 @@ public class GooglePlacesStreams {
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
+        List<RestaurantDetailsJson> restaurantDetailsJsonList = new ArrayList<>();
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
@@ -95,22 +96,26 @@ public class GooglePlacesStreams {
                 //})//...to this to light the request and have only 20 restaurants
                 .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {/*---------------Google Place------------------*/
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                    //hide this to to light request
-                    //hide this to to light request
-                    return restaurantList;//hide this to to light request
+                    return restaurantList;
                 })
                 .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
                     for (Restaurant rest:restaurantListTemp) {
-                        googlePlacesStreams.compareAndSetList(rest,streamFetchRestaurantDetails(rest.getId()).blockingFirst());
+                        restaurantDetailsJsonList.addAll(streamFetchRestaurantDetails(rest.getId()).toList().blockingGet());
+                        Log.d(TAG, "liste de restaurantdeetail: "+restaurantDetailsJsonList.size());
                     }
                     return restaurantList;
                 })
-                //.map(restaurants -> {/*---------------Google photos------------------*/
-                //    for (Restaurant restaurant : restaurants) {
-                //        googlePlacesStreams.getPhotoMetadata(restaurant);
-                //    }
-                //    return restaurantList;
-                //})
+                .delay(3, TimeUnit.SECONDS)
+                .map(restaurants -> {/*---------------Google photos------------------*/
+                    googlePlacesStreams.compareAndSetList(restaurants,restaurantDetailsJsonList);
+
+                    for (Restaurant restaurant : restaurants) {
+                        googlePlacesStreams.getPhotoMetadata(restaurant);
+                    }
+                    return restaurantList;
+                })
+                .delay(3, TimeUnit.SECONDS)
+                .doOnComplete(() -> Observable.just(restaurantList))
                 ;
 
     }
@@ -143,6 +148,8 @@ public class GooglePlacesStreams {
                 //    }
                 //    return restaurantList;
                 //})
+                //.delay(3, TimeUnit.SECONDS)
+                .doOnComplete(() -> Observable.just(restaurantList))
                 ;
 
     }
@@ -164,23 +171,7 @@ public class GooglePlacesStreams {
         }
     }
     //extrude place Details api infos for restaurants
-    private void compareAndSetList(Restaurant restaurantList,RestaurantDetailsJson restaurantDetailsJsonList){
-
-                if(restaurantDetailsJsonList.getResult().getPlaceId().equals(restaurantList.getId())){
-                    restaurantList.setName(restaurantDetailsJsonList.getResult().getName());
-                    restaurantList.setAdress(extrudeAdressFromJson(restaurantDetailsJsonList));
-                    restaurantList.setUrl(restaurantDetailsJsonList.getResult().getWebsite());
-                    restaurantList.setPhoneNumber(restaurantDetailsJsonList.getResult().getFormattedPhoneNumber());
-                    restaurantList.setOpeningHours(checkOpeningHours(restaurantDetailsJsonList,restaurantList));
-                    double rating = restaurantDetailsJsonList.getResult().getRating() != null ?
-                            restaurantDetailsJsonList.getResult().getRating()
-                            : 0.0;
-                    restaurantList.setRating(rating);
-                }
-
-    }
-    //extrude place Details api infos for restaurants
-    private void fakecompareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
+    private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
         for (int i=0;i<restaurantList.size();i++){
             for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
                 if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
@@ -197,6 +188,25 @@ public class GooglePlacesStreams {
             }
         }
     }
+    //extrude place Details api infos for restaurants
+    private void fakecompareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
+        for (int i=0;i<restaurantList.size();i++){
+            for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
+                if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
+                    restaurantList.get(i).setName(restaurantDetailsJsonList.get(j).getResult().getName());
+                    restaurantList.get(i).setAdress(extrudeAdressFromJson(restaurantDetailsJsonList.get(j)));
+                    restaurantList.get(i).setUrl(restaurantDetailsJsonList.get(j).getResult().getWebsite());
+                    restaurantList.get(i).setPhoneNumber(restaurantDetailsJsonList.get(j).getResult().getFormattedPhoneNumber());
+                    restaurantList.get(i).setOpeningHours(checkOpeningHours(restaurantDetailsJsonList.get(j),restaurantList.get(i)));
+                    Double rating = restaurantDetailsJsonList.get(j).getResult().getRating() != null ?
+                            restaurantDetailsJsonList.get(j).getResult().getRating()
+                            : 0.0;
+                    restaurantList.get(i).setRating(rating);
+                }
+            }
+        }
+    }
+
     private String serializeJson(@RawRes int resources) throws IOException {
         InputStream is = ApplicationContext.getContext().getResources().openRawResource(resources);
         Writer writer = new StringWriter();
@@ -302,10 +312,15 @@ public class GooglePlacesStreams {
                         photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
                             @Override
                             public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                                PlacePhotoResponse photo = task.getResult();
-                                Bitmap bitmap = photo.getBitmap();
-                                String photoAsString = BitMapToString(bitmap);
-                                restaurant.setPhotoReference(photoAsString);
+                                if (task.isSuccessful()) {
+                                    PlacePhotoResponse photo = task.getResult();
+                                    Bitmap bitmap = photo.getBitmap();
+                                    String photoAsString = BitMapToString(bitmap);
+                                    restaurant.setPhotoReference(photoAsString);
+
+                                }else{
+                                    restaurant.setPhotoReference("");
+                                }
                             }
                         });
                     }else{
@@ -319,7 +334,7 @@ public class GooglePlacesStreams {
         ByteArrayOutputStream baos= new  ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG,100, baos);
         byte [] b=baos.toByteArray();
-        String temp=Base64.encodeToString(b, Base64.DEFAULT);
+        String temp=Base64.encodeToString(b, Base64.URL_SAFE);
         return temp;
     }
  }

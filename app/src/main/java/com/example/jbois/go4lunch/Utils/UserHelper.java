@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -13,6 +14,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,12 +77,6 @@ public class UserHelper {
     }
     public static Task<QuerySnapshot> getRestaurantsListLiked(String uid){
         return UserHelper.getRestaurantsLikedCollection(uid).get();
-    }
-    public static Task<QuerySnapshot> getRestaurantListChosen(){
-        return UserHelper.getRestaurantChosen().get();
-    }
-    public static Task<QuerySnapshot> test(){
-        return UserHelper.getRestaurantChosen().get();
     }
 
     // --- UPDATE ---

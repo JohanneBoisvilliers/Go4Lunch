@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
@@ -83,13 +84,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     private SharedPreferences.Editor mEditor;
     public static final String PREFS_NAME = "MySharedPreferences";
     public static final String RESTAURANT_SAVED = "restaurantInSharedPreferences";
-    private FirestoreRecyclerAdapter adapter;
+    private WorkmatesFragment mWorkmatesFragment;
 
     public static class getRestaurantNameForJoiningUsers{
-        public String restaurantName;
+        public String restaurantId;
 
         public getRestaurantNameForJoiningUsers(String restName){
-            this.restaurantName = restName;
+            this.restaurantId = restName;
         }
     }
     public static class getRestaurant{
@@ -121,9 +122,6 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mMySharedPreferences = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mEditor = mMySharedPreferences.edit();
         getRestaurantFromBundleAndSetProfile();
-
-        WorkmatesFragment fragment = (WorkmatesFragment)getSupportFragmentManager().findFragmentById(R.id.fooFragment);
-        fragment.configureRecyclerView();
 
         this.checkToSetStateButton(mPhoneNumberButton,mPhoneNumber);
         this.checkToSetStateButton(mWebsiteButton,mWebsiteUrl);
@@ -192,17 +190,17 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 break;
             case R.id.fab:
                 this.setStateOfFAB();
-                //if (this.getRestaurantInSharedPreferences()!=null){
-                //    if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
+                if (this.getRestaurantInSharedPreferences()!=null){
+                    if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
                         if(!mRestaurant.getFABChecked()){
                             UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
                         }else{
                             UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
                         }
-                //    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
-                //}else{
-                //    UserHelper.createRestaurantChosen(mRestaurant.getId(),this.getCurrentUser().getUid());
-                //}
+                    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
+                }else{
+                    UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
+                }
                 //this.checkStateOfFAB();
                 //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
@@ -320,4 +318,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         this.ifIsLikedChangeLikeButtonColor();
     }
 
+    public Restaurant getcurrentRestaurant() {
+        return mRestaurant;
+    }
 }

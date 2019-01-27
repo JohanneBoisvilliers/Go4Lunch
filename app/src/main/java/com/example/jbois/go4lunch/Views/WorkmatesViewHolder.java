@@ -48,9 +48,8 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void createListOfUserJoining(User user){
-
-                mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_joining),user.getUsername()));
-
+        this.glideRequest(user.getUrlPicture());
+        mRestaurantChose.setText(mRestaurantChose.getContext().getResources().getString((R.string.workmate_joining),user.getUsername()));
     }
 
     private void glideRequest(String url){

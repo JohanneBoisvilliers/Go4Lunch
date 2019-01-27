@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
@@ -53,7 +54,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     public void updateRestaurantInfos(Restaurant restaurant){
         this.mRestaurantName.setText(restaurant.getName());
         this.mRestaurantLocation.setText(restaurant.getAdress());
-        //this.fetchRestaurantPhoto(restaurant);
+        this.fetchRestaurantPhoto(restaurant);
         this.setOpeningHours(restaurant);
         this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
         this.mNumberOfWorkmates.setText(mNumberOfWorkmates.getContext().getResources().getString((R.string.number_of_workmates),restaurant.getNumberOfWorkmates()));
@@ -91,19 +92,22 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     }
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
-        Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
-        Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
-        if (TextUtils.isEmpty(restaurant.getPhotoReference())) {
+
+        if (TextUtils.isEmpty(restaurant.getPhotoReference())||restaurant.getPhotoReference().equals("null")) {
             mRestaurantImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
             mRestaurantImage.setImageDrawable(mRestaurantImage.getContext().getResources().getDrawable(R.drawable.no_image_small_icon));
         }else{
-            mRestaurantImage.setImageBitmap(bitmapResize);
+            Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
+            if (bitmap!=null) {
+                Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
+                mRestaurantImage.setImageBitmap(bitmapResize);
+            }
         }
     }
     //main stream return bitmap in string format and this method convert this string in bitmap
     public Bitmap StringToBitMap(String encodedString){
         try {
-            byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
+            byte [] encodeByte=Base64.decode(encodedString,Base64.URL_SAFE);
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch(Exception e) {
             Log.e("ERROR BITMAP", "StringToBitMap:Restaurantviewholder "+ e.getMessage());

@@ -14,18 +14,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
+import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.DividerDecoration;
 import com.example.jbois.go4lunch.Utils.ItemClickSupport;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.SnapshotParser;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -40,7 +46,6 @@ import butterknife.ButterKnife;
 public class WorkmatesFragment extends Fragment {
 
     @BindView(R.id.workmates_list_recycler_view)RecyclerView mRecyclerView;
-    @BindView(R.id.no_workmate)TextView mNoWorkmate;
 
     private FirestoreRecyclerAdapter adapter;
     private Activity mActivity;
@@ -73,6 +78,7 @@ public class WorkmatesFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
         ButterKnife.bind(this,view);
+
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
         mActivity = this.getActivity();
@@ -80,6 +86,7 @@ public class WorkmatesFragment extends Fragment {
     }
 
     public void configureRecyclerView(){
+        users.clear();
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
                 .setLifecycleOwner(this)
                 .setQuery(UserHelper.getUsersCollection(), new SnapshotParser<User>() {
@@ -87,12 +94,6 @@ public class WorkmatesFragment extends Fragment {
                     @Override
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
                         User user = snapshot.toObject(User.class);
-                        if(!TextUtils.isEmpty(user.getRestaurantChose())){
-                            if(user.getRestaurantChose().equals(mRestaurantInRestaurantProfile)){
-                                users.add(user);
-                                Log.e("LISTSIZE",users.size()+"");
-                            }
-                        }
                         return user;
                     }
                 })
@@ -100,19 +101,32 @@ public class WorkmatesFragment extends Fragment {
 
         adapter = new FirestoreRecyclerAdapter<User, WorkmatesViewHolder>(options) {
 
+
             @Override
             public void onBindViewHolder(WorkmatesViewHolder holder, int position, User model) {
+                Gson gson = new Gson();
+                String restaurantToString = model.getRestaurantChose();
+                Restaurant restaurant= gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
+
                 if(mActivity.getClass().getSimpleName().equals("RestaurantProfileActivity")){
-                    if(users.size()==0){
-                        mRecyclerView.setVisibility(View.INVISIBLE);
-                        mNoWorkmate.setVisibility(View.VISIBLE);
+                    mRestaurantInRestaurantProfile = ((RestaurantProfileActivity)getActivity()).getcurrentRestaurant().getId();
+                    if (TextUtils.isEmpty(restaurantToString)||!restaurant.getId().equals(mRestaurantInRestaurantProfile)) {
+
+                            holder.itemView.setVisibility(View.GONE);
+                            LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                            params.height=0;
+                            params.setMargins(0,0,0,0);
+                            holder.itemView.setLayoutParams(params);
+
                     }else{
-                        holder.createListOfUserJoining(users.get(position));
+                        holder.createListOfUserJoining(model);
                     }
                 }else{
                     holder.updateRestaurantDestination(model);
                 }
             }
+
 
             @Override
             public WorkmatesViewHolder onCreateViewHolder(ViewGroup group, int i) {
@@ -127,9 +141,9 @@ public class WorkmatesFragment extends Fragment {
         this.mRecyclerView.setAdapter(adapter);
         //Set layout manager to position the items
         this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        DividerDecoration divider= new DividerDecoration(getContext());
+        this.mRecyclerView.addItemDecoration(divider);
 
-        this.mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
-                DividerItemDecoration.VERTICAL));
     }
 
     private void configureOnClickRecyclerView(){
@@ -141,13 +155,12 @@ public class WorkmatesFragment extends Fragment {
                 });
     }
 
+
     //Callback method to fetch restaurant list
     @Subscribe(sticky = true)
     public void ongetRestaurantNameForJoiningUsers(RestaurantProfileActivity.getRestaurantNameForJoiningUsers event) {
-        mRestaurantInRestaurantProfile=event.restaurantName;
+        mRestaurantInRestaurantProfile=event.restaurantId;
+        this.configureRecyclerView();
     }
 
-    public FirestoreRecyclerAdapter getAdapter() {
-        return adapter;
-    }
 }

@@ -18,10 +18,13 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.AlarmReceiver;
+import com.example.jbois.go4lunch.Utils.ApplicationContext;
 import com.example.jbois.go4lunch.Utils.UserHelper;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -31,6 +34,7 @@ import java.util.Calendar;
 import butterknife.BindView;
 
 import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.USERID;
+import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.PREFS_NAME;
 
 public class SettingsActivity extends PreferenceActivity {
 
@@ -44,8 +48,9 @@ public class SettingsActivity extends PreferenceActivity {
 
         private String mUid;
         private String mNewName;
-        private AlarmManager mAlarmManager;
-        private PendingIntent mAlarmIntent;
+        private SharedPreferences mMySharedPreferences;
+        private SharedPreferences.Editor mEditor;
+        public static final String NOTIF_UID ="notification activation";
 
         @Override
         public void onStart() {
@@ -103,30 +108,23 @@ public class SettingsActivity extends PreferenceActivity {
             if (preference instanceof CheckBoxPreference) {
                 CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
                 if (checkBoxPreference.isChecked()){
-                    Log.e("ALARMSENT", "alarme activée");
-                    settingsForAlarm();
+                    Toast.makeText(ApplicationContext.getContext(), getResources().getString(R.string.notification_activated), Toast.LENGTH_SHORT).show();
+                    FirebaseMessaging.getInstance().subscribeToTopic("usersWhoChose");
+                    this.activationOfNotifications(true);
                 }
                 if(!checkBoxPreference.isChecked()){
-                    Log.e("ALARMSENT", "alarme annulée");
-                    if (mAlarmManager != null) {
-                        mAlarmManager.cancel(mAlarmIntent);
-                    }
+                    Toast.makeText(ApplicationContext.getContext(), getResources().getString(R.string.notification_deactivated), Toast.LENGTH_SHORT).show();
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("usersWhoChose");
+                    this.activationOfNotifications(false);
                 }
             }
         }
         //method that set the alarm for notifications
-        private void settingsForAlarm(){
-            mAlarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(getActivity(), AlarmReceiver.class);//Setting intent to class where Alarm broadcast message will be handled
-
-            mAlarmIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, 0);
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(System.currentTimeMillis());
-            calendar.set(Calendar.HOUR_OF_DAY, 12);
-
-            mAlarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                    AlarmManager.INTERVAL_DAY, mAlarmIntent);
+        private void activationOfNotifications(Boolean isActivated){
+            mMySharedPreferences = ApplicationContext.getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            mEditor = mMySharedPreferences.edit();
+            mEditor.putString(NOTIF_UID,mUid);
+            mEditor.apply();
         }
         //Callback method to fetch user's ID
         @Subscribe(sticky = true)

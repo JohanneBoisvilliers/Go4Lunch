@@ -22,7 +22,7 @@
             android:textColor="#000000"
             android:maxLines="1"
             android:maxLength="25"
-            android:textSize="18dp"
+            android:textSize="16dp"
             android:text="Le Zinc"/>
 
         <TextView

@@ -53,4 +53,13 @@
     <string name="description_username_setting">Veuillez entrer votre nom</string>
     <string name="notification_activation">Activation notifications</string>
     <string name="description_notification_setting">Cette option, si vous l\'activez, permet à l\'application de vous envoyer une notification pour vous rappeler où vous avez choisis de manger</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="notification_activated">Activation des notifications</string>
+    <string name="notification_deactivated">Notifications désactivées</string>
+    <!-- Firebase -->
+    <string name="info_no_email_found">email inconnue</string>
+    <string name="info_no_username_found">non d\'utilisateur inconnu</string>
+    <!-- Notifications -->
+    <string name="notif_with_restaurant">C\'est l\'heure de manger, voici votre choix !</string>
+    <string name="notif_without_restaurant">Vous n\'avez pas choisis de restaurant!</string>
 </resources>

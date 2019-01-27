@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -68,13 +69,17 @@ public class RestaurantListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        this.restaurantsChosenListener();
         EventBus.getDefault().register(this);
+        this.addRestaurantChosenListener();
+        adapter.notifyDataSetChanged();
     }
+
     @Override
     public void onStop() {
         EventBus.getDefault().unregister(this);
-        mRestaurantsChoseListener.remove();
+        if (mRestaurantsChoseListener!=null) {
+            mRestaurantsChoseListener.remove();
+        }
         super.onStop();
     }
     @Override
@@ -83,6 +88,7 @@ public class RestaurantListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         ButterKnife.bind(this,view);
         this.getRestaurantsChosen();
+        this.addRestaurantChosenListener();
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
         return view;
@@ -95,6 +101,8 @@ public class RestaurantListFragment extends Fragment {
         this.mRecyclerView.setAdapter(this.adapter);
         //Set layout manager to position the items
         this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        this.mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
+                DividerItemDecoration.VERTICAL));
     }
 
     private void configureOnClickRecyclerView(){
@@ -144,21 +152,21 @@ public class RestaurantListFragment extends Fragment {
         });
     }
     //check on database if restaurant is chose by someone
-    private void restaurantsChosenListener(){
-        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
+    private void restaurantsChosenListener(String placeId){
+        mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
-                        Log.e(TAG, "onEvent:changement dans base de données");
+                        Log.d(TAG, "onEvent:changement dans base de données");
                         if (e != null) { Log.w(TAG, "Listen failed.", e); }
 
                         if (value!=null){
-                            if(!value.isEmpty()){
-                                Log.e(TAG, "onEvent: post liste de restaurant");
+                                mFinalRestaurantsChosen.clear();
+                                Log.d(TAG, "onEvent: post liste de restaurant");
+                                getRestaurantsChosen();
                                 setNumberOfWorkmates();
-                                mRecyclerView.getAdapter().notifyDataSetChanged();
-                            }}
+                            }
                     }
                 });
     }
@@ -170,6 +178,12 @@ public class RestaurantListFragment extends Fragment {
                     mRestaurantList.get(i).setNumberOfWorkmates(entry.getValue());
                 }
             }
+        }
+    }
+
+    private void addRestaurantChosenListener(){
+        for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
+            restaurantsChosenListener(entry.getKey());
         }
     }
     /*

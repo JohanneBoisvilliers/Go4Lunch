@@ -136,7 +136,7 @@ public class MapFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-        this.RestaurantsChosenListener();
+        getRestaurantChosenFromUsers();
         EventBus.getDefault().register(this);
     }
 
@@ -189,7 +189,6 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap map) {
         mMap = map;
         this.settingsForMap(map);
-        Log.d(TAG, "Restaurants choisis par users : "+mRestaurantsChosenList.size());
         checkPermissionToLocation();
         updateLocationUI();
         getDeviceLocation();
@@ -402,25 +401,43 @@ public class MapFragment extends Fragment
 
     }
     //check on database if restaurant is chose by someone
-    private void RestaurantsChosenListener(){
-        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        getRestaurantChosenFromUsers();
-                        if (e != null) { Log.w(TAG, "Listen failed.", e); }
+   //private void RestaurantsChosenListener(){
+   //    mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
+   //            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+   //                @Override
+   //                public void onEvent(@Nullable QuerySnapshot value,
+   //                                    @Nullable FirebaseFirestoreException e) {
+   //                    getRestaurantChosenFromUsers();
+   //                    if (e != null) { Log.w(TAG, "Listen failed.", e); }
 
-                        if (value!=null){
-                            if(!value.isEmpty()){
-                            for (QueryDocumentSnapshot document : value) {
-                                Log.e(TAG, "onEvent: id de resto dans liste" + document.getId());
-                                browseMarkersList(document.getId());
-                            }
-                        }}
-                    }
-                });
-    }
+   //                    if (value!=null){
+   //                        if(!value.isEmpty()){
+   //                        for (QueryDocumentSnapshot document : value) {
+
+   //                            browseMarkersList(document.getId());
+   //                        }
+   //                    }}
+   //                }
+   //            });
+   //}
+   private void RestaurantsChosenListener(String placeId){
+       mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
+               .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                   @Override
+                   public void onEvent(@Nullable QuerySnapshot value,
+                                       @Nullable FirebaseFirestoreException e) {
+                       if (e != null) { Log.w(TAG, "Listen failed.", e); }
+
+                       if (value!=null){
+                           if(!value.isEmpty()){
+                               for (QueryDocumentSnapshot document : value) {
+
+                                   browseMarkersList(document.getId());
+                               }
+                           }}
+                   }
+               });
+   }
     private void browseMarkersList(String placeId){
         for (Marker marker : mMarkers) {
             if (marker.getTitle().equals(placeId)){
@@ -445,9 +462,8 @@ public class MapFragment extends Fragment
                                 Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
                                 if (restaurant!=null) {
                                     mRestaurantsChosenList.add(restaurant);
-                                    Log.e(TAG, "RESTAURANTCHOISIS : "+restaurant.getName());
-                                    Log.e("liste", "liste de restaurants choisis : "+mRestaurantsChosenList.size());
                                 }
+                                RestaurantsChosenListener(document.getId());
                             }
                         } else {
                             Log.w("LIKEBUTTON","can't receive if restaurant is liked");

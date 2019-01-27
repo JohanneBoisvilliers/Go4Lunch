@@ -139,7 +139,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
-        this.RestaurantsChosenListener();
         EventBus.getDefault().register(this);
     }
     @Override
@@ -148,7 +147,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mGoogleApiClient.disconnect();
         EventBus.getDefault().unregister(this);
         mUsernameListener.remove();
-        mRestaurantsChoseListener.remove();
         super.onStop();
     }
 
@@ -380,25 +378,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
                 }
             }
         });
-    }
-    //check on database if restaurant is chose by someone
-    private void RestaurantsChosenListener(){
-        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
-                        if (e != null) { Log.w(TAG, "Listen failed.", e); }
-
-                        if (value!=null){
-                            if(!value.isEmpty()){
-                                for (QueryDocumentSnapshot document : value) {
-                                    Log.e(TAG, "onEvent: listener changement nombre de users pour ce restaurant :" + document.getId());
-
-                                }
-                            }}
-                    }
-                });
     }
      /*
         ------------------ google places API autocomplete suggestions -------------------------
