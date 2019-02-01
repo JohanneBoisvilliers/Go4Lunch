@@ -189,18 +189,22 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 openWebPage(mWebsiteUrl);
                 break;
             case R.id.fab:
-                this.setStateOfFAB();
+
                 if (this.getRestaurantInSharedPreferences()!=null){
                     if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
-                        if(!mRestaurant.getFABChecked()){
+                        //if(mRestaurant.getFABChecked()){
                             UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
-                        }else{
-                            UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
-                        }
-                    }else{ UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());}
+                        //}else{
+                        //    UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
+                        //}
+                    }else{
+                        UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());
+                        UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
+                    }
                 }else{
                     UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
                 }
+                this.setStateOfFAB();
                 //this.checkStateOfFAB();
                 //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;

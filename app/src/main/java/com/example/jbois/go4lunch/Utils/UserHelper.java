@@ -96,7 +96,20 @@ public class UserHelper {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).delete();
     }
     public static Task<Void> unCheckRestaurantDestination(String placeId, String uid) {
-        return UserHelper.getUsersWhoChose(placeId).document(uid).delete();
+       WriteBatch batch = FirebaseFirestore.getInstance().batch();
+       DocumentReference userToDelete = UserHelper.getUsersWhoChose(placeId).document(uid);
+       DocumentReference restaurantToCheck =UserHelper.getRestaurantChosen().document(placeId);
+
+       batch.delete(userToDelete);
+       //restaurantToCheck.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+       //    @Override
+       //    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+       //        DocumentSnapshot documentSnapshot = task.getResult();
+       //        documentSnapshot.
+       //    }
+       //})
+        return batch.commit();
+        //return UserHelper.getUsersWhoChose(placeId).document(uid).delete();
     }
 
 }

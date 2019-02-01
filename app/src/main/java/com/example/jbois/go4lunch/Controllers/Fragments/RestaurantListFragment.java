@@ -69,13 +69,15 @@ public class RestaurantListFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart");
         EventBus.getDefault().register(this);
-        this.addRestaurantChosenListener();
-        adapter.notifyDataSetChanged();
+        //this.addRestaurantChosenListener();
+        this.RestaurantsChosenListener();
     }
 
     @Override
     public void onStop() {
+        Log.d(TAG, "onStop");
         EventBus.getDefault().unregister(this);
         if (mRestaurantsChoseListener!=null) {
             mRestaurantsChoseListener.remove();
@@ -88,7 +90,7 @@ public class RestaurantListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         ButterKnife.bind(this,view);
         this.getRestaurantsChosen();
-        this.addRestaurantChosenListener();
+       // this.addRestaurantChosenListener();
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
         return view;
@@ -100,7 +102,7 @@ public class RestaurantListFragment extends Fragment {
         //Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(this.adapter);
         //Set layout manager to position the items
-        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         this.mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
                 DividerItemDecoration.VERTICAL));
     }
@@ -122,8 +124,9 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            mFinalRestaurantsChosen.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-
+                                Log.d(TAG, "récupération restaurants");
                                 getNumberOfUsers(document.getId());
                             }
                         } else {
@@ -139,6 +142,7 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            Log.d(TAG, "Récupération nombre d'utilisateur dans chaque resto");
                             mFinalRestaurantsChosen.put(placeId,task.getResult().size());
                         } else {
                             Log.w("RESTAURANTADPTR","error when receiving users");
@@ -152,21 +156,39 @@ public class RestaurantListFragment extends Fragment {
         });
     }
     //check on database if restaurant is chose by someone
-    private void restaurantsChosenListener(String placeId){
-        mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
+    //private void restaurantsChosenListener(String placeId){
+    //    mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
+    //            .addSnapshotListener(new EventListener<QuerySnapshot>() {
+    //                @Override
+    //                public void onEvent(@Nullable QuerySnapshot value,
+    //                                    @Nullable FirebaseFirestoreException e) {
+    //                    if (e != null) { Log.w(TAG, "Listen failed.", e); }
+//
+    //                    if (value!=null){
+    //                            mFinalRestaurantsChosen.clear();
+    //                            getRestaurantsChosen();
+    //                            setNumberOfWorkmates();
+//
+    //                        }
+    //                }
+    //            });
+    //}
+    private void RestaurantsChosenListener(){
+        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
-                        Log.d(TAG, "onEvent:changement dans base de données");
+                        Log.d(TAG, "Changement dans base de données");
                         if (e != null) { Log.w(TAG, "Listen failed.", e); }
 
                         if (value!=null){
-                                mFinalRestaurantsChosen.clear();
-                                Log.d(TAG, "onEvent: post liste de restaurant");
-                                getRestaurantsChosen();
-                                setNumberOfWorkmates();
-                            }
+                            Log.d(TAG, "entrer dans condition pour rafraichir");
+                            mFinalRestaurantsChosen.clear();
+                            getRestaurantsChosen();
+                            setNumberOfWorkmates();
+                            
+                        }
                     }
                 });
     }
@@ -179,13 +201,14 @@ public class RestaurantListFragment extends Fragment {
                 }
             }
         }
+        this.mRecyclerView.setAdapter(new RestaurantAdapter(this.mRestaurantList,mLocation));
     }
 
-    private void addRestaurantChosenListener(){
-        for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
-            restaurantsChosenListener(entry.getKey());
-        }
-    }
+    //private void addRestaurantChosenListener(){
+    //    for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
+    //        restaurantsChosenListener(entry.getKey());
+    //    }
+    //}
     /*
         --------------------------- Callbacks Methods -----------------------------------------
     */
@@ -195,7 +218,6 @@ public class RestaurantListFragment extends Fragment {
         mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
         this.setNumberOfWorkmates();
-        this.configureRecyclerView();
     }
     //Callback method to fetch user's position
     @Subscribe
@@ -203,4 +225,5 @@ public class RestaurantListFragment extends Fragment {
         mLocation = event.location;
         //mRecyclerView.getAdapter().notifyDataSetChanged();
     }
+
 }

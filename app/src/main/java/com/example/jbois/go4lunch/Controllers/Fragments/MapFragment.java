@@ -136,7 +136,7 @@ public class MapFragment extends Fragment
     @Override
     public void onStart() {
         super.onStart();
-        getRestaurantChosenFromUsers();
+        this.RestaurantsChosenListener();
         EventBus.getDefault().register(this);
     }
 
@@ -182,13 +182,14 @@ public class MapFragment extends Fragment
     //Set location Manager which use onLocationChanged method
     @SuppressLint("MissingPermission")
     private void setLocationManager(){
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5*60*1000, 10, mLocationListenerGPS);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5*60*1000, 50, mLocationListenerGPS);
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
         this.settingsForMap(map);
+        getRestaurantChosenFromUsers();
         checkPermissionToLocation();
         updateLocationUI();
         getDeviceLocation();
@@ -257,7 +258,6 @@ public class MapFragment extends Fragment
     //Method to open restaurant profile when user click on a marker
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        marker.hideInfoWindow();
         Intent intent = new Intent(getActivity(), RestaurantProfileActivity.class);
         intent.putExtra(RESTAURANT_IN_TAG, (Restaurant) marker.getTag());
         startActivity(intent);
@@ -273,7 +273,6 @@ public class MapFragment extends Fragment
         }
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
-                .title(restaurant.getId())
                 .icon(BitmapDescriptorFactory.fromBitmap(this.setMarkerColor(color))));
         marker.setTag(restaurant);
         mMarkers.add(marker);
@@ -379,6 +378,7 @@ public class MapFragment extends Fragment
                 .subscribeWith(new DisposableObserver<List<Restaurant>>() {
                     @Override
                     public void onNext(List<Restaurant> restaurantList) {
+                        mMarkers.clear();
                         mRestaurantsAroundUser.clear();
                         mRestaurantsAroundUser.addAll(restaurantList);
                         for (Restaurant restaurant : restaurantList) {
@@ -400,50 +400,32 @@ public class MapFragment extends Fragment
                 });
 
     }
-    //check on database if restaurant is chose by someone
-   //private void RestaurantsChosenListener(){
-   //    mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-   //            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-   //                @Override
-   //                public void onEvent(@Nullable QuerySnapshot value,
-   //                                    @Nullable FirebaseFirestoreException e) {
-   //                    getRestaurantChosenFromUsers();
-   //                    if (e != null) { Log.w(TAG, "Listen failed.", e); }
-
-   //                    if (value!=null){
-   //                        if(!value.isEmpty()){
-   //                        for (QueryDocumentSnapshot document : value) {
-
-   //                            browseMarkersList(document.getId());
-   //                        }
-   //                    }}
-   //                }
-   //            });
-   //}
-   private void RestaurantsChosenListener(String placeId){
-       mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
+   private void RestaurantsChosenListener(){
+       mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
                .addSnapshotListener(new EventListener<QuerySnapshot>() {
                    @Override
                    public void onEvent(@Nullable QuerySnapshot value,
                                        @Nullable FirebaseFirestoreException e) {
                        if (e != null) { Log.w(TAG, "Listen failed.", e); }
-
-                       if (value!=null){
-                           if(!value.isEmpty()){
-                               for (QueryDocumentSnapshot document : value) {
-
-                                   browseMarkersList(document.getId());
-                               }
-                           }}
+                       resetMarkersColors();
+                       if(!value.isEmpty()){
+                           for (QueryDocumentSnapshot document : value) {
+                               browseMarkersList(document.getId());
+                           }
+                       }
                    }
                });
    }
+    private void resetMarkersColors(){
+        for (Marker marker : mMarkers) {
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
+            }
+    }
     private void browseMarkersList(String placeId){
         for (Marker marker : mMarkers) {
-            if (marker.getTitle().equals(placeId)){
+            Restaurant restaurant = (Restaurant)marker.getTag();
+            if (restaurant.getId().equals(placeId)){
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.floatingButtonValidate))));
-            }else{
-                marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
             }
         }
     }
@@ -463,7 +445,6 @@ public class MapFragment extends Fragment
                                 if (restaurant!=null) {
                                     mRestaurantsChosenList.add(restaurant);
                                 }
-                                RestaurantsChosenListener(document.getId());
                             }
                         } else {
                             Log.w("LIKEBUTTON","can't receive if restaurant is liked");
@@ -477,7 +458,6 @@ public class MapFragment extends Fragment
         mLastKnownLocation=event.location;
         this.moveCamera(mLastKnownLocation,20);
     }
-
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
