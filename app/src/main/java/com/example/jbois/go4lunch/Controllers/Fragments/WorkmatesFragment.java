@@ -30,6 +30,7 @@ import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.SnapshotParser;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.Query;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -89,7 +90,7 @@ public class WorkmatesFragment extends Fragment {
         users.clear();
         FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
                 .setLifecycleOwner(this)
-                .setQuery(UserHelper.getUsersCollection(), new SnapshotParser<User>() {
+                .setQuery(UserHelper.getUsersCollection().orderBy("restaurantChose", Query.Direction.DESCENDING), new SnapshotParser<User>() {
                     @NonNull
                     @Override
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {

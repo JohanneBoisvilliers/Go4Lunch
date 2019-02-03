@@ -20,6 +20,8 @@ import com.google.gson.reflect.TypeToken;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
+
 public class UserHelper {
 
     public static final String COLLECTION_USERS = "users";
@@ -95,21 +97,34 @@ public class UserHelper {
     public static Task<Void> UnlikeRestaurant(String uid,String placeId) {
         return UserHelper.getRestaurantsLikedCollection(uid).document(placeId).delete();
     }
+    public static Task<Void> deleteRestaurantInCollection(String uid) {
+        return UserHelper.getRestaurantChosen().document(uid).delete();
+    }
     public static Task<Void> unCheckRestaurantDestination(String placeId, String uid) {
        WriteBatch batch = FirebaseFirestore.getInstance().batch();
        DocumentReference userToDelete = UserHelper.getUsersWhoChose(placeId).document(uid);
-       DocumentReference restaurantToCheck =UserHelper.getRestaurantChosen().document(placeId);
+       DocumentReference restaurantToDelete = UserHelper.getRestaurantChosen().document(uid);
+       CollectionReference restaurantToCheck = UserHelper.getUsersWhoChose(placeId);
 
        batch.delete(userToDelete);
-       //restaurantToCheck.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-       //    @Override
-       //    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-       //        DocumentSnapshot documentSnapshot = task.getResult();
-       //        documentSnapshot.
-       //    }
-       //})
-        return batch.commit();
-        //return UserHelper.getUsersWhoChose(placeId).document(uid).delete();
+
+       return batch.commit().addOnCompleteListener(new OnCompleteListener<Void>() {
+           @Override
+           public void onComplete(@NonNull Task<Void> task) {
+               UserHelper.getUsersWhoChose(placeId).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                   @Override
+                   public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                       if (task.getResult().size()==0) {
+                           Log.d(TAG, "delete restaurant size 0");
+                           UserHelper.deleteRestaurantInCollection(placeId);
+                       }else {
+                           Log.d(TAG, "delete restaurant taille plus grand que 0");
+                       }
+                   }
+               });
+           }
+       });
+       //return UserHelper.getUsersWhoChose(placeId).document(uid).delete();
     }
 
 }

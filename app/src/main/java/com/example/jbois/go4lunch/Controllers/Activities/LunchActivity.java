@@ -340,20 +340,26 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         TextView userNameContainer = header.findViewById(R.id.user_profile_name);
         TextView userMail =header.findViewById(R.id.user_profile_mail);
 
-        GlideApp.with(this)
-                .load(this.getCurrentUser().getPhotoUrl())
-                .circleCrop()
-                .error(R.drawable.no_image_small_icon)
-                .into(userPhoto);
+        try {
+            GlideApp.with(this)
+                    .load(this.getCurrentUser().getPhotoUrl())
+                    .circleCrop()
+                    .error(R.drawable.no_image_small_icon)
+                    .into(userPhoto);
+            String userName = TextUtils.isEmpty(this.getCurrentUser().getDisplayName())?
+                    getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();
+            String email = TextUtils.isEmpty(this.getCurrentUser().getEmail())?
+                    getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
 
-        String userName = TextUtils.isEmpty(this.getCurrentUser().getDisplayName())?
-                getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();
-        String email = TextUtils.isEmpty(this.getCurrentUser().getEmail())?
-                getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
+            this.usernameListener(this.getCurrentUser().getUid(), userNameContainer);
+            userNameContainer.setText(userName);
+            userMail.setText(email);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        this.usernameListener(this.getCurrentUser().getUid(), userNameContainer);
-        userNameContainer.setText(userName);
-        userMail.setText(email);
+
+
     }
     //show the restaurant chosen by user
     private void yourLunchButton(){

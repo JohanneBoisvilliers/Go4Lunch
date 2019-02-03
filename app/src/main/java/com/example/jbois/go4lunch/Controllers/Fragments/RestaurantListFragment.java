@@ -155,24 +155,7 @@ public class RestaurantListFragment extends Fragment {
             }
         });
     }
-    //check on database if restaurant is chose by someone
-    //private void restaurantsChosenListener(String placeId){
-    //    mRestaurantsChoseListener = UserHelper.getUsersWhoChose(placeId)
-    //            .addSnapshotListener(new EventListener<QuerySnapshot>() {
-    //                @Override
-    //                public void onEvent(@Nullable QuerySnapshot value,
-    //                                    @Nullable FirebaseFirestoreException e) {
-    //                    if (e != null) { Log.w(TAG, "Listen failed.", e); }
-//
-    //                    if (value!=null){
-    //                            mFinalRestaurantsChosen.clear();
-    //                            getRestaurantsChosen();
-    //                            setNumberOfWorkmates();
-//
-    //                        }
-    //                }
-    //            });
-    //}
+    //Listener to get number of user in each restaurant
     private void RestaurantsChosenListener(){
         mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {

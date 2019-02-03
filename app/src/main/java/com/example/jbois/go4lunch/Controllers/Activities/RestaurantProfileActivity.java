@@ -57,6 +57,7 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
 
+import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.newInstance;
 
@@ -194,6 +195,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                     if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
                         //if(mRestaurant.getFABChecked()){
                             UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
+
                         //}else{
                         //    UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
                         //}
