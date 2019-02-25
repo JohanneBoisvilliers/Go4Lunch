@@ -3,6 +3,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
@@ -25,10 +27,12 @@ import com.example.jbois.go4lunch.Utils.DividerDecoration;
 import com.example.jbois.go4lunch.Utils.ItemClickSupport;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.WorkmatesViewHolder;
+import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.firebase.ui.firestore.SnapshotParser;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.google.gson.Gson;
@@ -42,6 +46,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
+import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
 
 public class WorkmatesFragment extends Fragment {
@@ -81,7 +88,7 @@ public class WorkmatesFragment extends Fragment {
         ButterKnife.bind(this,view);
 
         this.configureRecyclerView();
-        this.configureOnClickRecyclerView();
+        configureOnClickRecyclerView();
         mActivity = this.getActivity();
         return view;
     }
@@ -95,13 +102,14 @@ public class WorkmatesFragment extends Fragment {
                     @Override
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
                         User user = snapshot.toObject(User.class);
+                        users.add(user);
+                        Log.d(TAG, "parseSnapshot: " + users.size());
                         return user;
                     }
                 })
                 .build();
 
         adapter = new FirestoreRecyclerAdapter<User, WorkmatesViewHolder>(options) {
-
 
             @Override
             public void onBindViewHolder(WorkmatesViewHolder holder, int position, User model) {
@@ -137,6 +145,35 @@ public class WorkmatesFragment extends Fragment {
 
                 return new WorkmatesViewHolder(view);
             }
+
+            @NonNull
+            @Override
+            public User getItem(int position) {
+                return super.getItem(position);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull ChangeEventType type,
+                                       @NonNull DocumentSnapshot snapshot,
+                                       int newIndex,
+                                       int oldIndex) {
+                switch (type) {
+                    case ADDED:
+                        notifyItemInserted(newIndex);
+                        break;
+                    case CHANGED:
+                        notifyItemChanged(newIndex);
+                        break;
+                    case REMOVED:
+                        notifyItemRemoved(oldIndex);
+                        break;
+                    case MOVED:
+                        notifyItemMoved(oldIndex, newIndex);
+                        break;
+                    default:
+                        throw new IllegalStateException("Incomplete case statement");
+                }
+            }
         };
         //Attach the adapter to the recyclerview to populate items
         this.mRecyclerView.setAdapter(adapter);
@@ -144,7 +181,6 @@ public class WorkmatesFragment extends Fragment {
         this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         DividerDecoration divider= new DividerDecoration(getContext());
         this.mRecyclerView.addItemDecoration(divider);
-
     }
 
     private void configureOnClickRecyclerView(){
@@ -152,10 +188,21 @@ public class WorkmatesFragment extends Fragment {
                 .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Gson gson = new Gson();
+                        User user = (User)adapter.getItem(position);
+                        String restaurantToString =user.getRestaurantChose() ;
+                        //String restaurantToString = users.get(position).getRestaurantChose();
+                        Restaurant restaurant= gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
+                        if (!TextUtils.isEmpty(restaurantToString)) {
+                            Intent intent = new Intent(getActivity(),RestaurantProfileActivity.class);
+                            intent.putExtra(RESTAURANT_IN_TAG,restaurant);
+                            startActivity(intent);
+                        }else {
+                            Toast.makeText(getContext(), getResources().getString(R.string.workmate_no_choice_yet), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
     }
-
 
     //Callback method to fetch restaurant list
     @Subscribe(sticky = true)

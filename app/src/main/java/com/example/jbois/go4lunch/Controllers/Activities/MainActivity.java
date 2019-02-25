@@ -18,10 +18,15 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 import butterknife.BindView;

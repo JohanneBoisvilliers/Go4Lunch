@@ -17,31 +17,18 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         tools:context=".Controllers.Controllers.Activities.LunchActivity">
-
-
-    <!--<LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        app:theme="@style/ToolBarStyle">-->
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/activity_main_toolbar"
-                android:minHeight="?attr/actionBarSize"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:titleTextColor="@android:color/white"
-                android:background="?attr/colorPrimary"
-                app:title="@string/title_map"/>
-            <!--<fragment
-                android:id="@+id/place_autocomplete_fragment"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                app:theme="@style/ToolBarStyle"
-                android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
-                />
-
-    </LinearLayout>-->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="56dp">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/activity_main_toolbar"
+            android:minHeight="?attr/actionBarSize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:titleTextColor="@android:color/white"
+            android:background="?attr/colorPrimary"
+            app:title="@string/title_map"/>
 
         <android.support.v4.view.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
@@ -49,6 +36,7 @@
             android:id="@+id/activity_main_viewpager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+        </FrameLayout>
 
         <android.support.design.widget.BottomNavigationView
             android:id="@+id/bottom_navigation_view"
@@ -57,6 +45,7 @@
             android:layout_gravity="bottom"
             android:background="?android:attr/windowBackground"
             app:menu="@menu/navigation"/>
+
 
     </android.support.design.widget.CoordinatorLayout>
 

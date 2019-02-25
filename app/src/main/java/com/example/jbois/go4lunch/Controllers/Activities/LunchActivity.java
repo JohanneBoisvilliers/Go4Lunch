@@ -67,6 +67,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.PREFS_NAME;
+import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.RESTAURANT_SAVED;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 
 public class LunchActivity extends BaseUserActivity implements NavigationView.OnNavigationItemSelectedListener,
@@ -266,13 +268,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
             }
         });
     }
-    //Configure Drawer Layout
-    private void configureDrawerLayout(){
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        setNavigationDrawerHeader();
-    }
+
     //Configure NavigationView
     private void configureNavigationView(){
         mNavigationView.setNavigationItemSelectedListener(this);
@@ -298,6 +294,14 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     /*
         -------------------------- navigationDrawer settings -----------------------------------
      */
+    //Configure Drawer Layout
+    private void configureDrawerLayout(){
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.floatingButton));
+        toggle.syncState();
+        setNavigationDrawerHeader();
+    }
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
 
@@ -340,36 +344,34 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         TextView userNameContainer = header.findViewById(R.id.user_profile_name);
         TextView userMail =header.findViewById(R.id.user_profile_mail);
 
-        try {
-            GlideApp.with(this)
-                    .load(this.getCurrentUser().getPhotoUrl())
-                    .circleCrop()
-                    .error(R.drawable.no_image_small_icon)
-                    .into(userPhoto);
-            String userName = TextUtils.isEmpty(this.getCurrentUser().getDisplayName())?
-                    getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();
-            String email = TextUtils.isEmpty(this.getCurrentUser().getEmail())?
-                    getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
-
-            this.usernameListener(this.getCurrentUser().getUid(), userNameContainer);
-            userNameContainer.setText(userName);
-            userMail.setText(email);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
-
+        GlideApp.with(this)
+                .load(this.getCurrentUser().getPhotoUrl())
+                .circleCrop()
+                .error(R.drawable.no_image_small_icon)
+                .into(userPhoto);
+        String userName = TextUtils.isEmpty(this.getCurrentUser().getDisplayName())?
+                getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();
+        String email = TextUtils.isEmpty(this.getCurrentUser().getEmail())?
+                getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
+        this.usernameListener(this.getCurrentUser().getUid(), userNameContainer);
+        userNameContainer.setText(userName);
+        userMail.setText(email);
     }
     //show the restaurant chosen by user
     private void yourLunchButton(){
-        if (mRestaurant!=null){
+        Restaurant restaurant = this.getRestaurantInSharedPreferences();
+        if (restaurant!=null){
             Intent intentRestaurant = new Intent(this,RestaurantProfileActivity.class);
-            intentRestaurant.putExtra(RESTAURANT_IN_TAG, mRestaurant);
+            intentRestaurant.putExtra(RESTAURANT_IN_TAG, restaurant);
             startActivity(intentRestaurant);
         }else{
             Toast.makeText(this, getString(R.string.no_restaurant_chose_yet), Toast.LENGTH_SHORT).show();
         }
+    }
+    private Restaurant getRestaurantInSharedPreferences(){
+        Gson gson = new Gson();
+        String restaurantToString = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getString(RESTAURANT_SAVED,"");
+        return gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
     }
     //listener to know when user change his name to refresh the textview in navigation header
     private void usernameListener(String uid,TextView textView){
@@ -429,7 +431,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         --------------------------- Callbacks Methods -----------------------------------------
      */
     //Callback method to fetch restaurant
-    @Subscribe(sticky = true)
+    @Subscribe
     public void ongetRestaurant(RestaurantProfileActivity.getRestaurant event) {
         mRestaurant=event.restaurant;
     }

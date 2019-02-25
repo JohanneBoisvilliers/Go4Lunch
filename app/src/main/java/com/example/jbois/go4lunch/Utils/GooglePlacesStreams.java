@@ -234,7 +234,7 @@ public class GooglePlacesStreams {
                 for (int i = 0; i < periodList.size() ; i++) {
                     if (periodList.get(i).getOpen().getDay()+1 == Calendar.DAY_OF_WEEK) {
                         if(periodList.get(i).getClose()==null){
-                            openingHours ="Open 24/7";
+                            openingHours =ApplicationContext.getContext().getResources().getString(R.string.always_open);
                         }else{
                             DateTime open= new DateTime().withHourOfDay(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getHourOfDay())
                                     .withMinuteOfHour(convertHoursInDateTime(periodList.get(i).getOpen().getTime()).getMinuteOfHour());
@@ -252,17 +252,16 @@ public class GooglePlacesStreams {
                                 isGoodSchedule = true;
                             }
                             if (!isGoodSchedule) {
-                                openingHours = "Closed";
+                                openingHours = ApplicationContext.getContext().getResources().getString(R.string.closed_status);
                             }
                         }
                     }
                     if(periodList.get(i).getOpen().getDay() == 0 && periodList.get(i).getClose()==null){
-                        openingHours = "Open 24/7";
+                        openingHours = ApplicationContext.getContext().getResources().getString(R.string.always_open);
                     }
                 }
             }else {
-                //openingHours = Resources.getSystem().getString(R.string.closed_status);
-                openingHours = "Closed";
+                openingHours = ApplicationContext.getContext().getResources().getString(R.string.closed_status);;
             }
         }
         return openingHours;

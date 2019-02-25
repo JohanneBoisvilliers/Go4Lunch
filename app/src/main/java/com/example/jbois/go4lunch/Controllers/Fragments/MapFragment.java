@@ -3,6 +3,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -22,10 +23,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Activities.LunchActivity;
@@ -33,6 +36,7 @@ import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivi
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.ApplicationContext;
 import com.example.jbois.go4lunch.Utils.GooglePlacesStreams;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.google.android.gms.common.ConnectionResult;
@@ -83,8 +87,9 @@ public class MapFragment extends Fragment
     private GoogleMap mMap;
     private LocationManager mLocationManager;
     private GoogleApiClient mGoogleApiClient;
+    private View mMapView;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private final LatLng mDefaultLocation = new LatLng(-48.874949, 2.350520);
+    private final LatLng mDefaultLocation = new LatLng(48.874949, 2.350520);
     private Location mLastKnownLocation;
     private List<Marker> mMarkers = new ArrayList<>();
     private List<Restaurant> mRestaurantsChosenList = new ArrayList<>();
@@ -95,7 +100,7 @@ public class MapFragment extends Fragment
     private final static int MY_PERMISSION_FINE_LOCATION = 101;
     public final static String RESTAURANT_IN_TAG = "restaurant";
     private final static String TAG = "debug";
-
+    private LocationListener mCurrentLocation;
     private List<Restaurant> mRestaurantsAroundUser = new ArrayList<>();
     //Set onLocationChanged method to know what to do when user is moving
     private LocationListener mLocationListenerGPS = new LocationListener() {
@@ -154,6 +159,7 @@ public class MapFragment extends Fragment
     public void onStop() {
         super.onStop();
         mRestaurantsChoseListener.remove();
+        mLocationManager.removeUpdates(mLocationListenerGPS);
         EventBus.getDefault().unregister(this);
     }
 
@@ -170,13 +176,11 @@ public class MapFragment extends Fragment
         View result = inflater.inflate(R.layout.fragment_map, container, false);
         //get map from GoogleMaps
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
+        mMapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
         //Initialize location objects
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
         mLocationManager=(LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-
-        // this.setLocationManager();
-        //this.buildGoogleApiClient();
         return result;
     }
     //Set location Manager which use onLocationChanged method
@@ -191,11 +195,11 @@ public class MapFragment extends Fragment
         this.settingsForMap(map);
         getRestaurantChosenFromUsers();
         checkPermissionToLocation();
-        updateLocationUI();
-        getDeviceLocation();
+
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
+        this.settingsForLocationButton();
     }
     //set style for map
     private void settingsForMap(GoogleMap map){
@@ -214,31 +218,73 @@ public class MapFragment extends Fragment
             Log.e(TAG, "Can't find style. Error: ", e);
         }
     }
+    private void settingsForLocationButton(){
+        if (mMapView != null &&
+                mMapView.findViewById(Integer.parseInt("1")) != null) {
+            // Get the button view
+            View locationButton = ((View) mMapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+            // and next place it, on bottom right (as Google Maps app)
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams)
+                    locationButton.getLayoutParams();
+            // position on right bottom
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+            layoutParams.setMargins(0, 0, 30, 30);
+        }
+    }
+    //if GPS is off, then ask user to activate it
+    private void buildAlertMessageNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
     //Check permission for location and ask for it if user didn't allowed it
     public void checkPermissionToLocation() {
         //Permission for user's location
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+        if (ActivityCompat.checkSelfPermission(ApplicationContext.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
             mLocationPermissionGranted = true;
+            updateLocationUI();
+            this.setLocationManager();
+            getDeviceLocation();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSION_FINE_LOCATION);
             }
         }
+
     }
     //What to do when user allowed or not permission for location
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSION_FINE_LOCATION:
-                for (int grantResult : grantResults) {
-                    if (grantResult == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)  {
                         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionGranted = true;
+                            updateLocationUI();
+                            this.setLocationManager();
+                            getDeviceLocation();
                         }
-                    }
+                }else{
+                    Log.d(TAG, "DEBUG: REQUETE NON");
                 }
+
         }
-        updateLocationUI();
+
     }
     //Avoid memory leaks
     private void disposeWhenDestroy() {
@@ -298,7 +344,7 @@ public class MapFragment extends Fragment
                 mMap.setMyLocationEnabled(true);
             } else {
                 mMap.setMyLocationEnabled(false);
-                mLastKnownLocation = null;
+                mLastKnownLocation=null;
                 checkPermissionToLocation();
             }
         } catch (SecurityException e) {
@@ -313,10 +359,19 @@ public class MapFragment extends Fragment
                 locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful()&& mLocationManager.isProviderEnabled( LocationManager.GPS_PROVIDER )) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
-                            moveCamera(mLastKnownLocation,15);
+                            if (mLastKnownLocation==null) {
+                                Location location = mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                                if (location != null) {
+                                    mLastKnownLocation = new Location("currentLocation");
+                                    mLastKnownLocation.setLatitude(location.getLatitude());
+                                    mLastKnownLocation.setLongitude(location.getLongitude());
+                                }
+                            }else{
+                                moveCamera(mLastKnownLocation,15);
+                            }
                             EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
                             //executeRequestToShowCurrentPlace(mLastKnownLocation);
                             try {
@@ -325,8 +380,8 @@ public class MapFragment extends Fragment
                                 e.printStackTrace();
                             }
                         } else {
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(mDefaultLocation, 15));
+                            buildAlertMessageNoGps();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 1));
                             mMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
@@ -400,31 +455,32 @@ public class MapFragment extends Fragment
                 });
 
     }
-   private void RestaurantsChosenListener(){
-       mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-               .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                   @Override
-                   public void onEvent(@Nullable QuerySnapshot value,
-                                       @Nullable FirebaseFirestoreException e) {
-                       if (e != null) { Log.w(TAG, "Listen failed.", e); }
-                       resetMarkersColors();
-                       if(!value.isEmpty()){
-                           for (QueryDocumentSnapshot document : value) {
-                               browseMarkersList(document.getId());
-                           }
-                       }
-                   }
-               });
-   }
+    private void RestaurantsChosenListener(){
+        mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (value!=null){
+                            resetMarkersColors();
+                            for (QueryDocumentSnapshot document : value) {
+                                browseMarkersList(document.getId());
+                            }
+                        }
+                    }
+                });
+    }
     private void resetMarkersColors(){
         for (Marker marker : mMarkers) {
-                marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
-            }
+            Log.d(TAG, "marqueur orange ");
+            marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
+        }
     }
     private void browseMarkersList(String placeId){
         for (Marker marker : mMarkers) {
             Restaurant restaurant = (Restaurant)marker.getTag();
             if (restaurant.getId().equals(placeId)){
+                Log.d(TAG, "marqueur vert: ");
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.floatingButtonValidate))));
             }
         }

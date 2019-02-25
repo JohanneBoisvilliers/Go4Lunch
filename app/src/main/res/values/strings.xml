@@ -40,7 +40,8 @@
     <string name="closing_soon_status">Closing soon</string>
     <string name="open_status">Open until %s</string>
     <string name="always_open">Open 24/7</string>
-    <string name="distance_unit">%d m</string>
+    <string name="distance_unit_in_meter">%d m</string>
+    <string name="distance_unit_in_kilometer">%d km</string>
     <string name="number_of_workmates">(%d)</string>
     <!-- Workmates recyclerview -->
     <string name="restaurant_chose_by_workmate">%s is eating to : %s</string>

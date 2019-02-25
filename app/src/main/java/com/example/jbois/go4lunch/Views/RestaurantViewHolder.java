@@ -56,7 +56,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
         this.mRestaurantLocation.setText(restaurant.getAdress());
         this.fetchRestaurantPhoto(restaurant);
         this.setOpeningHours(restaurant);
-        this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit),restaurant.getDistance()));
+        this.metersOrKilometers(restaurant);
         this.mNumberOfWorkmates.setText(mNumberOfWorkmates.getContext().getResources().getString((R.string.number_of_workmates),restaurant.getNumberOfWorkmates()));
         if(restaurant.getRating()!=null){
             BaseUserActivity.setStars(restaurant.getRating(),mStars);
@@ -83,6 +83,14 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
                             mRestaurantImage.getContext().getResources().getColor(R.color.black));
                 }
             }
+        }
+    }
+    //change UI : distance in meters or kilometers
+    private void metersOrKilometers(Restaurant restau){
+        if (restau.getDistance()>999) {
+            this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit_in_kilometer),(restau.getDistance()/1000)));
+        }else{
+            this.mDistance.setText(mDistance.getContext().getResources().getString((R.string.distance_unit_in_meter),restau.getDistance()));
         }
     }
     //set text and text color for opening hours of each restaurant in recyclerview
