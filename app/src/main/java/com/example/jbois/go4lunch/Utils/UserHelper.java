@@ -115,7 +115,6 @@ public class UserHelper {
                    @Override
                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
                        if (task.getResult().size()==0) {
-                           Log.d(TAG, "delete restaurant size 0");
                            UserHelper.deleteRestaurantInCollection(placeId);
                        }else {
                            Log.d(TAG, "delete restaurant taille plus grand que 0");

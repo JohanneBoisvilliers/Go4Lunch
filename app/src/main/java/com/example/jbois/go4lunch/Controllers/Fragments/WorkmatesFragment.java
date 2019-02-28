@@ -103,7 +103,6 @@ public class WorkmatesFragment extends Fragment {
                     public User parseSnapshot(@NonNull DocumentSnapshot snapshot) {
                         User user = snapshot.toObject(User.class);
                         users.add(user);
-                        Log.d(TAG, "parseSnapshot: " + users.size());
                         return user;
                     }
                 })

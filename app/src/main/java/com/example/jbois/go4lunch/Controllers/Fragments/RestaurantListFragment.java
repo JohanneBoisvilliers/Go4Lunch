@@ -90,7 +90,7 @@ public class RestaurantListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
         ButterKnife.bind(this,view);
         this.getRestaurantsChosen();
-       // this.addRestaurantChosenListener();
+        // this.addRestaurantChosenListener();
         this.configureRecyclerView();
         this.configureOnClickRecyclerView();
         return view;
@@ -124,7 +124,7 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            mFinalRestaurantsChosen.clear();
+                            mFinalRestaurantsChosen.clear();//na pas faire de clear puisque sinon le restaurant supprimer par le dernier utilistaeur n'est plus dans la liste et ne peu donc plus etre mis a jour pouur etre reinitialiser
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, "récupération restaurants");
                                 getNumberOfUsers(document.getId());
@@ -144,6 +144,8 @@ public class RestaurantListFragment extends Fragment {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Récupération nombre d'utilisateur dans chaque resto");
                             mFinalRestaurantsChosen.put(placeId,task.getResult().size());
+                            setNumberOfWorkmates();
+                            mRecyclerView.setAdapter(new RestaurantAdapter(mRestaurantList,mLocation));
                         } else {
                             Log.w("RESTAURANTADPTR","error when receiving users");
                         }
@@ -167,10 +169,8 @@ public class RestaurantListFragment extends Fragment {
 
                         if (value!=null){
                             Log.d(TAG, "entrer dans condition pour rafraichir");
-                            mFinalRestaurantsChosen.clear();
                             getRestaurantsChosen();
-                            setNumberOfWorkmates();
-                            
+
                         }
                     }
                 });
@@ -184,7 +184,6 @@ public class RestaurantListFragment extends Fragment {
                 }
             }
         }
-        this.mRecyclerView.setAdapter(new RestaurantAdapter(this.mRestaurantList,mLocation));
     }
 
     //private void addRestaurantChosenListener(){
@@ -201,6 +200,7 @@ public class RestaurantListFragment extends Fragment {
         mRestaurantList.clear();
         mRestaurantList.addAll(event.restaurantList);
         this.setNumberOfWorkmates();
+        this.mRecyclerView.setAdapter(new RestaurantAdapter(this.mRestaurantList,mLocation));
     }
     //Callback method to fetch user's position
     @Subscribe

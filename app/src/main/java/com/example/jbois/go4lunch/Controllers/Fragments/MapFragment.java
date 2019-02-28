@@ -450,6 +450,7 @@ public class MapFragment extends Fragment
 
                     @Override
                     public void onComplete() {
+                        Toast.makeText(getContext(),"requête finie",Toast.LENGTH_LONG).show();
                         EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
                     }
                 });

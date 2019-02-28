@@ -20,6 +20,7 @@ import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.ApplicationContext;
 import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.google.android.gms.location.places.PlacePhotoMetadata;
@@ -68,9 +69,9 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.unknown_hours)),
                     mRestaurantImage.getContext().getResources().getColor(R.color.black));
         }else{
-            if(restaurant.getOpeningHours().equals("Closed")){
+            if(restaurant.getOpeningHours().equals(ApplicationContext.getContext().getResources().getString(R.string.closed_status))){
                 this.UiOpeningHours(restaurant.getOpeningHours(),mRestaurantImage.getContext().getResources().getColor(R.color.deactivated));
-            } else{
+            }else{
                 if (!restaurant.getClosingSoon()){
                     this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.open_status),restaurant.getOpeningHours()),
                             mRestaurantImage.getContext().getResources().getColor(R.color.black));
@@ -78,7 +79,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
                     this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.closing_soon_status)),
                             mRestaurantImage.getContext().getResources().getColor(R.color.colorPrimaryDark));
                 }
-                if (restaurant.getOpeningHours().equals("Open 24/7")) {
+                if (restaurant.getOpeningHours().equals(ApplicationContext.getContext().getResources().getString(R.string.always_open))) {
                     this.UiOpeningHours(mRestaurantImage.getContext().getResources().getString((R.string.always_open)),
                             mRestaurantImage.getContext().getResources().getColor(R.color.black));
                 }
