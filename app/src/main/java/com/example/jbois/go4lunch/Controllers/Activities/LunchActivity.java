@@ -225,6 +225,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
     private void configureViewPager(){
         // Get ViewPager from layout
         ViewPager pager = mViewPager;
+        pager.setOffscreenPageLimit(4);
         // Set Adapter PageAdapter and glue it together
         pager.setAdapter(new PageAdapter(getSupportFragmentManager()) {
         });

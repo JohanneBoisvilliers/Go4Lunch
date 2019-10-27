@@ -93,6 +93,7 @@ public class MapFragment extends Fragment
     private Location mLastKnownLocation;
     private List<Marker> mMarkers = new ArrayList<>();
     private List<Restaurant> mRestaurantsChosenList = new ArrayList<>();
+    private List<String> mRestaurantsChosenId = new ArrayList<>();
     private List<String> mCollectionRestaurantsChosenList = new ArrayList<>();
     private boolean mLocationPermissionGranted;
     private Disposable mDisposable;
@@ -110,6 +111,14 @@ public class MapFragment extends Fragment
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                     new LatLng(location.getLatitude(),
                             location.getLongitude()), 15));
+            //try {
+            //    fakeRequest();
+            //} catch (IOException e) {
+            //    e.printStackTrace();
+            //}
+            mMarkers.clear();
+            mMap.clear();
+            executeRequestToShowCurrentPlace(location);
         }
 
         @Override
@@ -131,12 +140,10 @@ public class MapFragment extends Fragment
     public MapFragment() {}
 
     public static MapFragment newInstance() {
-
-        //Create new fragment
-        MapFragment frag = new MapFragment();
-
-        return (frag);
+        return  new MapFragment();
     }
+
+    // -------------------------------- LIFE CYCLE --------------------------------
 
     @Override
     public void onStart() {
@@ -144,17 +151,14 @@ public class MapFragment extends Fragment
         this.RestaurantsChosenListener();
         EventBus.getDefault().register(this);
     }
-
     @Override
     public void onPause() {
         super.onPause();
     }
-
     @Override
     public void onResume() {
         super.onResume();
     }
-
     @Override
     public void onStop() {
         super.onStop();
@@ -162,13 +166,11 @@ public class MapFragment extends Fragment
         mLocationManager.removeUpdates(mLocationListenerGPS);
         EventBus.getDefault().unregister(this);
     }
-
     @Override
     public void onDestroy() {
         this.disposeWhenDestroy();
         super.onDestroy();
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -186,16 +188,15 @@ public class MapFragment extends Fragment
     //Set location Manager which use onLocationChanged method
     @SuppressLint("MissingPermission")
     private void setLocationManager(){
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5*60*1000, 50, mLocationListenerGPS);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 200, mLocationListenerGPS);
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
         this.settingsForMap(map);
-        getRestaurantChosenFromUsers();
+        this.getRestaurantsChosen();
         checkPermissionToLocation();
-
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         mMap.setOnMarkerClickListener(this);
@@ -312,8 +313,8 @@ public class MapFragment extends Fragment
     //Set and add a new marker
     public void createMarker(LatLng latLng, Restaurant restaurant) {
         String color = getResources().getString(0 + R.color.colorPrimary);
-        for (Restaurant restaurantChosenId : mRestaurantsChosenList) {
-            if (restaurant.getId().equals(restaurantChosenId.getId())) {
+        for (String restaurantChosenId : mRestaurantsChosenId) {
+            if (restaurant.getId().equals(restaurantChosenId)) {
                 color = getResources().getString(0 + R.color.floatingButtonValidate);
             }
         }
@@ -325,6 +326,7 @@ public class MapFragment extends Fragment
     }
     //set the color of markers
     private Bitmap setMarkerColor(String color){
+
         Bitmap ob = BitmapFactory.decodeResource(this.getResources(),R.drawable.restaurant_location_32);
         Bitmap obm = Bitmap.createBitmap(ob.getWidth(), ob.getHeight(), ob.getConfig());
         Canvas canvas = new Canvas(obm);
@@ -373,12 +375,12 @@ public class MapFragment extends Fragment
                                 moveCamera(mLastKnownLocation,15);
                             }
                             EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
-                            //executeRequestToShowCurrentPlace(mLastKnownLocation);
-                            try {
-                                fakeRequest();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            executeRequestToShowCurrentPlace(mLastKnownLocation);
+                            //try {
+                            //    fakeRequest();
+                            //} catch (IOException e) {
+                            //    e.printStackTrace();
+                            //}
                         } else {
                             buildAlertMessageNoGps();
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, 1));
@@ -450,7 +452,6 @@ public class MapFragment extends Fragment
 
                     @Override
                     public void onComplete() {
-                        Toast.makeText(getContext(),"requête finie",Toast.LENGTH_LONG).show();
                         EventBus.getDefault().post(new LunchActivity.refreshRestaurantsList(mRestaurantsAroundUser));
                     }
                 });
@@ -458,7 +459,7 @@ public class MapFragment extends Fragment
     }
     private void RestaurantsChosenListener(){
         mRestaurantsChoseListener = UserHelper.getRestaurantChosen()
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .addSnapshotListener(MetadataChanges.INCLUDE,new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
@@ -471,51 +472,45 @@ public class MapFragment extends Fragment
                     }
                 });
     }
+    //reset marker's colors when there is an event
     private void resetMarkersColors(){
         for (Marker marker : mMarkers) {
-            Log.d(TAG, "marqueur orange ");
             marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.colorPrimary))));
         }
     }
+    //browse marker's list to change only marker's colors where there is at least one user
     private void browseMarkersList(String placeId){
         for (Marker marker : mMarkers) {
             Restaurant restaurant = (Restaurant)marker.getTag();
             if (restaurant.getId().equals(placeId)){
-                Log.d(TAG, "marqueur vert: ");
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(setMarkerColor(getResources().getString(0 + R.color.floatingButtonValidate))));
             }
         }
     }
-    //check on database if user liked this restaurant
-    private void getRestaurantChosenFromUsers(){
-        mRestaurantsChosenList.clear();
-        UserHelper.getUsersCollection().get()
+    //get restaurants chosen by users to change marker's colors
+    private void getRestaurantsChosen(){
+        UserHelper.getRestaurantChosen().get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        mRestaurantsChosenId.clear();
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                User user = document.toObject(User.class);
-                                Gson gson = new Gson();
-                                String restaurantToString = user.getRestaurantChose();
-                                Restaurant restaurant = gson.fromJson(restaurantToString,new TypeToken<Restaurant>(){}.getType());
-                                if (restaurant!=null) {
-                                    mRestaurantsChosenList.add(restaurant);
-                                }
+                                mRestaurantsChosenId.add(document.getId());
                             }
                         } else {
-                            Log.w("LIKEBUTTON","can't receive if restaurant is liked");
+                            Log.w(TAG,"error when receiving users");
                         }
                     }
                 });
     }
+
     //Callback method to fetch place position into autocomplete widget
     @Subscribe
     public void onGetLocation(LunchActivity.getPlaceLocation event) {
         mLastKnownLocation=event.location;
         this.moveCamera(mLastKnownLocation,20);
     }
-
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }

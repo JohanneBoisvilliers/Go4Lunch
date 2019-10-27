@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestManager;
 import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
@@ -56,11 +57,8 @@ public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder
     @Override
     public void onBindViewHolder(@NonNull RestaurantViewHolder holder, int position) {
         mRestaurantList.get(position).setDistance(this.extrudeDistance(mRestaurantList,position));
-        try{
-            holder.updateRestaurantInfos(mRestaurantList.get(position));
-        }catch (Exception e){
-            Log.e(TAG, "onBindViewHolder: "+e.getMessage()+"on :"+mRestaurantList.get(position).getName());
-        }
+
+        holder.updateRestaurantInfos(mRestaurantList.get(position));
     }
 
     private int extrudeDistance(List<Restaurant> restaurantList,int index){

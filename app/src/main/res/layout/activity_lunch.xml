@@ -31,7 +31,6 @@
             app:title="@string/title_map"/>
 
         <android.support.v4.view.ViewPager
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_marginTop="?attr/actionBarSize"
             android:id="@+id/activity_main_viewpager"
             android:layout_width="match_parent"

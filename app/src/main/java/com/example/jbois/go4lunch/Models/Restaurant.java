@@ -74,7 +74,7 @@ public class Restaurant implements Parcelable {
         dest.writeInt(this.mDistance);
         dest.writeValue(this.mFABChecked);
         dest.writeValue(this.mClosingSoon);
-        dest.writeDouble(this.mRating);
+            dest.writeDouble(this.mRating);
         dest.writeInt(this.mNumberOfWorkmates);
     }
 

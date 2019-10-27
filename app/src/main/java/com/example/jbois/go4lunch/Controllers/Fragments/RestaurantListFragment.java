@@ -4,6 +4,7 @@ package com.example.jbois.go4lunch.Controllers.Fragments;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -59,11 +60,7 @@ public class RestaurantListFragment extends Fragment {
     public RestaurantListFragment() {}
 
     public static RestaurantListFragment newInstance() {
-
-        //Create new fragment
-        RestaurantListFragment frag = new RestaurantListFragment();
-
-        return(frag);
+        return new RestaurantListFragment();
     }
 
     @Override
@@ -124,9 +121,8 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            mFinalRestaurantsChosen.clear();//na pas faire de clear puisque sinon le restaurant supprimer par le dernier utilistaeur n'est plus dans la liste et ne peu donc plus etre mis a jour pouur etre reinitialiser
+                            mFinalRestaurantsChosen.clear();
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "récupération restaurants");
                                 getNumberOfUsers(document.getId());
                             }
                         } else {
@@ -142,8 +138,12 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Récupération nombre d'utilisateur dans chaque resto");
                             mFinalRestaurantsChosen.put(placeId,task.getResult().size());
+                            for (int i = 0; i < mRestaurantList.size(); i++) {
+                                if (!mFinalRestaurantsChosen.containsKey(mRestaurantList.get(i).getId())) {
+                                    mRestaurantList.get(i).setNumberOfWorkmates(0);
+                                }
+                            }
                             setNumberOfWorkmates();
                             mRecyclerView.setAdapter(new RestaurantAdapter(mRestaurantList,mLocation));
                         } else {
@@ -164,13 +164,10 @@ public class RestaurantListFragment extends Fragment {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
-                        Log.d(TAG, "Changement dans base de données");
                         if (e != null) { Log.w(TAG, "Listen failed.", e); }
 
                         if (value!=null){
-                            Log.d(TAG, "entrer dans condition pour rafraichir");
                             getRestaurantsChosen();
-
                         }
                     }
                 });
@@ -185,12 +182,6 @@ public class RestaurantListFragment extends Fragment {
             }
         }
     }
-
-    //private void addRestaurantChosenListener(){
-    //    for(Map.Entry<String, Integer> entry : mFinalRestaurantsChosen.entrySet()) {
-    //        restaurantsChosenListener(entry.getKey());
-    //    }
-    //}
     /*
         --------------------------- Callbacks Methods -----------------------------------------
     */
@@ -206,7 +197,6 @@ public class RestaurantListFragment extends Fragment {
     @Subscribe
     public void onLocationFetch(LunchActivity.getLocation event) {
         mLocation = event.location;
-        //mRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
 }

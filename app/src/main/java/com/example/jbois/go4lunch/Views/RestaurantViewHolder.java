@@ -13,9 +13,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
@@ -36,6 +38,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
+
+import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
 
 public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
@@ -101,16 +105,24 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
     }
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
-
         if (TextUtils.isEmpty(restaurant.getPhotoReference())||restaurant.getPhotoReference().equals("null")) {
             mRestaurantImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
             mRestaurantImage.setImageDrawable(mRestaurantImage.getContext().getResources().getDrawable(R.drawable.no_image_small_icon));
         }else{
-            Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
-            if (bitmap!=null) {
-                Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
-                mRestaurantImage.setImageBitmap(bitmapResize);
-            }
+            RequestOptions cropOptions = new RequestOptions().centerCrop();
+
+            byte [] encodeByte=Base64.decode(restaurant.getPhotoReference(),Base64.URL_SAFE);
+            Glide.with(ApplicationContext.getContext())
+                    .asBitmap()
+                    .load(encodeByte)
+                    .apply(cropOptions)
+                    .into(mRestaurantImage);
+
+            //Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
+            //if (bitmap!=null) {
+            //    Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
+            //    mRestaurantImage.setImageBitmap(bitmapResize);
+            //}
         }
     }
     //main stream return bitmap in string format and this method convert this string in bitmap
@@ -119,7 +131,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             byte [] encodeByte=Base64.decode(encodedString,Base64.URL_SAFE);
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch(Exception e) {
-            Log.e("ERROR BITMAP", "StringToBitMap:Restaurantviewholder "+ e.getMessage());
+            Log.e("ERROR BITMAP", "StringToBitMap:RestraurantProfileActivity "+ e.getMessage());
             return null;
         }
     }

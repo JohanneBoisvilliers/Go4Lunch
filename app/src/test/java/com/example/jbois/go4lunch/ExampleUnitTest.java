@@ -32,8 +32,8 @@ import static org.mockito.Mockito.when;
 public class ExampleUnitTest {
     Activity lunchActivity;
     Context context = ApplicationContext.getContext();
-   //@Mock
-   //FirebaseAuth mMockAuth;
+   @Mock
+   FirebaseAuth mMockAuth;
    //@Mock
    //FirebaseUser mUser = "gxV6l27p9CXthiCVpMenVR1RJHh1" ;
    //@Mock

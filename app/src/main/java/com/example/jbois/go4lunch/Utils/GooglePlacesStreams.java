@@ -7,6 +7,7 @@ import android.support.annotation.RawRes;
 import android.util.Base64;
 import android.util.Log;
 
+import com.example.jbois.go4lunch.BuildConfig;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
@@ -49,7 +50,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class GooglePlacesStreams {
 
-    private static final String apiKey = "AIzaSyDZvqeraNLOceysL3s7LNUInkaaZjq5bSE";
+    private static final String apiKey = /*"AIzaSyDZvqeraNLOceysL3s7LNUInkaaZjq5bSE";*/ApplicationContext.getContext().getString(R.string.APIKEY);
     private static final String rankby = "distance";
     private static final String type = "restaurant";
     public static final String TAG = "DEBUG_APPLICATION";
@@ -78,22 +79,6 @@ public class GooglePlacesStreams {
         GooglePlacesStreams googlePlacesStreams = new GooglePlacesStreams();
 
         return streamFetchRestaurants(location,null)
-                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantlistjson -> {//hide from this...
-                //    googlePlacesStreams.extrudePlaceInfo(restaurantlistjson,restaurantList);
-                //    return  restaurantlistjson;
-                //})
-                //.delay(1, TimeUnit.SECONDS)
-                //.map((Function<RestaurantListJson, RestaurantListJson>) restaurantListJsonNextPage -> {
-                //    if(!TextUtils.isEmpty(restaurantListJsonNextPage.getNextPageToken())){
-                //        return streamFetchRestaurants(location,restaurantListJsonNextPage.getNextPageToken())
-                //                .map((Function<RestaurantListJson, RestaurantListJson>) restaurantlistjson -> {
-                //                    googlePlacesStreams.extrudePlaceInfo(restaurantlistjson,restaurantList);
-                //                    return  restaurantlistjson;
-                //                }).blockingFirst();
-                //    }else{
-                //        return restaurantListJsonNextPage;
-                //    }
-                //})//...to this to light the request and have only 20 restaurants
                 .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {/*---------------Google Place------------------*/
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
                     return restaurantList;
@@ -101,11 +86,10 @@ public class GooglePlacesStreams {
                 .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
                     for (Restaurant rest:restaurantListTemp) {
                         restaurantDetailsJsonList.addAll(streamFetchRestaurantDetails(rest.getId()).toList().blockingGet());
-                        Log.d(TAG, "liste de restaurantdeetail: "+restaurantDetailsJsonList.size());
                     }
                     return restaurantList;
                 })
-                .delay(3, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
                 .map(restaurants -> {/*---------------Google photos------------------*/
                     googlePlacesStreams.compareAndSetList(restaurants,restaurantDetailsJsonList);
 
@@ -114,7 +98,7 @@ public class GooglePlacesStreams {
                     }
                     return restaurantList;
                 })
-                .delay(3, TimeUnit.SECONDS)
+                .delay(1, TimeUnit.SECONDS)
                 .doOnComplete(() -> Observable.just(restaurantList))
                 ;
 
@@ -128,27 +112,24 @@ public class GooglePlacesStreams {
         RestaurantListJson restaurantListJson = gson.fromJson(googlePlacesStreams.serializeJson(R.raw.restaurantlistjson),new TypeToken<RestaurantListJson>(){}.getType());
         restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.tesoroditalia),new TypeToken<RestaurantDetailsJson>(){}.getType()));
         restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.larosedetunis),new TypeToken<RestaurantDetailsJson>(){}.getType()));
-        restaurantDetailsJsonList.add(gson.fromJson(googlePlacesStreams.serializeJson(R.raw.camouflageveggie),new TypeToken<RestaurantDetailsJson>(){}.getType()));
 
 
         return Observable.just(restaurantListJson)
                 .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson1 -> {/*---------------Google Place------------------*/
                     googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
-                    //hide this to to light request
-                    //hide this to to light request
                     return restaurantList;//hide this to to light request
                 })
                 .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
                     googlePlacesStreams.fakecompareAndSetList(restaurantListTemp,restaurantDetailsJsonList);
                     return restaurantList;
                 })
-                //.map(restaurants -> {/*---------------Google photos------------------*/
-                //    for (Restaurant restaurant : restaurants) {
-                //        googlePlacesStreams.getPhotoMetadata(restaurant);
-                //    }
-                //    return restaurantList;
-                //})
-                //.delay(3, TimeUnit.SECONDS)
+                .map(restaurants -> {/*---------------Google photos------------------*/
+                    for (Restaurant restaurant : restaurants) {
+                        googlePlacesStreams.getPhotoMetadata(restaurant);
+                    }
+                    return restaurantList;
+                })
+                .delay(3, TimeUnit.SECONDS)
                 .doOnComplete(() -> Observable.just(restaurantList))
                 ;
 

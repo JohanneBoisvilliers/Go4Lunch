@@ -131,7 +131,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
         mLikeButton.setOnClickListener(this);
         this.checkStateOfFAB();
         this.checkIfRestaurantIsLiked();
-        //this.fetchRestaurantPhoto(mRestaurant);
+        this.fetchRestaurantPhoto(mRestaurant);
     }
 
     //Browse Bundle sent by OnMarkerClicked to set the RestaurantProfileActivity
@@ -161,20 +161,16 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             startActivity(intent);
         }
     }
-    //Get the screen width to optimize the google photo request
-    private int getScreenWidth(Context context){
-        DisplayMetrics metrics = new DisplayMetrics();
-        ((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        return metrics.widthPixels;
-    }
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
-        Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
-        if (TextUtils.isEmpty(restaurant.getPhotoReference())) {
+        if (TextUtils.isEmpty(restaurant.getPhotoReference())||restaurant.getPhotoReference().equals("null")) {
             mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            mRestaurantPhoto.setImageDrawable(getResources().getDrawable(R.drawable.no_photo_profile));
+            mRestaurantPhoto.setImageDrawable(mRestaurantPhoto.getContext().getResources().getDrawable(R.drawable.no_image_small_icon));
         }else{
-            mRestaurantPhoto.setImageBitmap(bitmap);
+            Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
+            if (bitmap!=null) {
+                mRestaurantPhoto.setImageBitmap(bitmap);
+            }
         }
     }
     @Override
@@ -190,15 +186,9 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 openWebPage(mWebsiteUrl);
                 break;
             case R.id.fab:
-
                 if (this.getRestaurantInSharedPreferences()!=null){
                     if(this.getRestaurantInSharedPreferences().getId().equals(mRestaurant.getId())){
-                        //if(mRestaurant.getFABChecked()){
-                            UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
-
-                        //}else{
-                        //    UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
-                        //}
+                        UserHelper.unCheckRestaurantDestination(mRestaurant.getId(),this.getCurrentUser().getUid());
                     }else{
                         UserHelper.unCheckRestaurantDestination(this.getRestaurantInSharedPreferences().getId(),this.getCurrentUser().getUid());
                         UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
@@ -207,14 +197,11 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                     UserHelper.createRestaurantChosen(mRestaurant,this.getCurrentUser().getUid());
                 }
                 this.setStateOfFAB();
-                //this.checkStateOfFAB();
-                //EventBus.getDefault().post(new RestaurantProfileActivity.getRestaurant(mRestaurant));
                 break;
         }
     }
     //check if the restaurant has a website/or a phone number and set UI(activate or deactivate button)
     private void checkToSetStateButton(Button button,String buttonName){
-
         if (TextUtils.isEmpty(buttonName)){
             DrawableCompat.setTint(button.getCompoundDrawables()[1], ContextCompat.getColor(this, R.color.deactivated));
             button.setTextColor(getResources().getColor(R.color.deactivated));
@@ -276,7 +263,6 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             UserHelper.createRestaurantLiked(mRestaurant.getId(),this.getCurrentUser().getUid(),mRestaurant).addOnFailureListener(this.onFailureListener());
             checkIfRestaurantIsLiked();
         }
-
     }
     //check on database if user liked this restaurant
     private void checkIfRestaurantIsLiked(){
@@ -307,13 +293,13 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
             mLikeButton.setTextColor(getResources().getColor(R.color.colorPrimary));
         }
     }
+    //main stream return bitmap in string format and this method convert this string in bitmap
     public Bitmap StringToBitMap(String encodedString){
         try {
-            byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
-            Bitmap bitmap=BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
-            return bitmap;
+            byte [] encodeByte=Base64.decode(encodedString,Base64.URL_SAFE);
+            return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch(Exception e) {
-            e.getMessage();
+            Log.e("ERROR BITMAP", "StringToBitMap:RestraurantProfileActivity "+ e.getMessage());
             return null;
         }
     }
