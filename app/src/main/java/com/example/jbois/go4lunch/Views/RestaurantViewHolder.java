@@ -2,9 +2,8 @@ package com.example.jbois.go4lunch.Views;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -13,33 +12,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.ApplicationContext;
-import com.example.jbois.go4lunch.Utils.GlideApp;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
-import com.google.android.gms.location.places.PlacePhotoResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.ButterKnife;
-
-import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
 
 public class RestaurantViewHolder extends RecyclerView.ViewHolder{
 
@@ -109,20 +92,14 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             mRestaurantImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
             mRestaurantImage.setImageDrawable(mRestaurantImage.getContext().getResources().getDrawable(R.drawable.no_image_small_icon));
         }else{
-            RequestOptions cropOptions = new RequestOptions().centerCrop();
+            Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
 
-            byte [] encodeByte=Base64.decode(restaurant.getPhotoReference(),Base64.URL_SAFE);
-            Glide.with(ApplicationContext.getContext())
-                    .asBitmap()
-                    .load(encodeByte)
-                    .apply(cropOptions)
-                    .into(mRestaurantImage);
-
-            //Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
-            //if (bitmap!=null) {
-            //    Bitmap bitmapResize = Bitmap.createScaledBitmap(bitmap,128,128,false);
-            //    mRestaurantImage.setImageBitmap(bitmapResize);
-            //}
+            if (bitmap!=null) {
+                Glide.with(ApplicationContext.getContext())
+                        .load(bitmap)
+                        .apply(new RequestOptions().centerCrop())
+                        .into(mRestaurantImage);
+            }
         }
     }
     //main stream return bitmap in string format and this method convert this string in bitmap

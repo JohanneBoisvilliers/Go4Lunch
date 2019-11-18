@@ -2,7 +2,7 @@ package com.example.jbois.go4lunch.Utils;
 
 import android.app.Application;
 import android.content.Context;
-import android.support.multidex.MultiDex;
+import androidx.multidex.MultiDex;
 
 public class ApplicationContext extends Application {
     private static Application instance;

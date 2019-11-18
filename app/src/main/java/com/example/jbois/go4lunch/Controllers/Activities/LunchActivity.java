@@ -4,19 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import androidx.core.view.GravityCompat;
+import androidx.core.view.MenuItemCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,33 +30,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jbois.go4lunch.Controllers.Adapters.PageAdapter;
-import com.example.jbois.go4lunch.Controllers.Adapters.PlaceAutocompleteAdapter;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBufferResponse;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
+import com.google.android.libraries.places.compat.GeoDataClient;
+import com.google.android.libraries.places.compat.Places;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.MetadataChanges;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -167,8 +156,6 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         mTitleList = getResources().getStringArray(R.array.toolbar_title_list);
         mGoogleApiClient = new GoogleApiClient
                 .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
                 .addApi(LocationServices.API)
                 .enableAutoManage(this, this)
                 .build();
@@ -185,7 +172,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.menu_activity_main, menu);
         mItem=menu.findItem(R.id.action_search);
         mSearchView = (SearchView) MenuItemCompat.getActionView(mItem);
-        mSearchAutoComplete = (SearchView.SearchAutoComplete) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        mSearchAutoComplete = (SearchView.SearchAutoComplete) mSearchView.findViewById(R.id.search_src_text);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -344,11 +331,13 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         ImageView userPhoto = header.findViewById(R.id.user_profile_photo);
         TextView userNameContainer = header.findViewById(R.id.user_profile_name);
         TextView userMail =header.findViewById(R.id.user_profile_mail);
+        RequestOptions options = new RequestOptions();
+        options.circleCrop();
+        options.error(R.drawable.no_image_small_icon);
 
-        GlideApp.with(this)
+        Glide.with(this)
                 .load(this.getCurrentUser().getPhotoUrl())
-                .circleCrop()
-                .error(R.drawable.no_image_small_icon)
+                .apply(options)
                 .into(userPhoto);
         String userName = TextUtils.isEmpty(this.getCurrentUser().getDisplayName())?
                 getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();

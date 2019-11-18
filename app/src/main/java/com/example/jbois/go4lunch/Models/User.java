@@ -1,6 +1,6 @@
 package com.example.jbois.go4lunch.Models;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class User {
 

@@ -5,10 +5,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.text.TextUtils;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
 
@@ -26,10 +26,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
-import java.util.Observable;
-
 import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.PREFS_NAME;
-import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.RESTAURANT_SAVED;
 import static com.example.jbois.go4lunch.Controllers.Activities.SettingsActivity.MyPreferenceFragment.NOTIF_UID;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
 import static com.example.jbois.go4lunch.Utils.UserHelper.COLLECTION_USERS;

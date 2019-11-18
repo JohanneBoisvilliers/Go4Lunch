@@ -1,18 +1,18 @@
 package com.example.jbois.go4lunch.Views;
 
-import android.content.Context;
 import android.graphics.Typeface;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -53,10 +53,13 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void glideRequest(String url){
-        GlideApp.with(this.mRestaurantChose.getContext())
+        RequestOptions options = new RequestOptions();
+        options.circleCrop();
+        options.error(R.drawable.no_image_small_icon);
+
+        Glide.with(this.mRestaurantChose.getContext())
                 .load(url)
-                .circleCrop()
-                .error(R.drawable.no_image_small_icon)
+                .apply(options)
                 .into(mWorkmatesPhoto);
     }
 }

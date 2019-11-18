@@ -1,26 +1,23 @@
 package com.example.jbois.go4lunch.Utils;
 
 import android.graphics.Bitmap;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RawRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RawRes;
 import android.util.Base64;
-import android.util.Log;
 
-import com.example.jbois.go4lunch.BuildConfig;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.RestaurantDetailsJson;
 import com.example.jbois.go4lunch.Models.RestaurantListJson;
 import com.example.jbois.go4lunch.R;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
-import com.google.android.gms.location.places.PlacePhotoResponse;
-import com.google.android.gms.location.places.Places;
+import com.google.android.libraries.places.compat.GeoDataClient;
+import com.google.android.libraries.places.compat.PlacePhotoMetadata;
+import com.google.android.libraries.places.compat.PlacePhotoMetadataBuffer;
+import com.google.android.libraries.places.compat.PlacePhotoMetadataResponse;
+import com.google.android.libraries.places.compat.PlacePhotoResponse;
+import com.google.android.libraries.places.compat.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -36,12 +33,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -188,7 +183,7 @@ public class GooglePlacesStreams {
         }
     }
 
-    private String serializeJson(@RawRes int resources) throws IOException {
+    public String serializeJson(@RawRes int resources) throws IOException {
         InputStream is = ApplicationContext.getContext().getResources().openRawResource(resources);
         Writer writer = new StringWriter();
         char[] buffer = new char[1024];

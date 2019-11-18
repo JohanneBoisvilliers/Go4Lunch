@@ -2,33 +2,19 @@ package com.example.jbois.go4lunch.Controllers.Adapters;
 
 import android.content.Context;
 import android.location.Location;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.RequestManager;
-import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
-import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
-import com.example.jbois.go4lunch.Utils.UserHelper;
 import com.example.jbois.go4lunch.Views.RestaurantViewHolder;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import io.reactivex.disposables.Disposable;
 
 public class RestaurantAdapter extends RecyclerView.Adapter<RestaurantViewHolder> {
 

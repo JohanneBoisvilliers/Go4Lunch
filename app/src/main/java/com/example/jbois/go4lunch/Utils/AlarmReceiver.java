@@ -5,18 +5,15 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
+import androidx.core.app.NotificationCompat;
+
 import android.text.TextUtils;
-import android.util.Log;
 import android.app.PendingIntent;
 
 import com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
-import java.util.ArrayList;
 
 import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.PREFS_NAME;
 import static com.example.jbois.go4lunch.Controllers.Activities.RestaurantProfileActivity.RESTAURANT_SAVED;
@@ -29,7 +26,6 @@ public class AlarmReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("AAAAAAAAAAAAAAAA","alarme recue");
 
         Gson gson = new Gson();
 

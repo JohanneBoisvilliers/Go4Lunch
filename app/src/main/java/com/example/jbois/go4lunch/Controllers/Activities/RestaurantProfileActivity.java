@@ -1,46 +1,34 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.SharedPreferences;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.jbois.go4lunch.Controllers.Fragments.WorkmatesFragment;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
-//import com.example.jbois.go4lunch.Utils.GlideApp;
-import com.example.jbois.go4lunch.Utils.ApplicationContext;
-import com.example.jbois.go4lunch.Utils.GlideApp;
 import com.example.jbois.go4lunch.Utils.UserHelper;
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
-import com.google.android.gms.location.places.GeoDataClient;
-import com.google.android.gms.location.places.PlacePhotoMetadata;
-import com.google.android.gms.location.places.PlacePhotoMetadataBuffer;
-import com.google.android.gms.location.places.PlacePhotoMetadataResponse;
-import com.google.android.gms.location.places.PlacePhotoResponse;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -59,7 +47,6 @@ import butterknife.ButterKnife;
 
 import static com.example.jbois.go4lunch.Controllers.Activities.LunchActivity.TAG;
 import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.RESTAURANT_IN_TAG;
-import static com.example.jbois.go4lunch.Controllers.Fragments.MapFragment.newInstance;
 
 public class RestaurantProfileActivity extends BaseUserActivity implements View.OnClickListener {
 
@@ -164,12 +151,18 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     //fetch restaurant's photo
     private void fetchRestaurantPhoto(Restaurant restaurant){
         if (TextUtils.isEmpty(restaurant.getPhotoReference())||restaurant.getPhotoReference().equals("null")) {
+            Log.d(TAG, "fetchRestaurantPhoto: photo is empty");
             mRestaurantPhoto.setScaleType(ImageView.ScaleType.FIT_CENTER);
             mRestaurantPhoto.setImageDrawable(mRestaurantPhoto.getContext().getResources().getDrawable(R.drawable.no_image_small_icon));
         }else{
+            Log.d(TAG, "fetchRestaurantPhoto: not empty");
             Bitmap bitmap = StringToBitMap(restaurant.getPhotoReference());
             if (bitmap!=null) {
-                mRestaurantPhoto.setImageBitmap(bitmap);
+                //mRestaurantPhoto.setImageBitmap(bitmap);
+                Glide.with(this)
+                        .load(bitmap)
+                        .apply(new RequestOptions().centerCrop())
+                        .into(mRestaurantPhoto);
             }
         }
     }
@@ -297,6 +290,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
     public Bitmap StringToBitMap(String encodedString){
         try {
             byte [] encodeByte=Base64.decode(encodedString,Base64.URL_SAFE);
+            Log.d("debug image", "StringToBitMap: ");
             return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
         } catch(Exception e) {
             Log.e("ERROR BITMAP", "StringToBitMap:RestraurantProfileActivity "+ e.getMessage());
