@@ -110,7 +110,7 @@ dependencies {
     testImplementation "org.robolectric:shadows-multidex:4.0.2"
     //Mockito
     testImplementation 'org.mockito:mockito-core:2.28.2'
-    androidTestImplementation 'org.mockito:mockito-android:2.7.22'
+    androidTestImplementation 'org.mockito:mockito-android:2.28.2'
 }
 apply plugin: 'com.google.gms.google-services'
 com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
