@@ -65,120 +65,6 @@
       "open_now" : true,
       "periods" : [
         {
-          "close" : {
-            "day" : 1,
-            "time" : "1500"
-          },
-          "open" : {
-            "day" : 1,
-            "time" : "1200"
-          }
-        },
-        {
-          "close" : {
-            "day" : 1,
-            "time" : "2300"
-          },
-          "open" : {
-            "day" : 1,
-            "time" : "1830"
-          }
-        },
-        {
-          "close" : {
-            "day" : 2,
-            "time" : "1500"
-          },
-          "open" : {
-            "day" : 2,
-            "time" : "1200"
-          }
-        },
-        {
-          "close" : {
-            "day" : 2,
-            "time" : "2300"
-          },
-          "open" : {
-            "day" : 2,
-            "time" : "1830"
-          }
-        },
-        {
-          "close" : {
-            "day" : 3,
-            "time" : "1500"
-          },
-          "open" : {
-            "day" : 3,
-            "time" : "1200"
-          }
-        },
-        {
-          "close" : {
-            "day" : 3,
-            "time" : "2300"
-          },
-          "open" : {
-            "day" : 3,
-            "time" : "1830"
-          }
-        },
-        {
-          "close" : {
-            "day" : 4,
-            "time" : "1500"
-          },
-          "open" : {
-            "day" : 4,
-            "time" : "1200"
-          }
-        },
-        {
-          "close" : {
-            "day" : 4,
-            "time" : "2300"
-          },
-          "open" : {
-            "day" : 4,
-            "time" : "1830"
-          }
-        },
-        {
-          "close" : {
-            "day" : 5,
-            "time" : "1500"
-          },
-          "open" : {
-            "day" : 5,
-            "time" : "1200"
-          }
-        },
-        {
-          "close" : {
-            "day" : 5,
-            "time" : "2300"
-          },
-          "open" : {
-            "day" : 5,
-            "time" : "1830"
-          }
-        },
-        {
-          "close" : {
-            "day" : 6,
-            "time" : "1230"//vraie heure 1500
-          },
-          "open" : {
-            "day" : 6,
-            "time" : "1200"//vraie heure 1200
-          }
-        },
-        {
-          "close" : {
-            "day" : 6,
-            "time" : "2300"
-          },
           "open" : {
             "day" : 6,
             "time" : "1830"
@@ -277,13 +163,13 @@
         "width" : 3024
       }
     ],
-    "place_id" : "ChIJv7JzxxRu5kcR4erzMX_tZi8",
+    "place_id" : "restaurantId1",
     "plus_code" : {
       "compound_code" : "V9G2+52 Paris, France",
       "global_code" : "8FW4V9G2+52"
     },
     "price_level" : 2,
-    "rating" : 2,//vraie note 4.4
+    "rating" : 2,
     "reference" : "ChIJv7JzxxRu5kcR4erzMX_tZi8",
     "reviews" : [
       {

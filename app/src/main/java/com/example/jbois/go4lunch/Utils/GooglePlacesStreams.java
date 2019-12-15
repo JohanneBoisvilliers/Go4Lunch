@@ -49,10 +49,11 @@ public class GooglePlacesStreams {
     private static final String rankby = "distance";
     private static final String type = "restaurant";
     public static final String TAG = "DEBUG_APPLICATION";
+    public static final GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
+
 
     //Observable to fetch Restaurants list from google
     private static Observable<RestaurantListJson> streamFetchRestaurants(@Nullable String location, @Nullable String pageToken){
-        GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurants(location,rankby,type,pageToken,apiKey)
                 .subscribeOn(Schedulers.io())
                 //.observeOn(AndroidSchedulers.mainThread())
@@ -60,13 +61,11 @@ public class GooglePlacesStreams {
     }
     //Observable to fetch Restaurants Details
     private static Observable<RestaurantDetailsJson> streamFetchRestaurantDetails(String placeId){
-        GooglePlaceServices googlePlaceServices = GooglePlaceServices.retrofit.create(GooglePlaceServices.class);
         return googlePlaceServices.getRestaurantDetails(placeId,apiKey)
                 .subscribeOn(Schedulers.io())
                 //.observeOn(AndroidSchedulers.mainThread())
                 .timeout(20, TimeUnit.SECONDS);
     }
-
 
     public static Observable<List<Restaurant>> streamFetchRestaurantsWithNeededInfos(String location){
         List<Restaurant> restaurantList = new ArrayList<>();
@@ -75,7 +74,7 @@ public class GooglePlacesStreams {
 
         return streamFetchRestaurants(location,null)
                 .map((Function<RestaurantListJson, List<Restaurant>>) restaurantListJson -> {/*---------------Google Place------------------*/
-                    googlePlacesStreams.extrudePlaceInfo(restaurantListJson,restaurantList);
+                    extrudePlaceInfo(restaurantListJson,restaurantList);
                     return restaurantList;
                 })
                 .map((Function<List<Restaurant>, List<Restaurant>>) restaurantListTemp -> {/*---------------Place Details------------------*/
@@ -134,7 +133,7 @@ public class GooglePlacesStreams {
     -------Private methods---------
      */
     //extrude place api info for restaurants
-    private void extrudePlaceInfo(RestaurantListJson restList, List<Restaurant> list){
+    public static void extrudePlaceInfo(RestaurantListJson restList, List<Restaurant> list){
         for(int i=0;i<restList.getResults().size();i++){
             Restaurant restaurant = new Restaurant();
             restaurant.setId(restList.getResults().get(i).getPlaceId());
@@ -147,7 +146,7 @@ public class GooglePlacesStreams {
         }
     }
     //extrude place Details api infos for restaurants
-    private void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
+    public static void compareAndSetList(List<Restaurant> restaurantList, List<RestaurantDetailsJson> restaurantDetailsJsonList){
         for (int i=0;i<restaurantList.size();i++){
             for (int j = 0; j < restaurantDetailsJsonList.size(); j++) {
                 if(restaurantDetailsJsonList.get(j).getResult().getPlaceId().equals(restaurantList.get(i).getId())){
@@ -200,7 +199,7 @@ public class GooglePlacesStreams {
         return writer.toString();
     }
     //Get openingHours for each restaurant
-    private String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson, Restaurant restaurant){
+    public static String checkOpeningHours(RestaurantDetailsJson restaurantDetailsJson, Restaurant restaurant){
         String openingHours="";
         List<RestaurantDetailsJson.Period> periodList=new ArrayList<>();
         Boolean isGoodSchedule = false;
@@ -237,23 +236,23 @@ public class GooglePlacesStreams {
                     }
                 }
             }else {
-                openingHours = ApplicationContext.getContext().getResources().getString(R.string.closed_status);;
+                openingHours = ApplicationContext.getContext().getResources().getString(R.string.closed_status);
             }
         }
         return openingHours;
     }
     //convert hours from api into AM PM format
-    private DateTime convertHoursInDateTime(String stringToConvert){
+    public static DateTime convertHoursInDateTime(String stringToConvert){
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HHmm");
         return dtf.parseDateTime(stringToConvert);
     }
-    private String convertHoursInString(DateTime dateTime){
+    public static String convertHoursInString(DateTime dateTime){
         DateTimeFormatter outputFormat = DateTimeFormat.forPattern("K.mma");
         return outputFormat.print(dateTime);
     }
 
     //extrude from Json a compact adress ( street number + road )
-    private static String extrudeAdressFromJson(RestaurantDetailsJson restaurantDetailsJson){
+    public static String extrudeAdressFromJson(RestaurantDetailsJson restaurantDetailsJson){
         List<RestaurantDetailsJson.AddressComponent> addressComponentList = restaurantDetailsJson.getResult().getAddressComponents();
         String road = "";
         String streetNumber = "";

@@ -1,0 +1,79 @@
+{
+  "html_attributions": [],
+  "next_page_token": "",
+  "results": [
+    {
+      "geometry": {
+        "location": {
+          "lat": 48.87445880000001,
+          "lng": 2.3498705
+        },
+        "viewport": {
+          "northeast": {
+            "lat": 48.8760572802915,
+            "lng": 2.351279080291502
+          },
+          "southwest": {
+            "lat": 48.87335931970851,
+            "lng": 2.348581119708498
+          }
+        }
+      },
+      "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png",
+      "id": "f1ff6baea08a323e38015504ec17291f72805b12",
+      "name": "Tesoro d'Italia",
+      "place_id": "restaurantId1",
+      "plus_code": {
+        "compound_code": "V8FX+QW Paris, France",
+        "global_code": "8FW4V8FX+QW"
+      },
+      "price_level": 2,
+      "reference": "ChIJT-fc7RRu5kcRvgiVWkK-To4",
+      "scope": "GOOGLE",
+      "types": [
+        "restaurant",
+        "point_of_interest",
+        "food",
+        "establishment"
+      ],
+      "vicinity": "Paris"
+    },
+    {
+      "geometry": {
+        "location": {
+          "lat": 48.87445880000001,
+          "lng": 2.3498705
+        },
+        "viewport": {
+          "northeast": {
+            "lat": 48.8760572802915,
+            "lng": 2.351279080291502
+          },
+          "southwest": {
+            "lat": 48.87335931970851,
+            "lng": 2.348581119708498
+          }
+        }
+      },
+      "icon": "https://maps.gstatic.com/mapfiles/place_api/icons/restaurant-71.png",
+      "id": "f1ff6baea08a323e38015504ec17291f72805b13",
+      "name": "restaurant 2",
+      "place_id": "restaurantId2",
+      "plus_code": {
+        "compound_code": "V8FX+QW Paris, France",
+        "global_code": "8FW4V8FX+QW"
+      },
+      "price_level": 2,
+      "reference": "ChIJT-fc7RRu5kcRvgiVWkK-To4",
+      "scope": "GOOGLE",
+      "types": [
+        "restaurant",
+        "point_of_interest",
+        "food",
+        "establishment"
+      ],
+      "vicinity": "Paris"
+    }
+  ],
+  "status": "OK"
+}
