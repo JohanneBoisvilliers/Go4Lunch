@@ -12,11 +12,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.jbois.go4lunch.Controllers.Activities.BaseUserActivity;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.R;
 import com.example.jbois.go4lunch.Utils.ApplicationContext;
+import com.example.jbois.go4lunch.Utils.GlideOptions;
 
 import java.util.List;
 
@@ -97,7 +97,7 @@ public class RestaurantViewHolder extends RecyclerView.ViewHolder{
             if (bitmap!=null) {
                 Glide.with(ApplicationContext.getContext())
                         .load(bitmap)
-                        .apply(new RequestOptions().centerCrop())
+                        .apply(new GlideOptions().centerCrop())
                         .into(mRestaurantImage);
             }
         }

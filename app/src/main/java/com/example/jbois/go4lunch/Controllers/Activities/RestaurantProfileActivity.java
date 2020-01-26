@@ -10,7 +10,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.request.RequestOptions;
+import com.example.jbois.go4lunch.Utils.GlideOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.core.content.ContextCompat;
@@ -161,7 +161,7 @@ public class RestaurantProfileActivity extends BaseUserActivity implements View.
                 //mRestaurantPhoto.setImageBitmap(bitmap);
                 Glide.with(this)
                         .load(bitmap)
-                        .apply(new RequestOptions().centerCrop())
+                        .apply(new GlideOptions().centerCrop())
                         .into(mRestaurantPhoto);
             }
         }

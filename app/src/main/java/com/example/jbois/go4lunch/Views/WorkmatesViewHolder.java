@@ -9,10 +9,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.jbois.go4lunch.Models.Restaurant;
 import com.example.jbois.go4lunch.Models.User;
 import com.example.jbois.go4lunch.R;
+import com.example.jbois.go4lunch.Utils.GlideOptions;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -53,7 +53,7 @@ public class WorkmatesViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void glideRequest(String url){
-        RequestOptions options = new RequestOptions();
+        GlideOptions options = new GlideOptions();
         options.circleCrop();
         options.error(R.drawable.no_image_small_icon);
 

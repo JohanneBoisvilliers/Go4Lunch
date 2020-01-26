@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Go4Lunch</string>
+    <string name="title_map">J\'ai faim!</string>
+    <string name="always_open">Ouvert 24/7</string>
+    <string name="bottom_navigation_list">Liste</string>
+    <string name="bottom_navigation_map">Carte</string>
+    <string name="bottom_navigation_workmates">Collègues</string>
+    <string name="call_button">Appeler</string>
+    <string name="closed_status">Fermé</string>
+    <string name="closing_soon_status">Ferme bientôt</string>
+    <string name="description_notification_setting">Cette option vous permet d\'activer le rappel du lieu choisit pour manger</string>
+    <string name="description_username_setting">Entrez votre nom</string>
+    <string name="like_button">AIMER</string>
+    <string name="navigation_drawer_menu_logout">SE DECONNECTER</string>
+    <string name="navigation_drawer_menu_lunch">VOTRE REPAS</string>
+    <string name="navigation_drawer_menu_settings">PARAMETRES</string>
+    <string name="no_restaurant_chose">Aucun collègues ne mange ici!</string>
+    <string name="no_restaurant_chose_yet">Veuillez choisir un restaurant</string>
+    <string name="notif_with_restaurant">Il est l\'heure de manger: voici votre choix</string>
+    <string name="notif_without_restaurant">Vous n\'avez pas choisit de restaurant</string>
+    <string name="notification_activation">Parametres de notifications</string>
+    <string name="open_status">Ouvert jusqu\'à %s</string>
+    <string name="restaurant_chose_by_workmate">%s mange à : %s</string>
+    <string name="title_activity_settings">Paramètres</string>
+    <string name="unknown_hours">Horaires inconnus</string>
+    <string name="user_name">Votre nom</string>
+    <string name="user_position">Vous êtes ici</string>
+    <string name="website_button">SITE</string>
+    <string name="workmate_joining">%s mange ici</string>
+    <string name="workmate_no_choice_yet">%s n\'a pas encore décidé</string>
+</resources>

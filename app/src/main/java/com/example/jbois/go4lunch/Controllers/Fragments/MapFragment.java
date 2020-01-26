@@ -113,7 +113,7 @@ public class MapFragment extends Fragment
             //}
             mMarkers.clear();
             mMap.clear();
-            executeRequestToShowCurrentPlace(location);
+//            executeRequestToShowCurrentPlace(location);
         }
 
         @Override
@@ -370,7 +370,7 @@ public class MapFragment extends Fragment
                                 moveCamera(mLastKnownLocation,15);
                             }
                             EventBus.getDefault().post(new LunchActivity.getLocation(mLastKnownLocation));
-                            executeRequestToShowCurrentPlace(mLastKnownLocation);
+//                            executeRequestToShowCurrentPlace(mLastKnownLocation);
                             //try {
                             //    fakeRequest();
                             //} catch (IOException e) {

@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
+import com.example.jbois.go4lunch.Utils.GlideOptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.view.GravityCompat;
@@ -331,7 +331,7 @@ public class LunchActivity extends BaseUserActivity implements NavigationView.On
         ImageView userPhoto = header.findViewById(R.id.user_profile_photo);
         TextView userNameContainer = header.findViewById(R.id.user_profile_name);
         TextView userMail =header.findViewById(R.id.user_profile_mail);
-        RequestOptions options = new RequestOptions();
+        GlideOptions options = new GlideOptions();
         options.circleCrop();
         options.error(R.drawable.no_image_small_icon);
 

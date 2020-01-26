@@ -191,7 +191,7 @@ public class WorkmatesFragment extends Fragment {
                             intent.putExtra(RESTAURANT_IN_TAG,restaurant);
                             startActivity(intent);
                         }else {
-                            Toast.makeText(getContext(), getResources().getString(R.string.workmate_no_choice_yet), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), getResources().getString((R.string.workmate_no_choice_yet),user.getUsername()), Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

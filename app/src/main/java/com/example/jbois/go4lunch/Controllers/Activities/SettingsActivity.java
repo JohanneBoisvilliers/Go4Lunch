@@ -1,5 +1,6 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.CheckBoxPreference;
@@ -27,7 +28,9 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new MyPreferenceFragment()).commit();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(android.R.id.content,new MyPreferenceFragment());
+        fragmentTransaction.commit();
     }
 
     public static class MyPreferenceFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -94,12 +97,10 @@ public class SettingsActivity extends PreferenceActivity {
             if (preference instanceof CheckBoxPreference) {
                 CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
                 if (checkBoxPreference.isChecked()){
-                    Toast.makeText(ApplicationContext.getContext(), getResources().getString(R.string.notification_activated), Toast.LENGTH_SHORT).show();
                     FirebaseMessaging.getInstance().subscribeToTopic("usersWhoChose");
                     this.activationOfNotifications(true);
                 }
                 if(!checkBoxPreference.isChecked()){
-                    Toast.makeText(ApplicationContext.getContext(), getResources().getString(R.string.notification_deactivated), Toast.LENGTH_SHORT).show();
                     FirebaseMessaging.getInstance().unsubscribeFromTopic("usersWhoChose");
                     this.activationOfNotifications(false);
                 }

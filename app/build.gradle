@@ -100,9 +100,8 @@ dependencies {
     //EventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
     //Glide
-    implementation 'com.github.bumptech.glide:glide:4.8.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //Jodatime
     implementation 'joda-time:joda-time:2.10.1'
     //Robolectric
@@ -111,6 +110,7 @@ dependencies {
     //Mockito
     testImplementation 'org.mockito:mockito-core:2.28.2'
     androidTestImplementation 'org.mockito:mockito-android:2.28.2'
+    androidTestImplementation 'androidx.test:rules:1.2.0-beta01'
 }
 apply plugin: 'com.google.gms.google-services'
 com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
