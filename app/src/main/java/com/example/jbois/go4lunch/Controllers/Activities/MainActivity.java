@@ -1,12 +1,20 @@
 package com.example.jbois.go4lunch.Controllers.Activities;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.multidex.MultiDex;
 
 import com.example.jbois.go4lunch.R;
@@ -36,6 +44,7 @@ public class MainActivity extends BaseUserActivity {
     private static final int RC_SIGN_IN = 123;
     private SharedPreferences mMySharedPreferences;
     private SharedPreferences.Editor mEditor;
+    private static final int REQUEST_CODE_LOCATION = 0x01;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +65,7 @@ public class MainActivity extends BaseUserActivity {
         mEditor = mMySharedPreferences.edit();
         mEditor.putString(NOTIF_UID,this.getCurrentUser().getUid());
         mEditor.apply();
-        this.startLunchActivity();
-
+        this.checkLocationPermissions();
     }
     //Start an activity that let user choose between two ways for connection
     private void startSignInActivity(){
@@ -123,8 +131,41 @@ public class MainActivity extends BaseUserActivity {
                 }
             }
         });
+            }
+    private void checkLocationPermissions() {
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            this.checkGpsOn();
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_CODE_LOCATION);
+            }
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode == REQUEST_CODE_LOCATION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                this.startLunchActivity();
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_CODE_LOCATION);
+            }
+        }
+    }
+    private void checkGpsOn() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", (dialog, id) -> startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS)))
+                .setNegativeButton("No", (dialog, id) -> dialog.cancel());
+        final AlertDialog alert = builder.create();
+        alert.show();
     }
 }
